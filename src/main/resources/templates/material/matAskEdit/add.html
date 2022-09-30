@@ -1,0 +1,292 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="matNos" name="matNos" value="">
+<div class="topjui-fluid">
+
+	<div class="topjui-row">
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">加工件名称</label>
+			<div class="topjui-input-block">
+				<input type="text" name="askName" id="askName"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'加工件名称',
+					   required:true,
+					   valueField:'matCode',
+                       textField:'matCode',
+                       panelHeight:'200',
+                       mode:'remote',
+                       editable:true,
+                       url:'/material/mMaterial/getMaterialName',
+					   onSelect:function(newValue, oldValue){
+							$('#askModelDiv, #askUnitDiv').attr('disabled', 'disabled')
+					   }">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">业务科室</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="checkTeam" data-options="required:true,valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',loadFilter:function(data){
+					data.unshift({id:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+		<div class="topjui-col-sm6" id="askModelDiv">
+			<label class="topjui-form-label">加工件型号</label>
+			<div class="topjui-input-block">
+				<input type="text" name="askModel"
+					   data-toggle="topjui-textbox"
+					   data-options="prompt:'加工件型号',required:true">
+			</div>
+		</div>
+		<div class="topjui-col-sm6" id="askUnitDiv">
+			<label class="topjui-form-label">计量单位</label>
+			<div class="topjui-input-block">
+				<input type="text" name="askUnit" value=""
+					   data-toggle="topjui-combobox"
+					   data-options="required:true,
+					   valueField:'value',
+					   textField:'text',
+					   url:'/system/dicSet/getDicItemByCode?code=m.matUnit',
+					   loadFilter:function(data){
+					   		data.unshift({value:'', text:'--请选择--'});
+					   		return data;
+					   }">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">申请数量</label>
+			<div class="topjui-input-block">
+				<input type="number" name="askAmount"
+					   data-toggle="topjui-textbox"
+					   data-options="prompt:'申请数量',required:true">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">用料工程</label>
+			<div class="topjui-input-block">
+				<input type="text" name="prjNo" value=""
+					   data-toggle="topjui-combobox"
+					   data-options="required:true,
+					   valueField:'prjNo',
+					   textField:'prjName',
+					   url:'/material/mPrj/getPrjList2',
+					   loadFilter:function(data){
+					   		data.unshift({prjNo:'', prjName:'--请选择--'});
+					   		return data;
+					   },
+					   onChange:function(newValue, oldValue){
+					   		$('#itemNo').iCombobox('reload', '/material/mItem/getItemList?prjNo='+newValue);
+					   }">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">加工单位</label>
+			<div class="topjui-input-block">
+				<input type="text" name="makeTeam", value=""
+					   data-toggle="topjui-combobox"
+					   data-options="required:true,
+						valueField:'id',
+                    	textField:'text',
+                   	 	url:'/mdata/organization/getWorkDeptSet',
+						loadFilter:function(data){
+							data.unshift({id:'', text:'--请选择--'});
+					   		return data;
+						}">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">费用项目</label>
+			<div class="topjui-input-block">
+				<input type="text" name="itemNo" id="itemNo" value=""
+					   data-toggle="topjui-combobox"
+					   data-options="required:true,
+						valueField:'itemNo',
+                    	textField:'itemName',
+                   	 	url:'/material/mItem/getItemList?prjNo=',
+						loadFilter:function(data){
+							data.unshift({itemNo:'', itemName:'--请选择--'});
+					   		return data;
+						}">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">预期类型</label>
+			<div class="topjui-input-block">
+				<select data-toggle="topjui-combobox" name="needType">
+					<option value="0">普通</option>
+					<option value="1">永久使用</option>
+					<option value="2">一次性投入</option>
+				</select>
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">回收预期</label>
+			<div class="topjui-input-block">
+				<input type="text" name="needDate"
+					   data-toggle="topjui-datebox"
+					   data-options="prompt:'回收预期'">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">使用地点</label>
+			<div class="topjui-input-block">
+				<input type="text" name="useAddr"
+					   data-toggle="topjui-textbox"
+					   data-options="prompt:'使用地点',required:true">
+			</div>
+		</div>
+	</div>
+	<div class="topjui-row">
+		<div class="topjui-col-sm12">
+			<label class="topjui-form-label">备注</label>
+			<div class="topjui-input-block">
+				<input type="text" name="remark"
+					   data-toggle="topjui-textarea"
+					   data-options="prompt:'备注'">
+			</div>
+		</div>
+	</div>
+	<fieldset>
+		<legend>材料信息</legend>
+	</fieldset>
+
+	<div id="completion">
+		<div></div>
+	</div>
+	<div class="topjui-row">
+		<div class="topjui-col-sm12">
+			<div style="padding-left: 15%">
+				<a href="javascript:void(0)"
+				   data-toggle="topjui-menubutton"
+				   data-options="
+                   btnCls:'topjui-btn-green',
+                   onClick:addRow,
+                   iconCls:'fa fa-plus'">增加一行</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	//var empinputArray = new Array();
+	//增加一行
+	function addRow(){
+		debugger;
+		var GenId = randomString(32);
+		var askName = $('#askName').iCombobox('getValue')
+		if(askName==null||askName==''||askName==undefined){
+			$.iMessager.alert('操作提示', '请先选择加工材料', 'messager-error');
+			return null;
+		}
+		$("#completion").append(
+				"<div class=\"topjui-row\" id='" + GenId + "'>" +
+
+				"<div class=\"topjui-col-sm6\">" +
+				"<label class=\"topjui-form-label\">材料</label>" +
+				"<div class=\"topjui-input-block\">" +
+				"<input type=\"text\" name='" + 'matNo_' + GenId + "' id='" + 'matNo_' + GenId +"'"+
+				"   data-toggle=\"topjui-combogrid\"" +
+				"   data-options=\"required:true," +
+				"   	idField:'matNo'," +
+				"       textField:'matName'," +
+				"       editable:true," +
+				"   	url:'/material/mMaterial/getMatListForSel'," +
+				"   	columns:[ [" +
+				"       	{field:'matCode',title:'材料编码'}," +
+				"   		{field:'matName',title:'材料名称'}," +
+				"   		{field:'matPrice',title:'价格'}" +
+				"   	] ] \">" +
+				"</div>" +
+				"</div>"+
+
+				"<div class=\"topjui-col-sm4\">" +
+				"<label class=\"topjui-form-label\">数量</label>" +
+				"<div class=\"topjui-input-block\">" +
+				"<input type=\"text\" name='" + 'amount_' + GenId + "'" +
+				"   data-toggle=\"topjui-numberbox\"" +
+				"   data-options=\"prompt:'数量',required:true\">" +
+				"</div>" +
+				"</div>" +
+				 "<div class=\"topjui-col-sm2\">" +
+				 "<div style=\"padding-top: 14px;padding-left: 25px;\">" +
+				 "<a href=\"javascript:void(0)\" onclick=\"delRow('"+GenId+"')\">删除该条</a>" +
+				 "</div>" +
+				 "</div>" +
+
+				"</div>");
+		$.parser.parse('#completion');
+		//empinputArray.push('empId_'+GenId);
+		//页面ID参数，用于后台取值
+		if($("#matNos").attr("value")==null||""==$("#matNos").attr("value")||undefined == $("#matNos").attr("value")){
+			$("#matNos").val(GenId);
+		}else{
+			$("#matNos").val($("#matNos").attr("value")+','+GenId);
+		}
+		console.log("======NOW=============="+$("#matNos").attr("value"));
+		// for (let i = 0; i < empinputArray.length; i++) {
+		// 	console.log(empinputArray[i]+"--------------"+i);
+		// }
+	}
+
+	function delRow(Id){
+		$("#"+Id).remove();
+		var userIdsI=$("#userIds").attr("value");
+		if(userIdsI.indexOf(','+Id) != -1){
+			$("#userIds").val(userIdsI.replace(','+Id,''));
+		}else if(userIdsI.indexOf(Id+',') != -1){
+			$("#userIds").val(userIdsI.replace(Id+",",''));
+		} else if(userIdsI.indexOf(Id) != -1){
+			$("#userIds").val(userIdsI.replace(Id,''));
+		}
+		console.log("======NOW=============="+$("#userIds").attr("value"));
+	}
+
+	//生成随机ID
+	function randomString(len) {
+		len = len || 32;
+		var $chars = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
+		var maxPos = $chars.length;
+		var str = '';
+		for (i = 0; i < len; i++) {
+			str += $chars.charAt(Math.floor(Math.random() * maxPos));
+		}
+		return str;
+	}
+
+</script>
+<!--
+<script>
+	$(function () {
+		$('#teamNo').iCombobox({
+			onChange: function (newValue,oldValue){
+				debugger;
+				if(oldValue!=null&&oldValue!=''&&oldValue!=undefined){
+					for (let i = 0; i < empinputArray.length; i++) {
+						$(empinputArray[i]).iCombobox('reload','/cost/fAward/getSysUserListByKeywords?teamNo='+newValue);
+					}
+				}
+			}
+		});
+	})
+</script>
+-->
+
+<!--
+<script>
+	$.fn.iDatebox.defaults.formatter = function(date){
+		var y = date.getFullYear();
+		var m = date.getMonth()+1;
+		var d = date.getDate();
+		if (m >= 1 && m <= 9) {
+			m = "0" + m;
+		}
+		if (d >= 0 && d <= 9) {
+			d = "0" + d;
+		}
+		return y+''+m+''+d;
+	}
+</script>-->

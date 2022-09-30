@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false,height:'50%'">
+            <div data-toggle="topjui-layout" data-options="fit:true">
+                <form id="oldMatRegForm">
+                    <div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'70%'">
+                        <table id="oldMatRegDg"></table>
+                    </div>
+                </form>
+                <form id="addForm">
+                    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+                        <div class="topjui-fluid" style="margin-top: 10px">
+                            <div class="topjui-row">
+                                <div class="topjui-col-sm12">
+                                    <label class="topjui-form-label">交旧单位：</label>
+                                    <div class="topjui-input-block">
+                                        <input data-toggle="topjui-combobox" name="teamNo" id="teamNo" th:value="${teamNo}" data-options="valueField:'id',textField:'text',width:'200px',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',loadFilter:function(data){
+                                            data.unshift({id:'', text:'--请选择--'});
+                                            return data
+                                        }">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="topjui-row">
+                                <div class="topjui-col-sm12">
+                                    <label class="topjui-form-label">材料代码：</label>
+                                    <div class="topjui-input-block">
+                                        <select id="matCode" name="matCode"></select>
+                                        <input type="hidden" name="matNo" id="matNo" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="topjui-row">
+                                <div class="topjui-col-sm12">
+                                    <label class="topjui-form-label">材料名称：</label>
+                                    <div class="topjui-input-block">
+                                        <input id="matName" data-toggle="topjui-textbox" name="matName" data-options="width:'200px'">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="topjui-row">
+                                <div class="topjui-col-sm12">
+                                    <label class="topjui-form-label">计划单价：</label>
+                                    <div class="topjui-input-block">
+                                        <input id="matPrice" data-toggle="topjui-textbox" name="matPrice" data-options="width:'130px'">元
+                                        <input id="matUnit" data-toggle="topjui-textbox" name="matUnit" data-options="width:'55px'">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="topjui-row">
+                                <div class="topjui-col-sm12">
+                                    <label class="topjui-form-label">应交数量：</label>
+                                    <div class="topjui-input-block">
+                                        <input id="matAmount" data-toggle="topjui-textbox" name="matAmount" data-options="width:'200'">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="topjui-row">
+                                <div class="topjui-col-sm12">
+                                    <label class="topjui-form-label">日期：</label>
+                                    <div class="topjui-input-block">
+                                        <input id="occDate" data-toggle="topjui-datebox" name="occDate" data-options="width:'200'">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="topjui-row">
+                                <div class="topjui-col-sm12">
+                                    <label class="topjui-form-label">备注：</label>
+                                    <div class="topjui-input-block">
+                                        <input id="remark" data-toggle="topjui-textbox" name="remark" data-options="width:'200'">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="topjui-row">
+                                <div class="topjui-col-sm12">
+                                    <a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="margin-left:130px; position: static; display: inline-block; left: auto; height: 30px;">
+                                    <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                                        <span class="l-btn-text">保存</span>
+                                        <span class="l-btn-icon fa fa-check">&nbsp;</span>
+                                    </span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <form id="detailForm" style="height:50%">
+            <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+                <table id="detailDg"></table>
+            </div>
+        </form>
+    </div>
+
+    <div id="oldMatRegDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'oldMatRegDg'
+       }" style="display:none">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">申请日期：</label>
+        <input id="date1Qry" name="date1Qry" th:value="${startDate}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+        <label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+        <input id="date2Qry" name="date2Qry" th:value="${endDate}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">交旧单位：</label>
+        <input id="teamNoQry" name="teamNoQry" value="">
+
+        <br />
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">材料编码：</label>
+        <input id="matCodeQry" data-toggle="topjui-textbox" name="matCodeQry" data-options="width:'150px'">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">材料名称：</label>
+        <input id="matNameQry" data-toggle="topjui-textbox" name="matNameQry" data-options="width:'150px'">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">回收仓库：</label>
+        <input data-toggle="topjui-combobox" name="storeNoQry" id="storeNoQry" th:value="${storeNoQry}" data-options="valueField:'storeNo',textField:'storeName',url:'/repository/mStore/getStoreList?mngTeam=0&storeType=r.storeType2.61&storeLevel=r.storeLevel.1',width:'150px',loadFilter:function(data){
+            data.unshift({storeNo:'', storeName:'--全部--'});
+            return data
+        }">
+
+        <a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">查询</span>
+                <span class="l-btn-icon fa fa-search">&nbsp;</span>
+            </span>
+        </a>
+
+        <a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+        </a>
+
+        <a href="javascript:void(0)" id="updateBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">确认交旧</span>
+            <span class="l-btn-icon fa fa-check">&nbsp;</span>
+        </span>
+        </a>
+    </div>
+
+    <div id="detailDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'detailDg'
+       }" style="display:none">
+
+        <label class="topjui-form-label" style="width:80px">发生月份：</label>
+        <select id="yearQry" data-toggle="topjui-combobox" name="yearQry" data-options="width:80" >
+            <option th:each="i:${#numbers.sequence(2015, endYear)}" th:value="${i}" th:text="${i}" th:selected="${i==currentYear}"></option>
+        </select>
+        <select id="monQry" data-toggle="topjui-combobox" name="monQry" data-options="width:80" >
+            <option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}" th:selected="${i==currentMonth}"></option>
+        </select>
+
+        <input data-toggle="topjui-combobox" name="teamNoQry1" id="teamNoQry1" value="" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',width:'150px',loadFilter:function(data){
+            data.unshift({id:'', text:'--全部--'});
+            return data
+        }">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">材料编码：</label>
+        <input id="matCodeQry1" data-toggle="topjui-textbox" name="matCodeQry1" data-options="width:'150px'">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">材料名称：</label>
+        <input id="matNameQry1" data-toggle="topjui-textbox" name="matNameQry1" data-options="width:'150px'">
+
+        <a href="javascript:void(0)" id="searchBtn1" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">查询</span>
+                <span class="l-btn-icon fa fa-search">&nbsp;</span>
+            </span>
+        </a>
+
+        <a href="javascript:void(0)" id="downloadBtn1" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+        </a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        var delRight = [[${delRight}]]
+        $(document).ready(function(){
+            $('#teamNoQry').iCombobox({
+                valueField:'id',
+                textField:'text',
+                url:'/material/oldMatReg/getTeamSet?date1Qry='+ $('#date1Qry').iDatebox('getValue') +'&date2Qry='+ $('#date2Qry').iDatebox('getValue') +'&storeNoQry=' + $('#storeNoQry').iCombobox('getValue') + '&matCodeQry=' + $('#matCodeQry').iTextbox('getValue') + '&matNameQry=' + $('#matNameQry').iTextbox('getValue'),
+                width:'150px',
+                loadFilter:function(data){
+                    data.unshift({id:'', text:'--全部--'});
+                    return data
+                }
+            });
+
+            $('#date1Qry').iDatebox({
+                onChange:function(newValue, oldValue){
+                    $('#teamNoQry').iCombobox('reload', '/material/oldMatReg/getTeamSet?date1Qry='+ newValue +'&date2Qry='+ $('#date2Qry').iDatebox('getValue') +'&storeNoQry=' + $('#storeNoQry').iCombobox('getValue') + '&matCodeQry=' + $('#matCodeQry').iTextbox('getValue') + '&matNameQry=' + $('#matNameQry').iTextbox('getValue'))
+                }
+            })
+
+            $('#date2Qry').iDatebox({
+                onChange:function(newValue, oldValue){
+                    $('#teamNoQry').iCombobox('reload', '/material/oldMatReg/getTeamSet?date1Qry='+ $('#date1Qry').iDatebox('getValue') +'&date2Qry='+ newValue +'&storeNoQry=' + $('#storeNoQry').iCombobox('getValue') + '&matCodeQry=' + $('#matCodeQry').iTextbox('getValue') + '&matNameQry=' + $('#matNameQry').iTextbox('getValue'))
+                }
+            })
+
+            $('#storeNoQry').iCombobox({
+                onChange:function(newValue, oldValue){
+                    $('#teamNoQry').iCombobox('reload', '/material/oldMatReg/getTeamSet?date1Qry='+ $('#date1Qry').iDatebox('getValue') +'&date2Qry='+ $('#date2Qry').iDatebox('getValue') +'&storeNoQry=' + newValue + '&matCodeQry=' + $('#matCodeQry').iTextbox('getValue') + '&matNameQry=' + $('#matNameQry').iTextbox('getValue'))
+                }
+            })
+
+            $('#matCodeQry').iTextbox({
+                onChange:function(newValue, oldValue){
+                    $('#teamNoQry').iCombobox('reload', '/material/oldMatReg/getTeamSet?date1Qry='+ $('#date1Qry').iDatebox('getValue') +'&date2Qry='+ $('#date2Qry').iDatebox('getValue') +'&storeNoQry=' + $('#storeNoQry').iCombobox('getValue') + '&matCodeQry=' + newValue + '&matNameQry=' + $('#matNameQry').iTextbox('getValue'))
+                }
+            })
+
+            $('#matNameQry').iTextbox({
+                onChange:function(newValue, oldValue){
+                    $('#teamNoQry').iCombobox('reload', '/material/oldMatReg/getTeamSet?date1Qry='+ $('#date1Qry').iDatebox('getValue') +'&date2Qry='+ $('#date2Qry').iDatebox('getValue') +'&storeNoQry=' + $('#storeNoQry').iCombobox('getValue') + '&matCodeQry=' + $('#matCodeQry').iTextbox('getValue') + '&matNameQry=' + newValue)
+                }
+            })
+
+            $('#oldMatRegDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                url: '/material/oldMatReg/getPageSet',
+                queryParams:{
+                    date1Qry:$('#date1Qry').iDatebox('getValue'),
+                    date2Qry:$('#date2Qry').iDatebox('getValue'),
+                    matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+                    matNameQry:$('#matNameQry').iTextbox('getValue'),
+                    teamNoQry:$('#teamNoQry').iCombobox('getValue')
+                },
+                columns:[ [
+                    {
+                        field:'billNo', sortable:false, title:'', checkbox:true
+                    },{
+                        field:'del', sortable:false, title:'删除', formatter:function(value, row, index){
+                            if(delRight){
+                                return '<a style="font-weight: bold; color:#00b7ee; cursor:pointer " billNo="'+row.billNo+'">删除</a>'
+                            }else{
+                                return '---';
+                            }
+                        }
+                    },{
+                        field:'teamName', sortable:false, title:'交旧单位'
+                    },{
+                        field:'matCode',title:'材料编码',sortable:false, formatter:function(value, row, index){
+                            return value.substring(0, 1) == 'X' ? value.substring(1) : value
+                        }
+                    },{
+                        field:'matName',title:'材料名称',sortable:false
+                    },{
+                        field:'matUnit',title:'计量单位',sortable:false
+                    },{
+                        field:'matPrice',title:'单价',sortable:false, align:'right'
+                    },{
+                        field:'occDate',title:'领用日期',sortable:false, formatter:function(value, row, index){
+                            if(value!=null && value != undefined && value!=''){
+                                return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+                            }else{
+                                return ''
+                            }
+                        }
+                    },{
+                        field:'remark',title:'领用备注',sortable:false
+                    },{
+                        field:'outAmount',title:'出库数量',sortable:false, align:'right', formatter:function(value, row, index){
+                            var oldRate = parseFloat(row.oldRate);
+                            return (parseFloat(row.matAmount) / (oldRate>0?oldRate:1)).toFixed(4);
+                        }
+                    },{
+                        field:'matAmount',title:'应交数量',sortable:false, align:'right'
+                    },{
+                        field:'backAmount',title:'已交数量',sortable:false, align:'right'
+                    },{
+                        field:'bAmount',title:'本次交旧',sortable:false, align:'right', formatter:function (value, row, index) {
+                            return '<span class="textbox"><input style="text-align:right" class="textbox-text" type="number" name="amount_'+row.billNo+'" id="amount_'+row.billNo+'" disabled value="'+(row.matAmount - row.backAmount)+'" /></span>'
+                        }
+                    },{
+                        field:'matPrice',title:'交旧备注',sortable:false, formatter:function(value, row, index){
+                            return '<span class="textbox"><input class="textbox-text" type="text" name="remark_'+row.billNo+'" id="remark_'+row.billNo+'" disabled value="" /></span>'
+                        }
+                    }
+                ] ],
+                onCheck:function(index, row){
+                    $('#amount_'+ row.billNo + ', #remark_' + row.billNo).removeAttr('disabled');
+                },
+                onUncheck:function(index, row){
+                    $('#amount_'+ row.billNo + ', #remark_' + row.billNo).attr('disabled', 'disabled');
+                },
+                onCheckAll:function(rows){
+                    $('[name^="amount_"], [name^="remark_"]').removeAttr("disabled");
+                },
+                onUncheckAll:function(rows){
+                    $('[name^="amount_"], [name^="remark_"]').attr("disabled", 'disabled');
+                },
+                onLoadSuccess:function(data){
+                    $('[billNo]').click(function(){
+                        var billNo = $(this).attr('billNo');
+                        $.iMessager.confirm('确认对话框', '您确定删除吗？', function (r) {
+                            if(r){
+                                $.getJSON('/material/oldMatReg/del', {
+                                    billNo:billNo,
+                                },function(data){
+                                    if(data.statusCode=='200'){
+                                        $.iMessager.show({
+                                            title:data.title,
+                                            msg:data.message,
+                                            timeout:5000,
+                                            showType:'slide'
+                                        });
+                                        reloadData();
+                                    }else{
+                                        $.iMessager.alert(data.title,data.message,'messager-info');
+                                    }
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+
+            $('#searchBtn').click(function(){
+                reloadData();
+            });
+
+            $('#downloadBtn').click(function(){
+                $('#oldMatRegForm').iForm('submit', {
+                    url:'/material/oldMatReg/download',
+                    success:function(data){
+
+                    }
+                });
+            });
+
+            $('#matCode').iCombogrid({
+                width:'200px',
+                panelWidth:'400px',
+                idField:'matNo',
+                textField:'matCode',
+                mode:'remote',
+                url:'/material/oldMatReg/getMatList',
+                columns:[ [
+                    {field:'matCode', title:'材料编码'},
+                    {field:'matName', title:'材料名称'},
+                    {field:'matPrice', title:'价格'}
+                ] ],
+                onSelect: function(newValue, oldValue){
+                    var g = $('#matNo').iCombogrid("grid");
+                    var r = g.iDatagrid('getSelected');
+                    $('#matNo').val(r.matNo);
+                    $('#matName').iTextbox('setValue', r.matName);
+                    $('#matPrice').iTextbox('setValue', r.matPrice);
+                    $('#matUnit').iTextbox('setValue', r.matUnit);
+                }
+            });
+
+            $('#saveBtn').click(function () {
+                $.iMessager.confirm('确认对话框', '您确定添加交旧吗？', function (r) {
+                    if(r){
+                        $('#addForm').iForm('submit', {
+                            url:'/material/oldMatReg/save',
+                            success:function(data){
+                                data = $.parseJSON(data);
+                                if(data.statusCode == 200){
+                                    $.iMessager.show({
+                                        title:data.title,
+                                        msg:data.message
+                                    })
+                                    reloadData();
+                                } else {
+                                    $.iMessager.alert({
+                                        icon:'messager-error',
+                                        title:data.title,
+                                        msg:data.message
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            })
+
+            $('#updateBtn').click(function () {
+                $.iMessager.confirm('确认对话框', '您确定提交交旧吗？', function (r) {
+                    if(r){
+                        $('#oldMatRegForm').iForm('submit', {
+                            url:'/material/oldMatReg/update',
+                            success:function(data){
+                                data = $.parseJSON(data);
+                                if(data.statusCode == 200){
+                                    $.iMessager.show({
+                                        title:data.title,
+                                        msg:data.message
+                                    })
+                                    reloadData();
+                                } else {
+                                    $.iMessager.alert({
+                                        icon:'messager-error',
+                                        title:data.title,
+                                        msg:data.message
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            })
+
+            $('#detailDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                url: '/material/oldMatReg/getDetailPageSet',
+                queryParams:{
+                    yearQry:$('#yearQry').iCombobox('getValue'),
+                    monQry:$('#monQry').iCombobox('getValue'),
+                    teamNoQry1:$('#teamNoQry1').iCombobox('getValue'),
+                    matCodeQry1:$('#matCodeQry1').iTextbox('getValue'),
+                    matNameQry1:$('#matNameQry').iTextbox('getValue')
+                },
+                columns:[ [
+                    {
+                        field:'billNo', sortable:false, title:'退回', formatter:function(value, row, index){
+                            if(delRight && row.checkStep=='7202F'){
+                                return '<a style="font-weight: bold; color:#00b7ee; cursor:pointer " backBtn="'+row.billNo+'">删除</a>'
+                            }else{
+                                return '---';
+                            }
+                        }
+                    },{
+                        field:'teamName', sortable:false, title:'交旧单位'
+                    },{
+                        field:'occDate',title:'发生日期',sortable:false, formatter:function(value, row, index){
+                            if(value!=null && value != undefined && value!=''){
+                                return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+                            }else{
+                                return ''
+                            }
+                        }
+                    },{
+                        field:'matCode',title:'材料编码',sortable:false, formatter:function(value, row, index){
+                            return value.substring(0, 1) == 'X' ? value.substring(1) : value
+                        }
+                    },{
+                        field:'matName',title:'材料名称',sortable:false
+                    },{
+                        field:'matUnit',title:'计量单位',sortable:false
+                    },{
+                        field:'matPrice',title:'单价',sortable:false, align:'right'
+                    },{
+                        field:'matAmount',title:'交旧数量',sortable:false, align:'right'
+                    },{
+                        field:'storeName',title:'回收仓库',sortable:false
+                    },{
+                        field:'modiEmpName',title:'操作员工',sortable:false
+                    },{
+                        field:'modiDate',title:'操作日期',sortable:false, formatter:function(value, row, index){
+                            if(value!=null && value != undefined && value!=''){
+                                return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+                            }else{
+                                return ''
+                            }
+                        }
+                    },{
+                        field:'checkStepName',title:'审批状态',sortable:false
+                    },{
+                        field:'remark',title:'备注',sortable:false
+                    }
+                ] ],
+                onLoadSuccess:function(data){
+                    $('[backBtn]').click(function(){
+                        var billNo = $(this).attr('backBtn');
+                        $.iMessager.confirm('确认对话框', '您确定退回交旧吗？', function (r) {
+                            if(r){
+                                $.getJSON('/material/oldMatReg/back', {
+                                    billNo:billNo,
+                                },function(data){
+                                    if(data.statusCode=='200'){
+                                        $.iMessager.show({
+                                            title:data.title,
+                                            msg:data.message,
+                                            timeout:5000,
+                                            showType:'slide'
+                                        });
+                                        reloadData();
+                                    }else{
+                                        $.iMessager.alert(data.title,data.message,'messager-info');
+                                    }
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+
+            $('#searchBtn1').click(function(){
+                reloadDetail();
+            });
+
+            $('#downloadBtn1').click(function(){
+                $('#detailForm').iForm('submit', {
+                    url:'/material/oldMatReg/downloadDetail',
+                    success:function(data){
+
+                    }
+                });
+            });
+        });
+
+        function reloadData(){
+            $('#oldMatRegDg').iDatagrid('reload',{
+                date1Qry:$('#date1Qry').iDatebox('getValue'),
+                date2Qry:$('#date2Qry').iDatebox('getValue'),
+                matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+                matNameQry:$('#matNameQry').iTextbox('getValue'),
+                teamNoQry:$('#teamNoQry').iCombobox('getValue')
+            });
+        }
+
+        function reloadDetail(){
+            $('#detailDg').iDatagrid('reload',{
+                yearQry:$('#yearQry').iCombobox('getValue'),
+                monQry:$('#monQry').iCombobox('getValue'),
+                teamNoQry1:$('#teamNoQry1').iCombobox('getValue'),
+                matCodeQry1:$('#matCodeQry1').iTextbox('getValue'),
+                matNameQry1:$('#matNameQry').iTextbox('getValue')
+            });
+        }
+    </script>
+</th:block>
+</body>
+</html>

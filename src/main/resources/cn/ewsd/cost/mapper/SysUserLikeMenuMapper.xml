@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.SysUserLikeMenuMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.cost.model.SysUserLikeMenu" id="sysUserLikeMenuMap">
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+        <result property="user_id" column="user_id"/>
+        <result property="user_name_id" column="user_name_id"/>
+        <result property="menu_uri" column="menu_uri"/>
+        <result property="clicks_number" column="clicks_number"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 user_id
+		  ,  	  	     			 user_name_id
+		  ,  	  	     			 menu_uri
+		  ,  	  	     			 clicks_number
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.cost.model.SysUserLikeMenu">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_user_like_menu
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.cost.model.SysUserLikeMenu">
+		select  <include refid="Base_Column_List" />  from sys_user_like_menu where uuid = #{value}
+	</select>
+
+	<select id="queryByUserIdAndUri" resultType="cn.ewsd.cost.model.SysUserLikeMenu">
+		select  <include refid="Base_Column_List" />  from sys_user_like_menu
+		where user_id = #{user_id}
+		and menu_uri = #{menu_uri}
+		limit 1
+	</select>
+
+	<update id="executeAddClicksNumber">
+		update sys_user_like_menu
+		set
+			clicks_number = clicks_number + 1
+		where user_id = #{user_id}
+		  and menu_uri = #{menu_uri}
+	</update>
+
+	<select id="queryTotalByUser" resultType="int">
+		select count(uuid) from sys_user_like_menu
+		where
+			user_id = #{user_id}
+	</select>
+
+	<select id="queryListByUser" resultType="cn.ewsd.cost.model.SysUserLikeMenu">
+		select  f.*,m.text as menu_name
+		from sys_user_like_menu f
+		left join sys_menu m on f.menu_uri = m.url
+		where
+			user_id = #{user_id}
+		order by f.clicks_number desc
+		limit 6
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.cost.model.SysUserLikeMenu">
+		select  <include refid="Base_Column_List" />  from sys_user_like_menu
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_user_like_menu 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.cost.model.SysUserLikeMenu">
+		insert into sys_user_like_menu
+		(
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`, 
+			`user_id`, 
+			`user_name_id`, 
+			`menu_uri`, 
+			`clicks_number`
+		)
+		values
+		(
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time}, 
+			#{user_id}, 
+			#{user_name_id}, 
+			#{menu_uri}, 
+			#{clicks_number}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.cost.model.SysUserLikeMenu">
+		update sys_user_like_menu 
+		<set>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}, </if>
+			<if test="user_id != null">`user_id` = #{user_id}, </if>
+			<if test="user_name_id != null">`user_name_id` = #{user_name_id}, </if>
+			<if test="menu_uri != null">`menu_uri` = #{menu_uri}, </if>
+			<if test="clicks_number != null">`clicks_number` = #{clicks_number}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from sys_user_like_menu where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from sys_user_like_menu where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

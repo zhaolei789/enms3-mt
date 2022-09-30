@@ -1,0 +1,109 @@
+
+<input type="hidden" name="uuid">
+<input type="hidden" name="id">
+<input type="hidden" name="levelId">
+<div class="topjui-fluid">
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">父级机构</label>
+            <div class="topjui-input-block">
+                <input type="text" name="pid" data-toggle="topjui-combotree"
+                       data-options="required:true,
+                       url:'/mdata/organization/getListByLevelId?levelId=0',
+                       expandUrl:'/mdata/organization/getListByPid?pid={id}',
+                       getFatherIdsUrl:'/mdata/organization/getFatherIds?id={id}'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6"><label class="topjui-form-label">类型</label>
+            <div class="topjui-input-block">
+                <!--<input type="hidden" name="typeValue">param:'typeValue:text'-->
+                <input type="text" name="orgType"
+                       data-toggle="topjui-combobox"
+                       data-options="required:true,
+                   prompt:'必填',
+                   panelHeight:200,
+                   url:'/system/dicSet/getDicItemByCode?code=orgType',
+                    valueField:'value',
+                    textField:'text',
+                   ">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">名称</label>
+            <div class="topjui-input-block">
+                <input type="text" data-toggle="topjui-textbox" name="text" data-options="required:true">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">代码</label>
+            <div class="topjui-input-block">
+                <input type="text" data-toggle="topjui-textbox" name="code" data-options="required:true">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm12">
+            <label class="topjui-form-label">负责人</label>
+            <div class="topjui-input-block">
+                <input type="hidden" name="leader">
+                <input type="text" name="leaderId"
+                       data-toggle="topjui-combogrid"
+                       data-options="required:true,
+				   idField:'userNameId',
+    			   textField:'userName',
+    			   editable:true,
+				   url:'/mdata/user/getListByKeywords',
+				   loadFilter:function(data){
+                    if(data && data.length > 0){
+                        return {rows:data,total:data.length}
+                    }else{
+                        return {rows:[],total:0}
+                    }
+				   },
+				   columns:[[
+				       {field:'userName',title:'姓名',width:100},
+					   {field:'userNameId',title:'员工号',width:100}
+				   ]],
+				   param:'leader:userName'">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">状态</label>
+            <div class="topjui-input-block">
+                <input type="text" name="status"
+                       data-toggle="topjui-combobox"
+                       data-options="required:true,
+                       panelHeight:63,
+                       url:'/system/dicSet/getDicItemByCode?code=en-disable'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">是否有子节点</label>
+            <div class="topjui-input-block">
+                <input type="text" name="state"
+                       data-toggle="topjui-combobox"
+                       data-options="required:true,
+                       panelHeight:63,
+                       url:'/system/dicSet/getDicItemByCode?code=nodeState'">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">图标</label>
+            <div class="topjui-input-block">
+                <input type="text" data-toggle="topjui-textbox" name="iconCls">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">排序</label>
+            <div class="topjui-input-block">
+                <input type="text" data-toggle="topjui-numberspinner" name="sort">
+            </div>
+        </div>
+    </div>
+</div>

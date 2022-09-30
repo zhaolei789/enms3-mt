@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'west',title:'',split:true,border:false,width:'20%',iconCls:'fa fa-sitemap',headerCls:'border_right',bodyCls:'border_right'">
+            <!-- 机构信息 -->
+            <table data-toggle="topjui-treegrid"
+                   data-options="id:'orgnizationDatagrid',
+                   idField:'id',
+                   treeField:'text',
+                   fitColumns:true,
+                   singleSelect:true,
+                   url:'/mdata/organization/getListByLevelId?levelId=1',
+                   expandUrl:'/mdata/organization/getListByPid?pid={id}',
+                   childGrid:{
+                    param:'codeSetId:codeSetId,id:id',
+                    grid:[
+                    {type:'datagrid',id:'userDatagrid'},
+                    ]
+                    }
+                    ">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                    <th data-options="field:'text',title:'机构名称',width:100"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+        <!--用户信息-->
+        <div data-options="region:'center',iconCls:'fa fa-book',title:'',split:true,border:true,headerCls:'border_top_none'">
+            <div data-toggle="topjui-layout" data-options="fit:true">
+                <div data-options="region:'center',title:'',fit:false,split:true,border:false,bodyCls:'border_bottom'">
+                    <!-- datagrid表格 -->
+                    <table data-toggle="topjui-datagrid"
+                           data-options="id:'userDatagrid',
+                            url:'/mdata/user/getPageSet',
+                            filter: [{
+                                field: 'userName',
+                                type: 'textbox',
+                                op: ['contains', 'equal', 'notequal', 'less', 'greater']
+                            }],
+                            childTab: [{id:'southTabs',param:'userId:uuid'}]
+                            ">
+                        <thead>
+                        <tr>
+                            <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                            <th data-options="field:'userNameId',title:'用户名',sortable:true"></th>
+                            <th data-options="field:'userName',title:'姓名',sortable:true,width:100"></th>
+                            <th data-options="field:'telephone',title:'固定电话',sortable:true"></th>
+                            <th data-options="field:'cellphone',title:'手机',sortable:true"></th>
+                            <th data-options="field:'email',title:'电子邮箱',sortable:true"></th>
+                            <th data-options="field:'orgName',title:'所属机构',sortable:true"></th>
+                            <th data-options="field:'postText',title:'岗位职务',sortable:true"></th>
+                            <th data-options="field:'lbPostText',title:'劳保工种',sortable:true"></th>
+                            <th data-options="field:'gjPostText',title:'工具工种',sortable:true"></th>
+                            <th data-options="field:'linkEmployeesName',title:'关联员工',sortable:true"></th>
+                            <th data-options="field:'sex',title:'企业微信',sortable:true,
+                                formatter:function(value,row,index){
+                                    if (value == '1') {
+                                        return '未绑定';
+                                    } else if (value == '2') {
+                                        return '未绑定';
+                                    } else {
+                                        return '未绑定';
+                                    }
+                                }"></th>
+                            <th data-options="field:'sex',title:'钉钉',sortable:true,
+                                formatter:function(value,row,index){
+                                    if (value == '1') {
+                                        return '未绑定';
+                                    } else if (value == '2') {
+                                        return '未绑定';
+                                    } else {
+                                        return '未绑定';
+                                    }
+                                }"></th>
+                            <th data-options="field:'leadFlagText',title:'领导标记',sortable:true"></th>
+                            <th data-options="field:'isDriver',title:'司机标记',sortable:true,
+                                formatter:function(value,row,index){
+                                    if (value == '1') {
+                                        return '是';
+                                    } else if (value == '0') {
+                                        return '否';
+                                    } else {
+                                        return '';
+                                    }
+                                }"></th>
+                            <th data-options="field:'status',title:'状态',sortable:true,sortable:true,
+                                formatter: function(value,row,index){
+                                    if(value == '1'){
+                                        return '<span style=\'color:green\'>启用</span>';
+                                    }
+                                    if (value == '0'){
+                                        return '<span style=\'color:red\'>禁用</span>';
+                                    }
+                                }"></th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+                <!--用户权限-->
+                <!--<div data-options="region:'south',iconCls:'fa fa-book',title:'审批权限',split:true,border:false,height:'40%',headerCls:'border_top'">
+                    <table data-toggle="topjui-datagrid"
+                           data-options="id:'sysUserStepDg',
+                           singleSelect:true,
+                           selectOnCheck:false,
+                           checkOnSelect:false,
+                           url:'/system/sysUserStep/getPageSet'">
+                        <thead>
+                        <tr>
+                            <th data-options="field:'uuid',title:'主键',sortable:true,checkbox:true"></th>
+                            &lt;!&ndash;<th data-options="field:'userId',title:'用户',sortable:true"></th>&ndash;&gt;
+                            <th data-options="field:'processName',title:'审批流程',sortable:true,width:200"></th>
+                            <th data-options="field:'stepName',title:'步骤',sortable:true,width:200"></th>
+                            <th data-options="field:'orgName',title:'审批范围(部门)',sortable:true"></th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>-->
+
+
+                <div data-options="region:'south',iconCls:'icon-reload',title:'',split:true,border:false,bodyCls:'border_top',height:'40%'">
+                    <div data-toggle="topjui-tabs"
+                         data-options="id:'southTabs',
+						 fit:true,
+						 border:false,
+						 parentGrid:{
+                         type:'datagrid',
+                         id:'userDatagrid',
+                         param:'userId:uuid',
+                     }">
+                        <div title="审批权限" data-options="id:'tab0',iconCls:'fa fa-th'">
+                            <table data-toggle="topjui-edatagrid"
+                                   data-options="id:'sysUserStepDg',
+                                   singleSelect:false,
+                                   selectOnCheck:true,
+                                   checkOnSelect:true,
+                                   initCreate: false,
+                                   reloadAfterSave:true,
+                                   idField:'uuid',
+                                    url:'/system/sysUserStep/getPageSet'
+                                   ">
+                                <thead>
+                                <tr>
+                                    <th data-options="field:'uuid',title:'主键',sortable:true,checkbox:true"></th>
+                                    <th data-options="field:'processName',title:'审批流程',sortable:true,width:200"></th>
+                                    <th data-options="field:'stepName',title:'步骤',sortable:true,width:200"></th>
+                                    <th data-options="field:'orgName',title:'审批范围(部门)',sortable:true"></th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div title="科目权限" data-options="id:'tab1',iconCls:'fa fa-th'">
+                            <table data-toggle="topjui-edatagrid"
+                                   data-options="id:'sysUserItemDg',
+                                   singleSelect:false,
+                                   selectOnCheck:true,
+                                   checkOnSelect:true,
+                                   initCreate: false,
+                                   reloadAfterSave:true,
+                                   idField:'uuid',
+                                   url:'/system/sysUserItem/getPageSet'">
+                                <thead>
+                                <tr>
+                                    <th data-options="field:'uuid',title:'标识',sortable:true,checkbox:true"></th>
+                                    <!--<th data-options="field:'userId',title:'用户',sortable:true"></th>-->
+                                    <th data-options="field:'itemNo',title:'科目编号',sortable:true"></th>
+                                    <th data-options="field:'itemName',title:'科目名称',sortable:true"></th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div title="仓库权限" data-options="id:'tab2',iconCls:'fa fa-th'">
+                            <table data-toggle="topjui-edatagrid"
+                                   data-options="id:'sysUserStoreDg',
+                                   singleSelect:false,
+                                   selectOnCheck:true,
+                                   checkOnSelect:true,
+                                   initCreate: false,
+                                   reloadAfterSave:true,
+                                   idField:'uuid',
+                                   url:'/system/sysUserStore/getPageSet'">
+                                <thead>
+                                <tr>
+                                    <th data-options="field:'uuid',title:'标识',sortable:true,checkbox:true"></th>
+                                    <!--<th data-options="field:'userId',title:'用户',sortable:true"></th>-->
+                                    <th data-options="field:'storeNo',title:'仓库',sortable:true"></th>
+                                    <th data-options="field:'storeName',title:'仓库名称',sortable:true"></th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div title="查询部门" data-options="id:'tab3',iconCls:'fa fa-th'">
+                            <table data-toggle="topjui-edatagrid"
+                                   data-options="id:'sysUserQryOrgDg',
+                                   singleSelect:false,
+                                   selectOnCheck:true,
+                                   checkOnSelect:true,
+                                   initCreate: false,
+                                   reloadAfterSave:true,
+                                   idField:'uuid',
+                                   url:'/system/sysUserQryOrg/getPageSet'">
+                                <thead>
+                                <tr>
+                                    <th data-options="field:'uuid',title:'标识',sortable:true,checkbox:true"></th>
+                                    <th data-options="field:'orgNo',title:'部门编号',sortable:true"></th>
+                                    <th data-options="field:'orgName',title:'部门名称',sortable:true"></th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div title="审核部门" data-options="id:'tab4',iconCls:'fa fa-th'">
+                            <table data-toggle="topjui-edatagrid"
+                                   data-options="id:'sysUserDeptDg',
+                                   singleSelect:false,
+                                   selectOnCheck:true,
+                                   checkOnSelect:true,
+                                   initCreate: false,
+                                   reloadAfterSave:true,
+                                   idField:'uuid',
+                                   url:'/system/sysUserDept/getPageSet'">
+                                <thead>
+                                <tr>
+                                    <th data-options="field:'uuid',title:'标识',sortable:true,checkbox:true"></th>
+                                    <th data-options="field:'orgNo',title:'部门编号',sortable:true"></th>
+                                    <th data-options="field:'orgName',title:'部门名称',sortable:true"></th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div title="关联领导" data-options="id:'tab5',iconCls:'fa fa-th'">
+                            <table data-toggle="topjui-datagrid"
+                                   data-options="id:'sysUserBarMasterDg',
+                                    singleSelect:true,
+                                    selectOnCheck:false,
+                                    checkOnSelect:false,
+                                    initCreate: false,
+                                    reloadAfterSave:true,
+                                    idField:'uuid',
+                                    url:'/cost/sysUserBarMaster/getPageSet'">
+                                <thead>
+                                <tr>
+                                    <th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+                                    <th data-options="field:'userNameId',title:'用户编号',sortable:true"></th>
+                                    <th data-options="field:'masterName',title:'领导名称',sortable:true"></th>
+                                    <th data-options="field:'note',title:'备注',sortable:true"></th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <!--<div title="任务问题" data-options="id:'tab2',iconCls:'fa fa-th'">
+                            <table data-toggle="topjui-edatagrid"
+                                   data-options="id:'oaTaskProblemDg',
+                                   singleSelect:false,
+                                   selectOnCheck:true,
+                                   checkOnSelect:true,
+                                   initCreate: false,
+                                   reloadAfterSave:true,
+                                   idField:'uuid',
+                                   url:'/office/oaTaskProblem/getPageSet'">
+                                <thead>
+                                <tr>
+                                    <th data-options="field:'uuid',title:'标识',sortable:true,checkbox:true"></th>
+                                    <th data-options="field:'startTime',title:'开始时间',sortable:true"></th>
+                                    <th data-options="field:'endTime',title:'结束时间',sortable:true"></th>
+                                    <th data-options="field:'content',title:'问题内容',sortable:true"></th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>-->
+                    </div>
+                </div>
+
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户 表格工具栏 -->
+    <div id="userDatagrid-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'userDatagrid'
+       }" style="display:none">
+        <ewsd:rbac str="userAddDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#userDatagrid-toolbar',
+           btnCls:'topjui-btn-green',
+           parentGrid:{
+               type:'treegrid',
+               id:'orgnizationDatagrid',
+               param:'orgId:id,orgName:text',
+               unselectedMsg:'请先选择左侧树形导航中的机构'
+           },
+           dialog:{
+               id:'userAddDialog',
+               href:'/mdata/user/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/mdata/user/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="userEditDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#userDatagrid-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'userEditDialog',
+               href:'/mdata/user/edit',
+               url:'/mdata/user/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/mdata/user/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'userDatagrid'}]}
+               ]
+           }">编辑</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="/system/config/delete">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'doAjax',
+           extend:'#userDatagrid-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/mdata/user/delete'">删除</a>
+        </ewsd:rbac>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#userDatagrid-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#userDatagrid-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+
+
+        <ewsd:rbac str="/system/config/delete">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="menu:'#moreSubMenu',
+       btnCls:'topjui-btn-orange',
+       hasDownArrow:true,
+       iconCls:'fa fa-list'">更多</a>
+            <div id="moreSubMenu" class="topjui-toolbar" style="width:100px;">
+                <div data-toggle="topjui-menubutton"
+                     data-options="method:'doAjax',
+                 extend:'#userDatagrid-toolbar',
+                 iconCls:'fa fa-key',
+                 url:'/mdata/user/updatePassword',
+                 confirmMsg:'确定要重置该用户密码吗？重置后密码与用户名相同。',
+                 grid:{
+                     type:'datagrid',
+                     id:'userDatagrid',
+                     param:'uuid,password:userNameId',
+                     unselectedMsg:'请先选中要重置密码的用户！'
+                 }">重置密码
+                </div>
+            </div>
+        </ewsd:rbac>
+        <ewsd:rbac str="/system/config/delete">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="
+           onClick:batchAuthorization, btnCls:'topjui-btn-red',
+           iconCls:'fa fa-reorder'">批量授权</a>
+        </ewsd:rbac>
+
+        <form class="search-box" id="queryForm" name="dataForm" method="post">
+            角色:
+            <input type="text" name="userGroup" id="userGroup"
+                   data-toggle="topjui-combotree"
+                   data-options="
+                       prompt:'必填',
+                       id:'userGroup',
+                       width:200,
+                       multiple:false,
+                       url:'/system/authGroup/getListByLevelId?levelId=0',
+                       expandUrl:'/system/authGroup/getListByPid?pid={id}',
+                       expandAll:true,
+                       onBeforeSelect: function (node) {
+                         var opts = $(this).iTree('options');
+                         if (opts.onlyLeafCheck) {
+                            // 判断是否是叶子节点
+                             var isLeaf = $(this).iTree('isLeaf', node.target);
+                            if (!isLeaf) {
+                                // 返回false表示取消本次选择操作
+                                return false;
+                            }
+                         }
+                       },
+                       icons:[{
+                            iconCls:'fa fa-remove',
+                            handler: function(e){
+                                $(e.data.target).iCombotree('clear');
+                            }
+                        }],
+                        iconWidth:22,
+                       onlyLeafCheck:true">
+            用户名:
+            <input type="text" name="userNameId" id="userNameId" data-toggle="topjui-textbox"
+                   data-options="id:'userNameId',prompt:'用户名',width:135">
+
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'query',
+            iconCls:'fa fa-search',
+            btnCls:'topjui-btn-red',
+            form:{id:'queryForm'},
+            grid:{type:'datagrid','id':'userDatagrid'}">查询</a>
+        </form>
+    </div>
+
+    <!--审批步骤-->
+    <div id="sysUserStepDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'sysUserStepDg'
+       }" style="display:none">
+        <ewsd:rbac str="sysUserStepAddDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#sysUserStepDg-toolbar',
+           btnCls:'topjui-btn-green',
+           parentGrid:{
+               type:'datagrid',
+               id:'userDatagrid',
+               param:'userId:uuid',
+               unselectedMsg:'请先选择用户'
+           },
+           dialog:{
+               id:'sysUserStepAddDg',
+               href:'/system/sysUserStep/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/system/sysUserStep/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+        </ewsd:rbac>
+
+        <ewsd:rbac str="/system/sysUserStep/deleteBatch">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'doAjax',
+           extend:'#sysUserStepDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的步骤',param:'uuid:uuid'},
+	       url:'/system/sysUserStep/deleteBatch'">删除</a>
+        </ewsd:rbac>
+        <!--<a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#sysUserStepDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#sysUserStepDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>-->
+    </div>
+
+    <!--用户科目-->
+    <div id="sysUserItemDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'sysUserItemDg'
+       }" style="display:none">
+        <ewsd:rbac str="sysUserItemAddDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#sysUserItemDg-toolbar',
+           btnCls:'topjui-btn-green',
+           parentGrid:{
+               type:'datagrid',
+               id:'userDatagrid',
+               param:'userId:uuid',
+               unselectedMsg:'请先选择用户'
+           },
+           dialog:{
+               id:'sysUserItemAddDg',
+               href:'/system/sysUserItem/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/system/sysUserItem/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+        </ewsd:rbac>
+
+
+        <ewsd:rbac str="/system/sysUserItem/deleteBatch">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'doAjax',
+           extend:'#sysUserItemDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/system/sysUserItem/deleteBatch'">删除</a>
+        </ewsd:rbac>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#sysUserItemDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#sysUserItemDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+    </div>
+
+    <!--用户仓库-->
+    <div id="sysUserStoreDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'sysUserStoreDg'
+       }" style="display:none">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#sysUserStoreDg-toolbar',
+           btnCls:'topjui-btn-green',
+           parentGrid:{
+               type:'datagrid',
+               id:'userDatagrid',
+               param:'userId:uuid',
+               unselectedMsg:'请先选择用户'
+           },
+           dialog:{
+               id:'sysUserStoreAddDg',
+               href:'/system/sysUserStore/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/system/sysUserStore/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'doAjax',
+           extend:'#sysUserStoreDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的仓库',param:'uuid:uuid'},
+	       url:'/system/sysUserStore/deleteBatch'">删除</a>
+
+    </div>
+
+    <!--查询部门-->
+    <div id="sysUserQryOrgDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'sysUserQryOrgDg'
+       }" style="display:none">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#sysUserQryOrgDg-toolbar',
+           btnCls:'topjui-btn-green',
+           parentGrid:{
+               type:'datagrid',
+               id:'userDatagrid',
+               param:'userId:uuid',
+               unselectedMsg:'请先选择用户'
+           },
+           dialog:{
+               id:'sysUserQryOrgAddDg',
+               href:'/system/sysUserQryOrg/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/system/sysUserQryOrg/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#sysUserQryOrgDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的部门',param:'uuid:uuid'},
+	       url:'/system/sysUserQryOrg/deleteBatch'">删除</a>
+
+    </div>
+
+    <!--审核部门-->
+    <div id="sysUserDeptDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'sysUserDeptDg'
+       }" style="display:none">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#sysUserDeptDg-toolbar',
+           btnCls:'topjui-btn-green',
+           parentGrid:{
+               type:'datagrid',
+               id:'userDatagrid',
+               param:'userId:uuid',
+               unselectedMsg:'请先选择用户'
+           },
+           dialog:{
+               id:'sysUserDeptAddDg',
+               href:'/system/sysUserDept/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/system/sysUserDept/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#sysUserDeptDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的部门',param:'uuid:uuid'},
+	       url:'/system/sysUserDept/deleteBatch'">删除</a>
+
+    </div>
+
+    <!-- 关联领导 -->
+    <div id="sysUserBarMasterDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'sysUserBarMasterDg'
+       }" style="display:none">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#sysUserBarMasterDg-toolbar',
+           btnCls:'topjui-btn-green',
+           parentGrid:{
+               type:'datagrid',
+               id:'userDatagrid',
+               param:'userId:uuid',
+               unselectedMsg:'请先选择用户'
+           },
+           dialog:{
+               id:'sysUserBarMasterAddDg',
+               href:'/cost/sysUserBarMaster/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/cost/sysUserBarMaster/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'doAjax',
+           extend:'#sysUserBarMasterDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的数据',param:'uuid:uuid'},
+	       url:'/cost/sysUserBarMaster/deleteBatch'">删除</a>
+    </div>
+
+    <!--职位-->
+   <!-- <div id="filterDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'filterDg'
+       }" style="display:none">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="
+        btnCls:'topjui-btn-green',
+        iconCls:'fa fa-plus',onClick:addPosition">新增</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#filterDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'userEditDialog',
+               href:'/mdata/user/position',
+               url:'/mdata/sysUserPost/getDetailByUuid?uuid={uuid}',
+               width: 650,
+                height: 300,
+               buttonsGroup:[
+                   {text:'更新',url:'/mdata/sysUserPost/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'filterDg'}]}
+               ]
+           }">编辑</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#filterDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的数据',param:'uuid:uuid'},
+	       url:'/mdata/sysUserPost/deleteBatch'">删除</a>
+    </div>-->
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        //批量授权
+        function batchAuthorization() {
+            var userDatagrid = $('#userDatagrid').iDatagrid('getChecked');//勾选用户信息
+            if (userDatagrid.length <= 0) {
+                return $.iMessager.alert('提示', '请先勾选要授权用户!', 'messager-info');
+            }
+            var $batchAuthorizationDialog = $('<div id="mybatchAuthorizationDialog"></div>')
+            $batchAuthorizationDialog.iDialog({
+                title: '批量授权',
+                width: 750,
+                height: 250,
+                closed: false,
+                cache: false,
+                href: '/mdata/user/batchAuthorization',
+                modal: true,
+                buttons: [{
+                    text: '保存',
+                    iconCls: 'fa fa-save',
+                    btnCls: 'topjui-btn-blue',
+                    handler: function () {
+                        var userDatagrid = $('#userDatagrid').iDatagrid('getChecked');//勾选用户信息
+                        var userGroup = $('#userGroup').iCombotree('getValues');//角色授权userGroup
+                        var dataAuth = $('#dataAuth').iCombobox('getValues');  //数据授权dataAuth
+                        var url = '/mdata/user/batchAuthorizationSave';
+                        var data = {
+                            user: JSON.stringify(userDatagrid),
+                            dataAuth: dataAuth,
+                            userGroup: userGroup
+                        };
+                        var ps = $.param(data, true);
+                        $.post(url, ps, function (res) {
+                            if (200 == res.statusCode) {
+                                $.iMessager.show({
+                                    title: '我的消息',
+                                    msg: '授权成功!',
+                                    timeout: 1000,
+                                    showType: 'slide'
+                                });
+                                $('#mybatchAuthorizationDialog').iDialog('destroy');
+                                $('#userDatagrid').iDatagrid('reload');
+                            } else {
+                                $.iMessager.alert('提示', '授权失败!', 'messager-info');
+                            }
+                        }, 'JSON');
+                    }
+                }, {
+                    text: '关闭',
+                    iconCls: 'fa fa-close',
+                    btnCls: 'topjui-btn-red',
+                    handler: function (res) {
+                        $batchAuthorizationDialog.iDialog('close');
+                    }
+                }]
+            });
+
+        }
+
+        //职位新增
+        /*function addPosition() {
+            var userDatagrid = $('#userDatagrid').iDatagrid('getSelections');//勾选用户信息
+            if (userDatagrid.length <= 0) {
+                return $.iMessager.alert('提示', '请先选择用户信息!!!', 'messager-info');
+            }
+            var $editDialog = $('<div></div>');
+            $editDialog.iDialog({
+                title: '新建职位',
+                width: 650,
+                height: 300,
+                closed: false,
+                cache: false,
+                href: '/mdata/user/position',
+                modal: true,
+                buttons: [{
+                    text: '保存',
+                    iconCls: 'fa fa-save',
+                    btnCls: 'topjui-btn-blue',
+                    handler: function () {
+                        var orgId = $('#orgId').iCombotree('getValues');
+                        var post = $('#post').iCombotree('getValue');
+                        var url = '/mdata/user/savePosition';
+                        $.post(url, {
+                            userNameId: userDatagrid[0].userNameId,
+                            orgId: orgId,
+                            post: post,
+                            postText: $('#postText').val()
+                        }, function (res) {
+                            if (200 == res.statusCode) {
+                                $.iMessager.show({
+                                    title: '我的消息',
+                                    msg: '保存成功',
+                                    timeout: 1000,
+                                    showType: 'slide'
+                                });
+                                $editDialog.iDialog('close');
+                                $('#filterDg').iDatagrid('reload', {userNameId: userDatagrid[0].userNameId})
+                            } else {
+                                $.iMessager.alert('提示', res.message, 'info');
+                            }
+                        }, 'JSON');
+                    }
+                }, {
+                    text: '关闭',
+                    iconCls: 'fa fa-close',
+                    btnCls: 'topjui-btn-red',
+                    handler: function () {
+                        $editDialog.iDialog('close');
+                    }
+                }]
+            });
+
+        }*/
+
+
+        //ureport 导出
+        function ureportExportPDF() {
+            var userNameId = getChecked();
+            var name = '用户报表-多条件查询.ureport.xml';
+            window.location.href = '/report/ureport/pdf?_u=mysql-' + name + '&_n=' + name + '&userNameId=' + userNameId ;
+        }
+        function ureportExportEXCEL() {
+            var userNameId = getChecked();
+            var name = '用户报表-多条件查询.ureport.xml';
+            window.location.href = '/report/ureport/excel?_u=mysql-' + name + '&_n=' + name + '&userNameId=' + userNameId ;
+        }
+        function getChecked() {
+            var userNameId = '';
+            //
+            // var uNameId = $('#userNameId').iTextbox('getText');
+            // var uName = $('#userName').iTextbox('getText');
+            var userInfo = $('#userDatagrid').iDatagrid('getChecked');
+            if(!userInfo || userInfo.length == 0 ){
+                $.messager.alert('我的消息','请勾选需要导出的数据！','messager-info');
+                return;
+            }
+            for (var i = 0; i < userInfo.length; i++) {
+                userNameId += userInfo[i]['userNameId'] + ',';
+            }
+            if (userInfo.length > 0) {
+                userNameId = userNameId.substr(0, userNameId.length - 1)
+            }
+            return userNameId;
+        }
+
+
+        $.extend($.fn.textbox.methods, {
+            addClearBtn: function(jq, iconCls){
+                return jq.each(function(){
+                    var t = $(this);
+                    var opts = t.combotree('options');
+                    opts.icons = opts.icons || [];
+                    opts.icons.unshift({
+                        iconCls: iconCls,
+                        handler: function(e){
+                            $(e.data.target).combotree('clear').combotree('textbox').focus();
+                            $(this).css('visibility','hidden');
+                        }
+                    });
+                    t.textbox();
+                    if (!t.combotree('getText')){
+                        t.combotree('getIcon',0).css('visibility','hidden');
+                    }
+                    t.combotree('textbox').bind('keyup', function(){
+                        var icon = t.combotree('getIcon',0);
+                        if ($(this).val()){
+                            icon.css('visibility','visible');
+                        } else {
+                            icon.css('visibility','hidden');
+                        }
+                    });
+                });
+            }
+        });
+        $(function(){
+            $('#userGroup').combotree().textbox('addClearBtn', 'icon-clear');
+        });
+    </script>
+    <!--<script src="../../static/js/security/mainframe.js"-->
+    <!--th:src="@{/js/security/mainframe.js}"></script>-->
+</th:block>
+</body>
+</html>
+

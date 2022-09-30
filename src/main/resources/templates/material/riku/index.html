@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <form id="rikuForm" method="post">
+            <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+                <table id="rikuDg"></table>
+            </div>
+        </form>
+    </div>
+
+    <div id="rikuDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'rikuDg'
+       }" style="display:none">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料：</label>
+        <input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'" value="">
+
+        <label class="topjui-form-label" style="width:55px;float:none;display:inline-block">类型：</label>
+        <input data-toggle="topjui-combobox" name="planTypeQry" id="planTypeQry" value="" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.planType',width:'122px',loadFilter:function(data){
+            data.unshift({value:'', text:'--全部--'});
+            return data
+        }">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">ABC分类：</label>
+        <input name="abcTypeQry" id="abcTypeQry" value="m.abcType.C">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">成本中心：</label>
+        <input data-toggle="topjui-combobox" name="costCenterQry" id="costCenterQry" value="" data-options="valueField:'centerNo',textField:'centerName',url:'/material/costCenter/getCenterSet',width:'150px',multiple:true">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">WBS元素：</label>
+        <input id="wbsQry" data-toggle="topjui-textbox" name="wbsQry" data-options="width:'150px'" value="">
+
+        <label class="topjui-form-label" style="width:90px;float:none;display:inline-block">是否安全费：</label>
+        <input data-toggle="topjui-combobox" id="ifAqfyQry" value="" name="ifAqfyQry" data-options="width:'75px',valueField:'value',textField:'text',data:[
+            {value:'', text:'--全部--'},
+            {value:'0', text:'否'},
+            {value:'1', text:'是'}
+        ]">
+
+        <br />
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">计划区间：</label>
+        <input id="startDateQry" name="startDateQry" th:value="${startDateQry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+        <label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+        <input id="endDateQry" name="endDateQry" th:value="${endDateQry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">计划月份：</label>
+        <input id="monthQry" data-toggle="topjui-textbox" name="monthQry" data-options="width:'150px'" th:value="${monthQry}">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">工程：</label>
+        <input data-toggle="topjui-combobox" name="prjNo" id="prjNo" value="" data-options="valueField:'prjNo',textField:'prjName',url:'/material/mPrj/getPrjList',width:'150px',disabled:true">
+
+        <a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">查询</span>
+                <span class="l-btn-icon fa fa-search">&nbsp;</span>
+            </span>
+        </a>
+
+        <a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">保存</span>
+                <span class="l-btn-icon fa fa-save">&nbsp;</span>
+            </span>
+        </a>
+
+        <a href="javascript:void(0)" id="deleteBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">删除</span>
+                <span class="l-btn-icon fa fa-trash">&nbsp;</span>
+            </span>
+        </a>
+
+        <a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">完成利库</span>
+                <span class="l-btn-icon fa fa-check">&nbsp;</span>
+            </span>
+        </a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        $(document).ready(function(){
+            $('#searchBtn').click(function(){
+                reloadMat();
+            });
+
+            $('#abcTypeQry').iCombobox({
+                valueField:'value',
+                textField:'text',
+                url:'/system/dicSet/getDicItemByCode?code=m.abcType',
+                width:'150px',
+                onChange:function(newValue, oldValue){
+                    abcChange();
+                }
+            })
+
+            function abcChange(){
+                if($('#abcTypeQry').iCombobox('getValue') != 'm.abcType.C'){
+                    $('#prjNo').iCombobox('enable')
+                }else{
+                    $('#prjNo').iCombobox('disable')
+                }
+            }
+
+            $('#rikuDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                url: '/material/riku/getMatList',
+                queryParams:{
+                    matQry:$('#matQry').val(),
+                    abcTypeQry:$('#abcTypeQry').iCombobox('getValue'),
+                    startDateQry:$('#startDateQry').iDatebox('getValue'),
+                    endDateQry:$('#endDateQry').iDatebox('getValue'),
+                    planTypeQry:$('#planTypeQry').iCombobox('getValue'),
+                    costCenterQry:$('#costCenterQry').iCombobox('getValue'),
+                    monthQry:$('#monthQry').iTextbox('getValue'),
+                    wbsQry:$('#wbsQry').iTextbox('getValue'),
+                    ifAqfyQry:$('#ifAqfyQry').combobox('getValue')
+                },
+                columns:[ [
+                    {
+                        field:'erpType', sortable:false, title:'ERP分类'
+                    },{
+                        field:'typeName',title:'分类描述',sortable:false
+                    },{
+                        field:'matCode',title:'物料编码',sortable:false, width:'95px'
+                    },{
+                        field:'matName',title:'物料名称',sortable:false
+                    },{
+                        field:'matUnitName',title:'计量单位',sortable:false
+                    },{
+                        field:'matPrice',title:'价格',sortable:false, align:'right', width:'80px'
+                    },{
+                        field:'planAmount',title:'汇总数量',sortable:false, align:'right', width:'80px'
+                    },{
+                        field:'tgAmount',title:'统管总库存',sortable:false, align:'right', width:'80px'
+                    },{
+                        field:'sfAmount',title:'安全库存',sortable:false, align:'right', width:'80px'
+                    },{
+                        field:'calcAmount',title:'本次需求量',sortable:false, align:'right', formatter:function(value, row, index){
+                            var data = $('#rikuDg').iDatagrid('getData');
+                            if(index==0 || row.matNo != data.rows[index-1].matNo){
+                                return '<input type="hidden" name="matNo" value="'+ row.matNo +'" /><span class="textbox"><input style="text-align: right" class="textbox-text" type="number" name="amt_'+ row.matNo +'" value="'+ (value<0 ? 0 : value) +'" /></span>'
+                            }
+                            return '';
+                        }
+                    },{
+                        field:'planNo', sortable:false, title:'', checkbox:true
+                    },{
+                        field:'teamName',title:'计划单位',sortable:false
+                    },{
+                        field:'matAmount',title:'计划数量',sortable:false, align:'right', formatter:function(value, row, index){
+                            return '<span class="textbox"><input style="text-align: right" class="textbox-text" type="number" name="amount_'+row.planNo+'" id="amount_'+row.planNo+'" value="'+(value==0 ? '' : value)+'" /></span>'
+                        }
+                    },{
+                        field:'bala',title:'金额',sortable:false, align:'right', width:'100px'
+                    },{
+                        field:'abcType',title:'ABC分类',sortable:false,formatter:function(value, row, index){
+                            return '<input name="abcType_'+ row.planNo +'" id="abcType_'+ row.planNo +'" value="'+ row.abcType +'">'
+                        }
+                    },{
+                        field:'costCenter',title:'成本中心',sortable:false
+                    }
+                ] ],
+                onLoadSuccess:function(data){
+                    var fields = [];
+                    var abcType = $('#abcTypeQry').iCombobox('getValue');
+                    if('m.abcType.A' == abcType){
+                        $('#rikuDg').iDatagrid('hideColumn', 'planNo')
+                        $('#rikuDg').iDatagrid('showColumn', 'calcAmount')
+                        fields = ['erpType', 'typeName', 'matCode', 'matName', 'matUnitName', 'matPrice', 'planAmount', 'tgAmount', 'sfAmount', 'calcAmount'];
+                    }else{
+                        $('#rikuDg').iDatagrid('hideColumn', 'calcAmount')
+                        $('#rikuDg').iDatagrid('showColumn', 'planNo')
+                        fields = ['erpType', 'typeName', 'matCode', 'matName', 'matUnitName', 'matPrice', 'planAmount', 'tgAmount', 'sfAmount'];
+                    }
+
+                    var tempRowIdx = 0;
+                    var tempMatNo = '';
+                    for(var i=0; i<data.rows.length; i++){
+                        var matNo = data.rows[i].matNo;
+                        if(tempMatNo != matNo){
+                            mergeCell(i, tempRowIdx, fields);
+                            tempRowIdx = i;
+                            tempMatNo = matNo;
+                        }
+                    }
+                    if(tempRowIdx != data.rows.length-1){
+                        mergeCell(data.rows.length, tempRowIdx, fields);
+                    }
+
+                    $('[name^="abcType_"]').each(function(){
+                        $(this).iCombobox({
+                            url:'/system/dicSet/getDicItemByCode?code=m.abcType',
+                            valueField:'value',
+                            textField:'text'
+                        })
+                    });
+                }
+            });
+
+            $('#deleteBtn').click(function(){
+                $('#rikuForm').iForm('submit', {
+                    url:'/material/riku/delete',
+                    success:function(data){
+                        data = $.parseJSON(data);
+                        if(data.statusCode == 200){
+                            $.iMessager.show({
+                                title:data.title,
+                                msg:data.message
+                            })
+                            reloadMat();
+                        } else {
+                            $.iMessager.alert({
+                                icon:'messager-error',
+                                title:data.title,
+                                msg:data.message
+                            });
+                        }
+                    }
+                });
+            });
+
+            $('#saveBtn').click(function(){
+                $('#rikuForm').iForm('submit', {
+                    url:'/material/riku/save',
+                    success:function(data){
+                        data = $.parseJSON(data);
+                        if(data.statusCode == 200){
+                            $.iMessager.show({
+                                title:data.title,
+                                msg:data.message
+                            })
+                            reloadMat();
+                        } else {
+                            $.iMessager.alert({
+                                icon:'messager-error',
+                                title:data.title,
+                                msg:data.message
+                            });
+                        }
+                    }
+                });
+            });
+
+            $('#submitBtn').click(function(){
+                $('#rikuForm').iForm('submit', {
+                    url:'/material/riku/finish',
+                    success:function(data){
+                        data = $.parseJSON(data);
+                        if(data.statusCode == 200){
+                            $.iMessager.show({
+                                title:data.title,
+                                msg:data.message
+                            })
+                            reloadMat();
+                        } else {
+                            $.iMessager.alert({
+                                icon:'messager-error',
+                                title:data.title,
+                                msg:data.message
+                            });
+                        }
+                    }
+                });
+            });
+        });
+
+        function mergeCell(endIdx, startIdx, fields){
+            for(var j=0; j<fields.length; j++){
+                $('#rikuDg').iDatagrid('mergeCells', {
+                    index:startIdx,
+                    field:fields[j],
+                    rowspan:endIdx-startIdx,
+                    colspan:0
+                })
+            }
+        }
+
+        function reloadMat(){
+            $('#rikuDg').iDatagrid('reload',{
+                matQry:$('#matQry').val(),
+                abcTypeQry:$('#abcTypeQry').iCombobox('getValue'),
+                startDateQry:$('#startDateQry').iDatebox('getValue'),
+                endDateQry:$('#endDateQry').iDatebox('getValue'),
+                planTypeQry:$('#planTypeQry').iCombobox('getValue'),
+                costCenterQry:$('#costCenterQry').iCombobox('getValue'),
+                monthQry:$('#monthQry').iTextbox('getValue'),
+                wbsQry:$('#wbsQry').iTextbox('getValue'),
+                ifAqfyQry:$('#ifAqfyQry').combobox('getValue')
+            });
+        }
+    </script>
+</th:block>
+</body>
+</html>

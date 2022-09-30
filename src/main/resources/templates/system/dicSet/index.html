@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'west',title:'字典集',split:true,border:false,width:'50%',iconCls:'fa fa-book',headerCls:'border_right',bodyCls:'border_right'">
+            <!-- datagrid表格 -->
+            <table data-toggle="topjui-edatagrid"
+                   data-options="id:'dicSetDg',
+                   reloadAfterSave:true,
+                    url:'/system/dicSet/getPageSet',
+                    saveUrl:'/system/dicSet/save',
+                    updateUrl:'/system/dicSet/update',
+                    destroyUrl:'/system/dicSet/delete',
+                    childGrid:{
+                        param:'puuid:uuid,code',
+                        grid:[
+                            {type:'datagrid',id:'dicItemDg'}
+                        ]
+                    }">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                    <th data-options="field:'text',title:'字典集名称',sortable:true,editor:{type:'textbox',options:{required:true,height:30}}"></th>
+                    <th data-options="field:'code',title:'字典集代码',sortable:true,editor:{type:'textbox',options:{required:true,height:30}}"></th>
+                    <th data-options="field:'sort',title:'排序',sortable:true,editor:{type:'numberbox',options:{height:30}}"></th>
+                    <th data-options="field:'remark',title:'备注',sortable:true,editor:{type:'textbox',options:{height:30}}"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        <div data-options="region:'center',iconCls:'fa fa-book',title:'字典项',split:true,border:false,bodyCls:'border_left'">
+            <!-- datagrid表格 -->
+            <table data-toggle="topjui-edatagrid"
+                   data-options="id:'dicItemDg',
+                    idField:'uuid',
+                    reloadAfterSave:true,
+                    selectOnCheck:true,
+			        checkOnSelect:true,
+			        reloadAfterSave:true,
+                    url:'/system/dicItem/getPageSet',
+                    saveUrl:'/system/dicItem/save?code={parent.code}',
+                    updateUrl:'/system/dicItem/update',
+                    destroyUrl:'/system/dicItem/delete'">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                    <th data-options="field:'text',title:'字典项名称',sortable:true,editor:{type:'textbox',options:{required:true,height:30}}"></th>
+                    <th data-options="field:'value',title:'字典项值',sortable:true,editor:{type:'textbox',options:{required:true,height:30}}"></th>
+                    <th data-options="field:'selected',title:'默认选中',sortable:true,editor:{type:'combobox',options:{height:30,panelHeight:63,
+                    data: [{
+                        text: '是',
+                        value: 'true'
+                    },{
+                        text: '否',
+                        value: 'false'
+                    }]}}"></th>
+                    <th data-options="field:'valueColour',title:'颜色',sortable:true,editor:{type:'textbox',options:{height:30}}"></th>
+                    <th data-options="field:'sort',title:'排序',sortable:true,editor:{type:'numberbox',options:{height:30}}"></th>
+                    <th data-options="field:'remark',title:'备注',sortable:true,editor:{type:'textbox',options:{height:30}}"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- 字典集 表格工具栏 -->
+    <div id="dicSetDg-toolbar" class="topjui-toolbar" data-options="
+       grid:{
+           type:'edatagrid',
+           id:'dicSetDg'
+       }" style="display:none">
+        <ewsd:rbac str="dicSetAddBtn">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'edatagrid',
+           extend:'#dicSetDg-toolbar',
+           btnCls:'topjui-btn-green',
+           type:'addRow',
+           iconCls:'fa fa-plus'">新增</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="dicsetSaveBtn">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'edatagrid',
+       extend:'#dicSetDg-toolbar',
+       btnCls:'topjui-btn-blue',
+       type:'saveRow',
+       iconCls:'fa fa-save'">保存</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="dicsetCancelBtn">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'edatagrid',
+       extend:'#dicSetDg-toolbar',
+       btnCls:'topjui-btn-black',
+       type:'cancelRow',
+       iconCls:'fa fa-close'">取消</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="dicsetDelBtn">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#dicSetDg-toolbar',
+           btnCls:'topjui-btn-red',
+           url:'/system/dicSet/delete'">删除</a>
+        </ewsd:rbac>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#dicSetDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#dicSetDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+    </div>
+
+    <!-- 字典项 表格工具栏 -->
+    <div id="dicItemDg-toolbar" class="topjui-toolbar" data-options="
+       grid:{
+           type:'edatagrid',
+           id:'dicItemDg'
+       },parentGrid:{
+           type:'datagrid',
+           id:'dicSetDg'
+       }" style="display:none">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'edatagrid',
+           extend:'#dicItemDg-toolbar',
+           btnCls:'topjui-btn-green',
+           type:'addRow',
+           iconCls:'fa fa-plus'">新增</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'edatagrid',
+       extend:'#dicItemDg-toolbar',
+       btnCls:'topjui-btn-blue',
+       type:'saveRow',
+       iconCls:'fa fa-save'">保存</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'edatagrid',
+       extend:'#dicItemDg-toolbar',
+       btnCls:'topjui-btn-black',
+       type:'cancelRow',
+       iconCls:'fa fa-close'">取消</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'edatagrid',
+           extend:'#dicItemDg-toolbar',
+           btnCls:'topjui-btn-red',
+           type:'destroyRow',
+           iconCls:'fa fa-trash'">删除</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#dicItemDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <!--<%&#45;&#45;<a href="javascript:void(0)"&#45;&#45;%>-->
+        <!--<%&#45;&#45;data-toggle="topjui-menubutton"&#45;&#45;%>-->
+        <!--<%&#45;&#45;data-options="method:'search',&#45;&#45;%>-->
+        <!--<%&#45;&#45;extend:'#dicItemDg-toolbar',&#45;&#45;%>-->
+        <!--<%&#45;&#45;btnCls:'topjui-btn-purple'">查询</a>&#45;&#45;%>-->
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <!--<script src="../../static/js/security/mainframe.js"-->
+    <!--th:src="@{/js/security/mainframe.js}"></script>-->
+</th:block>
+</body>
+</html>

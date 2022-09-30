@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.repository.mapper.MSafeStoreMapper">
+    <select id="getPageSet" resultType="cn.ewsd.repository.model.MSafeStore">
+        SELECT s.store_no, s.stock_amount, m.erp_type, m.type_name, m.mat_code, m.mat_name, m.abc_type, m.mat_unit, m.mat_no, ss.max_amount, ss.yellow_warn, ss.red_warn, ss.uuid, m.mat_unit mat_unit_name,
+            sto.store_name
+        FROM m_stock s
+        INNER JOIN m_material m ON s.mat_no=m.mat_no
+        LEFT JOIN m_safe_stock ss ON s.mat_no=ss.mat_no AND s.store_no=ss.store_no
+        LEFT JOIN m_store sto ON sto.store_no=s.store_no
+        WHERE sto.if_safe='1'
+        <if test="storeNo!=''">
+            AND s.store_no=#{storeNo}
+        </if>
+        <if test="matQry!=''">
+            AND CONCAT(m.mat_code, m.mat_name) LIKE CONCAT('%', #{matQry}, '%')
+        </if>
+        ORDER BY m.mat_code
+    </select>
+
+    <insert id="save">
+        INSERT INTO m_safe_stock (`store_no`, `mat_no`, `max_amount`, `yellow_warn`, `red_warn`)
+        VALUES (#{storeNo}, #{matNo}, #{d[0]}, #{d[1]}, #{d[2]})
+    </insert>
+
+    <delete id="deleteData">
+        DELETE FROM m_Safe_stock WHERE store_no=#{storeNo} AND mat_no=#{matNo}
+    </delete>
+
+    <update id="excuteUpdate" parameterType="cn.ewsd.repository.model.MSafeStore">
+        UPDATE m_safe_stock
+        <set>
+            <if test="maxAmount != null">`max_amount` = #{maxAmount}, </if>
+            <if test="yellowWarn != null">`yellow_warn` = #{yellowWarn}, </if>
+            <if test="redWarn != null">`red_warn` = #{redWarn} </if>
+        </set>
+        WHERE store_no=#{storeNo} AND mat_no=#{matNo}
+    </update>
+
+    <update id="calcSafeStock" statementType="CALLABLE">
+		{call calcSafeStock(#{storeNo,mode=IN})}
+	</update>
+</mapper>

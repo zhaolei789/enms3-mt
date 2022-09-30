@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MOfferMatMapper">
+	<select id="getOfferMatByOfferNo" resultType="cn.ewsd.material.model.MOfferMat">
+        SELECT * FROM m_offer_mat
+        WHERE offer_no=#{offerNo}
+    </select>
+
+    <select id="getOfferMatByMatNo" resultType="cn.ewsd.material.model.MOffer">
+        SELECT o.offer_no, o.offer_name
+        FROM m_offer_mat om
+        LEFT JOIN m_offer o ON o.offer_no=om.offer_no
+        WHERE om.mat_no=#{matNo}
+    </select>
+</mapper>

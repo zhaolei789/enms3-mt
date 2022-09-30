@@ -1,0 +1,86 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">总工程名</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="upName" data-options="valueField:'upName',textField:'upName',url:'/material/mPrj/getUpNameAll',required:true,editable:true">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">工程名称</label>
+			<div class="topjui-input-block">
+				<input type="text" id="prjName" name="prjName" data-toggle="topjui-textbox" data-options="prompt:'',required:true">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">工程类型</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="prjType2" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.prjType2',required:true,loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">采掘类型</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="prodType" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.prodType',loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">计划周期</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="planPeriod" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.planPeriod',loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">施工单位</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="teamNo" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',required:true,loadFilter:function(data){
+					data.unshift({id:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">开工日期</label>
+			<div class="topjui-input-block">
+				<input name="beginDate" type="text" data-toggle="topjui-datebox" data-options="required:true">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">完工日期</label>
+			<div class="topjui-input-block">
+				<input name="endDate" type="text" data-toggle="topjui-datebox">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">工程状态</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="prjStatus" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.prjStatus',required:true,loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+	if($('#uuid').val() != ''){
+		$('#prjName').attr('readonly', 'readOnly');
+	}
+});
+</script>

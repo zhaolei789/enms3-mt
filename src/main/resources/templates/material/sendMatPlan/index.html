@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <form id="planForm" method="post">
+            <div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false,height:'550px'">
+                <table id="planDg"></table>
+            </div>
+        </form>
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <div data-toggle="topjui-layout" data-options="fit:true">
+                <form id="sendForm" method="post">
+                    <div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'50%'">
+                        <div class="topjui-fluid" style="margin-top: 50px">
+                            <div class="topjui-row">
+                                <!--
+                                <div class="topjui-col-sm6">
+                                    <label class="topjui-form-label">成本中心</label>
+                                    <div class="topjui-input-block">
+
+                                        <input data-toggle="topjui-combobox" id="newCenter" name="newCenter" data-options="valueField:'centerNo',textField:'centerName',url:'/material/costCenter/getCenterSet',width:'200px'">
+                                    </div>
+                                </div>
+                                -->
+                                <input type="hidden" name="planNo" id="planNo">
+                                <div class="topjui-col-sm6">
+                                    <label class="topjui-form-label">计划数</label>
+                                    <div class="topjui-input-block">
+                                        <input id="planAmount" data-toggle="topjui-textbox" name="planAmount" data-options="width:'200px'" value="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="topjui-row">
+                                <div class="topjui-col-sm6">
+                                    <label class="topjui-form-label">科目类型</label>
+                                    <div class="topjui-input-block">
+                                        <input data-toggle="topjui-combobox" id="moveType" name="moveType" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.erpItem',width:'200px'">
+                                    </div>
+                                </div>
+                                <div class="topjui-col-sm6">
+                                    <label class="topjui-form-label">工厂</label>
+                                    <div class="topjui-input-block">
+                                        <input data-toggle="topjui-combobox" id="factoryNo" name="factoryNo" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.factoryNo',width:'200px'">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="topjui-row">
+                                <div class="topjui-col-sm6">
+                                    <label class="topjui-form-label">库存地</label>
+                                    <div class="topjui-input-block">
+                                        <input data-toggle="topjui-combobox" id="matAddr" name="matAddr" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.matAddr',width:'200px'">
+                                    </div>
+                                </div>
+                                <div class="topjui-col-sm6">
+                                    <label class="topjui-form-label">是否应急</label>
+                                    <div class="topjui-input-block">
+                                        <input data-toggle="topjui-combobox" id="ifUrgent" name="ifUrgent" data-options="width:'200px',valueField:'value',textField:'text',data:[
+                                            {value:'', text:'&nbsp;'},
+                                            {value:'1', text:'是'},
+                                            {value:'0', text:'否'}
+                                        ]">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="topjui-row">
+                                <div class="topjui-col-sm6">
+                                    <label class="topjui-form-label"></label>
+                                    <a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+                                        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                                            <span class="l-btn-text">保存</span>
+                                            <span class="l-btn-icon fa fa-check">&nbsp;</span>
+                                        </span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="planDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'planDg'
+       }" style="display:none">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">计划单位：</label>
+        <input data-toggle="topjui-combobox" id="teamNoQry" name="teamNoQry" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',width:'150px'">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">成本中心：</label>
+        <input data-toggle="topjui-combobox" id="centerNoQry" name="centerNoQry" data-options="valueField:'centerNo',textField:'centerName',url:'/material/costCenter/getCenterSet',width:'150px'">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">计划月份：</label>
+        <input data-toggle="topjui-combobox" id="monthQry" name="monthQry" data-options="valueField:'planMonth',textField:'planMonth',url:'/material/sendMatPlan/getPlanMonth',width:'150px'">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">计划类型：</label>
+        <input data-toggle="topjui-combobox" id="planTypeQry" name="planTypeQry" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.planType',width:'150px'">
+
+        <a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">查询</span>
+                <span class="l-btn-icon fa fa-search">&nbsp;</span>
+            </span>
+        </a>
+
+        <a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">商城导入下载</span>
+                <span class="l-btn-icon fa fa-download">&nbsp;</span>
+            </span>
+        </a>
+
+        <br />
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">工程项目：</label>
+        <input data-toggle="topjui-combobox" id="prjNoQry" name="prjNoQry" data-options="valueField:'prjNo',textField:'prjName',url:'/material/mPrj/getPrjList1',width:'150px'">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料编码：</label>
+        <input id="matCodeQry" data-toggle="topjui-textbox" name="matCodeQry" data-options="width:'150px'" value="">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料描述：</label>
+        <input id="matNameQry" data-toggle="topjui-textbox" name="matNameQry" data-options="width:'150px'" value="">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">计划科目：</label>
+        <input data-toggle="topjui-combobox" id="itemNoQry" name="itemNoQry" data-options="valueField:'itemNo',textField:'itemName',url:'/material/mItem/getItemList',width:'150px'">
+
+        <a href="javascript:void(0)" id="backBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">退稿</span>
+                <span class="l-btn-icon fa fa-reply">&nbsp;</span>
+            </span>
+        </a>
+
+        <a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">审批定稿</span>
+                <span class="l-btn-icon fa fa-check"></span>
+            </span>
+        </a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        $(document).ready(function(){
+            $('#monthQry').iCombobox({
+                onLoadSuccess:function(){
+                    var data = $('#monthQry').iCombobox("getData");
+                    if(data.length>0){
+                        $('#monthQry').iCombobox("setValue", data[0].planMonth);
+                    }
+                    reloadPlan()
+                }
+            });
+
+            $('#teamNoQry').iCombobox({
+                onChange:function(newValue, oldValue){
+                    $('#prjNoQry').iCombobox('reload', '/material/mPrj/getPrjList1?teamNo='+newValue);
+                }
+            });
+
+            $('#planDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                url: '/material/sendMatPlan/getPageSet',
+                columns:[ [
+                    {
+                        field:'planNo', sortable:false, title:'', checkbox:true
+                    },{
+                        field:'factoryNo', sortable:false, title:'工厂',formatter:function(value, row, index){
+                            if(value != null && value!='' && value!=undefined){
+                                return value.substring(value.lastIndexOf('.')+1)
+                            }
+                        }
+                    },{
+                        field:'moveType',title:'科目类型',sortable:false,formatter:function(value, row, index){
+                            return row.typeName
+                        }
+                    },{
+                        field:'costCenter',title:'成本中心',sortable:false
+                    },{
+                        field:'teamName',title:'计划单位',sortable:false
+                    },{
+                        field:'planMonth',title:'计划月份',sortable:false
+                    },{
+                        field:'planTypeName',title:'计划类型',sortable:false
+                    },{
+                        field:'ifUrgent',title:'是否应急',sortable:false,formatter:function(value, row, index){
+                            if(value == '1'){
+                                return '是'
+                            }else{
+                                return '否'
+                            }
+                        }
+                    },{
+                        field:'matCode',title:'物资代码',sortable:false, formatter:function(value, row, index){
+                            if(value != null && value!='' && value!=undefined){
+                                return value.substring(0, 1)=='X' ? value.substring(1) : value;
+                            }
+                        }
+                    },{
+                        field:'matName',title:'物资名称',sortable:false
+                    },{
+                        field:'matUnitName',title:'单位',sortable:false
+                    },{
+                        field:'matAddr',title:'库存地',sortable:false, formatter:function(value, row, index){
+                            if(value != null && value!='' && value!=undefined){
+                                return value.substring(value.lastIndexOf('.')+1)
+                            }
+                        }
+                    },{
+                        field:'matAmount',title:'计划数',sortable:false
+                    },{
+                        field:'matPrice',title:'价格',sortable:false
+                    },{
+                        field:'matBala',title:'金额',sortable:false
+                    },{
+                        field:'matUse',title:'用途',sortable:false
+                    },{
+                        field:'remark',title:'备注',sortable:false
+                    },{
+                        field:'wbsElement',title:'WBS元素',sortable:false
+                    },{
+                        field:'planDate',title:'编制时间',sortable:false
+                    }
+                ] ],
+                onSelect:function(index, row){
+                    $('#planNo').val(row.planNo);
+                    //$('#newCenter').iCombobox('setValue', row.costCenter);
+                    $('#planAmount').textbox('setValue', row.matAmount);
+                    $('#moveType').iCombobox('setValue', row.moveType);
+                    $('#factoryNo').iCombobox('setValue', row.factoryNo);
+                    $('#matAddr').iCombobox('setValue', row.matAddr);
+                    $('#ifUrgent').iCombobox('setValue', row.ifUrgent);
+                }
+            })
+
+            $('#searchBtn').click(function(){
+                reloadPlan();
+            });
+
+            $('#saveBtn').click(function(){
+                $.getJSON('/material/sendMatPlan/save', {
+                    planNo:$('#planNo').val(),
+                    planAmount:$('#planAmount').textbox('getValue'),
+                    moveType:$('#moveType').iCombobox('getValue'),
+                    factoryNo:$('#factoryNo').iCombobox('getValue'),
+                    matAddr:$('#matAddr').iCombobox('getValue')
+                },function(data){
+                    if(data.statusCode=='200'){
+                        $.iMessager.show({
+                            title:data.title,
+                            msg:data.message,
+                            timeout:5000,
+                            showType:'slide'
+                        });
+                        reloadPlan();
+                    }else{
+                        $.iMessager.alert(data.title,data.message,'messager-info');
+                    }
+                });
+            });
+
+            $('#backBtn').click(function(){
+                $('#planForm').iForm('submit', {
+                    url:'/material/sendMatPlan/back',
+                    success:function(data){
+                        data = $.parseJSON(data);
+                        if(data.statusCode == 200){
+                            $.iMessager.show({
+                                title:data.title,
+                                msg:data.message
+                            })
+                            reloadPlan();
+                        } else {
+                            $.iMessager.alert({
+                                icon:'messager-error',
+                                title:data.title,
+                                msg:data.message
+                            });
+                        }
+                    }
+                });
+            });
+
+            $('#submitBtn').click(function(){
+                $('#planForm').iForm('submit', {
+                    url:'/material/sendMatPlan/submit',
+                    success:function(data){
+                        data = $.parseJSON(data);
+                        if(data.statusCode == 200){
+                            $.iMessager.show({
+                                title:data.title,
+                                msg:data.message
+                            })
+                            reloadPlan();
+                        } else {
+                            $.iMessager.alert({
+                                icon:'messager-error',
+                                title:data.title,
+                                msg:data.message
+                            });
+                        }
+                    }
+                });
+            });
+
+            $('#downloadBtn').click(function(){
+                $('#planForm').iForm('submit', {
+                    url:'/material/sendMatPlan/export',
+                    success:function(data){
+
+                    }
+                });
+            });
+        });
+
+        function reloadPlan(){
+            $('#planDg').iDatagrid('reload',{
+                teamNoQry:$('#teamNoQry').iCombobox('getValue'),
+                centerNoQry:$('#centerNoQry').iCombobox('getValue'),
+                monthQry:$('#monthQry').iCombobox('getValue'),
+                planTypeQry:$('#planTypeQry').iCombobox('getValue'),
+                prjNoQry:$('#prjNoQry').iCombobox('getValue'),
+                matCodeQry:$('#matCodeQry').val(),
+                matNameQry:$('#matNameQry').val(),
+                itemNoQry:$('#itemNoQry').iCombobox('getValue')
+            });
+        }
+    </script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'mFixAssessDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/fix/mFixAssess/getPageSet'">
+            <thead>
+            <tr>
+                								<th data-options="field:'uuid',title:'主键',sortable:true,checkbox:true"></th>
+						    									<th data-options="field:'createTime',title:'创建时间',sortable:true"></th>
+						    									<th data-options="field:'creator',title:'创建人',sortable:true"></th>
+						    									<th data-options="field:'creatorId',title:'创建人标识',sortable:true"></th>
+						    									<th data-options="field:'creatorOrgId',title:'组织机构ID',sortable:true"></th>
+						    									<th data-options="field:'modifierId',title:'修改人标识',sortable:true"></th>
+						    									<th data-options="field:'modifier',title:'修改人',sortable:true"></th>
+						    									<th data-options="field:'modifyTime',title:'修改时间',sortable:true"></th>
+						    									<th data-options="field:'assessId',title:'考核ID',sortable:true"></th>
+						    									<th data-options="field:'assType',title:'考核类型',sortable:true"></th>
+						    									<th data-options="field:'assMonth',title:'考核月份',sortable:true"></th>
+						    									<th data-options="field:'mngTeam',title:'业务科室',sortable:true"></th>
+						    									<th data-options="field:'teamNo',title:'施工单位',sortable:true"></th>
+						    									<th data-options="field:'prjNo',title:'工程编号',sortable:true"></th>
+						    									<th data-options="field:'prjName',title:'工程名称',sortable:true"></th>
+						    									<th data-options="field:'planValue',title:'计划完成',sortable:true"></th>
+						    									<th data-options="field:'workValue',title:'生产完成',sortable:true"></th>
+						    									<th data-options="field:'remark',title:'备注',sortable:true"></th>
+						    									<th data-options="field:'assStatus',title:'考核状态',sortable:true"></th>
+						    									<th data-options="field:'applyUser',title:'申请人',sortable:true"></th>
+						    									<th data-options="field:'applyDate',title:'申请日期',sortable:true"></th>
+						    									<th data-options="field:'agreeUser',title:'审核人',sortable:true"></th>
+						    									<th data-options="field:'agreeDate',title:'审核日期',sortable:true"></th>
+						    	            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="mFixAssessDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'mFixAssessDg'
+       }" style="display:none">
+		<ewsd:rbac str="mFixAssessAddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#mFixAssessDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'mFixAssessAddDg',
+               href:'/fix/mFixAssess/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/fix/mFixAssess/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="mFixAssessEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#mFixAssessDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'mFixAssessEditDg',
+               href:'/fix/mFixAssess/edit',
+               url:'/fix/mFixAssess/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/fix/mFixAssess/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'mFixAssessDg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/fix/mFixAssess/deleteBatch">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#mFixAssessDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/fix/mFixAssess/deleteBatch'">删除</a>
+		</ewsd:rbac>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#mFixAssessDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#mFixAssessDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

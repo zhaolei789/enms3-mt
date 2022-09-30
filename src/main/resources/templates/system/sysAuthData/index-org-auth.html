@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'west',title:'',split:true,border:false,headerCls:'border_right',bodyCls:'border_right'">
+        <!-- treegrid表格 -->
+        <table data-toggle="topjui-treegrid"
+               data-options="id:'sysAuthDataDg',
+               singleSelect:true,
+			  url:'/system/sysAuthData/getListByLevelId?levelId=0',
+			   expandUrl:'/system/sysAuthData/getListByPid?pid={id}'">
+            <thead>
+            <tr>
+                <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                <th data-options="field:'text',title:'名称'"></th>
+                <th data-options="field:'orgName',title:'所属机构'"></th>
+                <th data-options="field:'levelId',title:'层级',
+                    formatter: function(value,row,index){
+						if (value == 0){
+							return '顶级';
+						} else if (value == 1){
+							return '子级一层';
+						} else if (value == 2){
+							return '子级二层';
+						} else if (value == 3){
+							return '子级三层';
+						} else if (value == 4){
+							return '子级四层';
+						} else if (value == 5){
+							return '子级五层';
+						} else {
+							return '子级N层';
+						}
+                    }"></th>
+                <th data-options="field:'sort',title:'排序'"></th>
+                <th data-options="field:'status',title:'状态',
+					formatter: function(value,row,index){
+						if (value == '1'){
+							return '<span style=\'color:green\'>启用</span>';
+						} else {
+							return '<span style=\'color:red\'>禁用</span>';
+						}
+                    }"></th>
+                <th data-options="field:'remark',title:'备注',width:100"></th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- sysAuthDataDg 工具栏 -->
+<div id="sysAuthDataDg-toolbar" class="topjui-toolbar">
+    <!--<rbac:hasPermission name="groupAddDialog">-->
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           btnCls:'topjui-btn-green',
+           grid:{
+               type:'treegrid',
+               id:'sysAuthDataDg',
+               idField:'id'
+           },
+           parentGrid:{
+               type:'treegrid',
+               id:'sysAuthDataDg',
+               param:'codeSetId,pid:id',
+               unselectedMsg:'请先选中要添加分组的上级分组！'
+           },
+           dialog:{
+               width:700,
+               height:400,
+               id:'groupAddDialog',
+               href:'/system/sysAuthData/edit',
+               buttonsGroup:[
+                   {text:'保存',url:'/system/sysAuthData/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+    <!--</rbac:hasPermission>-->
+    <!--<rbac:hasPermission name="groupEditDialog">-->
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           iconCls:'fa fa-pencil',
+           btnCls:'topjui-btn-blue',
+           grid:{
+               type:'treegrid',
+               id:'sysAuthDataDg',
+               parentIdField:'pid'
+           },
+           dialog:{
+               width:700,
+               height:400,
+               id:'groupEditDialog',
+               href:'/system/sysAuthData/edit',
+               url:'/system/sysAuthData/getDetailByUuid?uuid={uuid}',
+               buttonsGroup:[
+                   {text:'更新',url:'/system/sysAuthData/update',iconCls:'fa fa-save',handler:'ajaxForm'}
+               ]
+           }">编辑</a>
+    <!--</rbac:hasPermission>-->
+    <!--<rbac:hasPermission name="/system/sysAuthData/deleteBatch">-->
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           iconCls:'fa fa-trash',
+           btnCls:'topjui-btn-red',
+           grid:{
+               type:'treegrid',
+               id:'sysAuthDataDg',
+           },
+            url:'/system/sysAuthData/deleteBatch'">删除</a>
+    <!--</rbac:hasPermission>-->
+
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <!--<script src="../../static/js/security/mainframe.js"-->
+    <!--th:src="@{/js/security/mainframe.js}"></script>-->
+</th:block>
+</body>
+</html>

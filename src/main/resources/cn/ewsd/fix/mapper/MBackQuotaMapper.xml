@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.fix.mapper.MBackQuotaMapper">
+	<select id="getBackQuotaList" resultType="cn.ewsd.fix.model.MBackQuota">
+		SELECT a.*, mm.mat_code, mm.mat_name, mm.mat_unit, o.text mng_team_name
+		FROM m_back_quota a
+		INNER JOIN (SELECT mat_no, MAX(begin_month) begin_month
+					FROM m_back_quota
+					WHERE begin_month&lt;=#{monthQry} AND prj_no=#{prjQry} AND mng_team=#{userTeam}
+					GROUP BY prj_no,mat_no) b ON a.mat_no=b.mat_no AND a.begin_month=b.begin_month
+		LEFT JOIN m_material mm ON a.mat_no=mm.mat_no
+		LEFT JOIN sys_organization o ON o.id=a.mng_team
+		WHERE a.prj_no=#{prjQry} AND a.mng_team=#{userTeam}
+	</select>
+
+	<select id="getBackPlanList" resultType="cn.ewsd.fix.model.MBackQuota">
+		SELECT a.*, mm.mat_code, mm.mat_name, mm.mat_unit, IFNULL(bp.plan_amount, 0) plan_amount, IFNULL(bp.remark, '') remark, IFNULL(bp.plan_no, '-1') plan_no, IFNULL(bp.plan_step, '') plan_step
+		FROM m_back_quota a
+		INNER JOIN (SELECT mat_no, MAX(begin_month) begin_month
+					FROM m_back_quota
+					WHERE begin_month&lt;=#{monthQry} AND prj_no=#{prjQry} AND mng_team=#{userTeam}
+					GROUP BY prj_no,mat_no) b ON a.mat_no=b.mat_no AND a.begin_month=b.begin_month
+		LEFT JOIN (SELECT mat_no, plan_amount, remark, plan_no, plan_step
+				   FROM m_back_plan
+		      	   WHERE plan_month=#{monthQry} AND team_no=#{teamNoQry} AND prj_no=#{prjQry}) bp ON a.mat_no=bp.mat_no
+		LEFT JOIN m_material mm ON a.mat_no=mm.mat_no
+		LEFT JOIN sys_organization o ON o.id=a.mng_team
+		WHERE a.prj_no=#{prjQry} AND a.mng_team=#{userTeam}
+	</select>
+
+	<insert id="insertBackQuota" parameterType="cn.ewsd.fix.model.MBackQuota">
+		INSERT INTO m_back_quota (`quota_id`, `begin_month`, `prj_no`, `prj_name`, `mat_no`, `measure`, `amount`, `mat_price`, `mng_team`, `modi_date`, `modi_user`,
+								  `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{quotaId}, #{beginMonth}, #{prjNo}, #{prjName}, #{matNo}, #{measure}, #{amount}, #{matPrice}, #{mngTeam}, #{modiDate}, #{modiUser},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<update id="updateBackQuota" parameterType="cn.ewsd.fix.model.MBackQuota">
+		UPDATE m_back_quota
+		<set>
+			<if test="measure!=null">`measure`=#{measure},</if>
+			<if test="amount!=null">`amount`=#{amount},</if>
+			<if test="matPrice!=null">`mat_price`=#{matPrice},</if>
+		</set>
+		WHERE 1=1
+		<if test="beginMonth!=null">AND begin_month=#{beginMonth}</if>
+		<if test="prjNo!=null">AND prj_no=#{prjNo}</if>
+		<if test="matNo!=null">AND mat_no=#{matNo}</if>
+	</update>
+
+	<delete id="deleteBackQuota">
+		DELETE FROM m_back_quota WHERE quota_id=#{_parameter}
+	</delete>
+
+	<select id="getBackQuotaList1" resultType="cn.ewsd.fix.model.MBackQuota">
+		SELECT mat_no, measure, amount
+		FROM m_back_quota
+		WHERE prj_no=#{prjNo} AND mng_team=#{mngTeam}
+	</select>
+</mapper>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.SysUserMessageMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.system.model.SysUserMessage" id="sysUserMessageMap">
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modifier_time" column="modifier_time"/>
+        <result property="is_del" column="is_del"/>
+        <result property="is_read" column="is_read"/>
+        <result property="user_uuid" column="user_uuid"/>
+        <result property="user_name_id" column="user_name_id"/>
+        <result property="msg_type" column="msg_type"/>
+        <result property="msg_text" column="msg_text"/>
+        <result property="msg_url" column="msg_url"/>
+        <result property="business_id" column="business_id"/>
+        <result property="note" column="note"/>
+		<result property="msg_url_name" column="msg_url_name"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modifier_time
+		  ,  	  	     			 is_del
+		  ,  	  	     			 is_read
+		  ,  	  	     			 user_uuid
+		  ,  	  	     			 user_name_id
+		  ,  	  	     			 msg_type
+		  ,  	  	     			 msg_text
+		  ,  	  	     			 msg_url
+		  ,  	  	     			 business_id
+		  ,  	  	     			 note
+		,msg_url_name
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.SysUserMessage">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_user_message
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.system.model.SysUserMessage">
+		select  <include refid="Base_Column_List" />  from sys_user_message where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.system.model.SysUserMessage">
+		select  <include refid="Base_Column_List" />  from sys_user_message
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(uuid) from sys_user_message where is_del != 1
+	</select>
+
+	<select id="queryNotReadNum" resultType="int">
+		select count(uuid) from sys_user_message
+			where user_uuid = #{userId} and is_read != 1 and is_del != 1
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.system.model.SysUserMessage">
+		insert into sys_user_message
+		(
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modifier_time`, 
+			`is_del`, 
+			`is_read`, 
+			`user_uuid`, 
+			`user_name_id`, 
+			`msg_type`, 
+			`msg_text`, 
+			`msg_url`, 
+			`business_id`, 
+			`note`,
+		 	`msg_url_name`
+		)
+		values
+		(
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modifier_time}, 
+			#{is_del}, 
+			#{is_read}, 
+			#{user_uuid}, 
+			#{user_name_id}, 
+			#{msg_type}, 
+			#{msg_text}, 
+			#{msg_url}, 
+			#{business_id}, 
+			#{note},
+		 	#{msg_url_name}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.system.model.SysUserMessage">
+		update sys_user_message 
+		<set>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modifier_time != null">`modifier_time` = #{modifier_time}, </if>
+			<if test="is_del != null">`is_del` = #{is_del}, </if>
+			<if test="is_read != null">`is_read` = #{is_read}, </if>
+			<if test="user_uuid != null">`user_uuid` = #{user_uuid}, </if>
+			<if test="user_name_id != null">`user_name_id` = #{user_name_id}, </if>
+			<if test="msg_type != null">`msg_type` = #{msg_type}, </if>
+			<if test="msg_text != null">`msg_text` = #{msg_text}, </if>
+			<if test="msg_url != null">`msg_url` = #{msg_url}, </if>
+			<if test="business_id != null">`business_id` = #{business_id}, </if>
+			<if test="note != null">`note` = #{note},</if>
+			<if test="msg_url_name != null">`msg_url_name` = #{msg_url_name}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from sys_user_message where uuid = #{value}
+	</delete>
+	
+	<update id="executeDeleteBatch">
+		update sys_user_message
+		set
+			is_del = 1
+		where uuid in
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</update>
+
+	<update id="executeReadBatch">
+		update sys_user_message
+		set
+			is_read = 1
+		where uuid in
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</update>
+
+</mapper>

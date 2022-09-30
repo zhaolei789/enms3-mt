@@ -1,0 +1,22 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="checkNo" name="checkNo">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">负责员工</label>
+			<div class="topjui-input-block">
+				<input type="text" name="checkEmp" data-toggle="topjui-textbox" data-options="prompt:'',required:true">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">仓库名称</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" id="storeNo" name="storeNo" data-options="valueField:'storeNo',textField:'storeName',url:'/repository/mStore/getStoreList?chkUser=true&storeLevel=r.storeLevel.1'">
+			</div>
+		</div>
+	</div>
+</div>

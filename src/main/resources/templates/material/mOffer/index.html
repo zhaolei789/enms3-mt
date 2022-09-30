@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'mOfferDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/material/mOffer/getPageSet'">
+            <thead>
+				<tr>
+					<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+					<th data-options="field:'offerNo',title:'供应商号',sortable:true"></th>
+					<th data-options="field:'offerName',title:'供应商名称',sortable:true"></th>
+					<th data-options="field:'shortName',title:'简称',sortable:true"></th>
+					<th data-options="field:'linkMan',title:'联系人',sortable:true"></th>
+					<th data-options="field:'contactWay',title:'联系方式',sortable:true"></th>
+					<th data-options="field:'offerAddr',title:'地址',sortable:true"></th>
+					<th data-options="field:'certInfo',title:'备注',sortable:true"></th>
+				</tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="mOfferDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'mOfferDg'
+       }" style="display:none">
+		<ewsd:rbac str="mOfferAddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#mOfferDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'mOfferAddDg',
+               href:'/material/mOffer/edit',
+               height:450,
+               width:800,
+               buttonsGroup:[
+                   {text:'保存',url:'/material/mOffer/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="mOfferEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#mOfferDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'mOfferEditDg',
+               href:'/material/mOffer/edit',
+               url:'/material/mOffer/getDetailByUuid?uuid={uuid}',
+               height:450,
+               width:800,
+               buttonsGroup:[
+                   {text:'更新',url:'/material/mOffer/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'mOfferDg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/material/mOffer/delete">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#mOfferDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的供应商',param:'uuid:uuid'},
+	       url:'/material/mOffer/delete'">删除</a>
+		</ewsd:rbac>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#mOfferDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#mOfferDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

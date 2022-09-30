@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.mdata.mapper.CsExcelUserMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.mdata.model.CsExcelUser" id="csExcelUserMap">
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="is_del" column="is_del"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modify_time" column="modify_time"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="remark" column="remark"/>
+        <result property="birthday" column="birthday"/>
+        <result property="education" column="education"/>
+        <result property="cellphone" column="cellphone"/>
+        <result property="email" column="email"/>
+        <result property="user_name" column="user_name"/>
+        <result property="user_name_id" column="user_name_id"/>
+        <result property="password" column="password"/>
+        <result property="age" column="age"/>
+        <result property="country" column="country"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 remark
+		  ,  	  	     			 birthday
+		  ,  	  	     			 education
+		  ,  	  	     			 cellphone
+		  ,  	  	     			 email
+		  ,  	  	     			 user_name
+		  ,  	  	     			 user_name_id
+		  ,  	  	     			 password
+		  ,  	  	     			 age
+		  ,  	  	     			 country
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.mdata.model.CsExcelUser">
+        select
+        <include refid="Base_Column_List"></include>
+        from cs_excel_user
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.mdata.model.CsExcelUser">
+		select  <include refid="Base_Column_List" />  from cs_excel_user where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.mdata.model.CsExcelUser">
+		select  <include refid="Base_Column_List" />  from cs_excel_user
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from cs_excel_user 
+	</select>
+	<select id="getDataByTablesAndField" resultType="cn.ewsd.mdata.model.CsExcelUser">
+		 SELECT ${field} from ${tables}
+	</select>
+
+	<insert id="executeSave" parameterType="cn.ewsd.mdata.model.CsExcelUser">
+		insert into cs_excel_user
+		(
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`,
+			`modifier`, 
+			`modifier_id`, 
+			`modify_time`, 
+			`creator_org_id`, 
+			`remark`, 
+			`birthday`, 
+			`education`, 
+			`cellphone`, 
+			`email`, 
+			`user_name`, 
+			`user_name_id`, 
+			`password`, 
+			`age`, 
+			`country`
+		)
+		values
+		(
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id},
+			#{modifier}, 
+			#{modifier_id}, 
+			#{modify_time}, 
+			#{creator_org_id}, 
+			#{remark}, 
+			#{birthday}, 
+			#{education}, 
+			#{cellphone}, 
+			#{email}, 
+			#{user_name}, 
+			#{user_name_id}, 
+			#{password}, 
+			#{age}, 
+			#{country}
+		)
+	</insert>
+	<insert id="batchInsert">
+		INSERT INTO cs_excel_user (
+		     uuid,
+		     create_time,
+		creator,
+		creator_id,
+		modifier,
+		modifier_id,
+		modify_time,
+		creator_org_id,
+		remark,
+		birthday,
+		education,
+		cellphone,
+		email,
+		user_name,
+		user_name_id,
+		password,
+		age,
+		country
+		)VALUE
+		<foreach collection="list" item="list" index="index" separator=",">
+			(
+			#{list.uuid},
+			#{list.createTime},
+			#{list.creator},
+			#{list.creatorId},
+			#{list.modifier},
+			#{list.modifierId},
+			#{list.modifyTime},
+			#{list.creatorOrgId,jdbcType=VARCHAR},
+			#{list.remark},
+			#{list.birthday},
+			#{list.education},
+			#{list.cellphone},
+			#{list.email},
+			#{list.userName},
+			#{list.userNameId},
+			#{list.password},
+			#{list.age,jdbcType=INTEGER},
+			#{list.country,jdbcType=VARCHAR}
+			)
+		</foreach>
+	</insert>
+
+	<update id="executeUpdate" parameterType="cn.ewsd.mdata.model.CsExcelUser">
+		update cs_excel_user 
+		<set>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="remark != null">`remark` = #{remark}, </if>
+			<if test="birthday != null">`birthday` = #{birthday}, </if>
+			<if test="education != null">`education` = #{education}, </if>
+			<if test="cellphone != null">`cellphone` = #{cellphone}, </if>
+			<if test="email != null">`email` = #{email}, </if>
+			<if test="user_name != null">`user_name` = #{user_name}, </if>
+			<if test="user_name_id != null">`user_name_id` = #{user_name_id}, </if>
+			<if test="password != null">`password` = #{password}, </if>
+			<if test="age != null">`age` = #{age}, </if>
+			<if test="country != null">`country` = #{country}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from cs_excel_user where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from cs_excel_user where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

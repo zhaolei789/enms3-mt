@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.FAwardMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.cost.model.FAward" id="fAwardMap">
+        <result property="award_id" column="award_id"/>
+        <result property="team_no" column="team_no"/>
+        <result property="ass_month" column="ass_month"/>
+        <result property="reason" column="reason"/>
+        <result property="occ_date" column="occ_date"/>
+        <result property="notice_no" column="notice_no"/>
+        <result property="assess_type" column="assess_type"/>
+        <result property="item_id" column="item_id"/>
+        <result property="award_bala" column="award_bala"/>
+        <result property="assess_team" column="assess_team"/>
+        <result property="sign_emp" column="sign_emp"/>
+        <result property="assess_cate" column="assess_cate"/>
+        <result property="standard" column="standard"/>
+        <result property="modi_date" column="modi_date"/>
+        <result property="modi_user" column="modi_user"/>
+        <result property="modi_user_name" column="modi_user_name"/>
+        <result property="assign_date" column="assign_date"/>
+        <result property="assign_user" column="assign_user"/>
+        <result property="assign_user_name" column="assign_user_name"/>
+        <result property="status" column="status"/>
+        <result property="check_no" column="check_no"/>
+        <result property="is_del" column="is_del"/>
+        <result property="is_execute" column="is_execute"/>
+        <result property="dept_type" column="dept_type"/>
+        <result property="del_status" column="del_status"/>
+        <result property="del_reason" column="del_reason"/>
+        <result property="upd_status" column="upd_status"/>
+        <result property="upd_reason" column="upd_reason"/>
+        <result property="old_bala" column="old_bala"/>
+        <result property="modi_team" column="modi_team"/>
+        <result property="old_date" column="old_date"/>
+        <result property="old_team" column="old_team"/>
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 award_id
+		  ,  	  	     			 team_no
+		  ,  	  	     			 ass_month
+		  ,  	  	     			 reason
+		  ,  	  	     			 occ_date
+		  ,  	  	     			 notice_no
+		  ,  	  	     			 assess_type
+		  ,  	  	     			 item_id
+		  ,  	  	     			 award_bala
+		  ,  	  	     			 assess_team
+		  ,  	  	     			 sign_emp
+		  ,  	  	     			 assess_cate
+		  ,  	  	     			 standard
+		  ,  	  	     			 modi_date
+		  ,  	  	     			 modi_user
+		  ,  	  	     			 modi_user_name
+		  ,  	  	     			 assign_date
+		  ,  	  	     			 assign_user
+		  ,  	  	     			 assign_user_name
+		  ,  	  	     			 status
+		  ,  	  	     			 check_no
+		  ,  	  	     			 is_del
+		  ,  	  	     			 is_execute
+		  ,  	  	     			 dept_type
+		  ,  	  	     			 del_status
+		  ,  	  	     			 del_reason
+		  ,  	  	     			 upd_status
+		  ,  	  	     			 upd_reason
+		  ,  	  	     			 old_bala
+		  ,  	  	     			 modi_team
+		  ,  	  	     			 old_date
+		  ,  	  	     			 old_team
+		  ,  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.cost.model.FAward">
+        select
+		f.award_id
+		,  	  	     			 f.team_no
+        ,(select text from sys_organization where f.team_no = sys_organization.id) as team_no_name
+		,  	  	     			 f.ass_month
+		,  	  	     			 f.reason
+		,  	  	     			 f.occ_date
+		,  	  	     			 f.notice_no
+		,  	  	     			 f.assess_type
+		,  	  	     			 f.item_id
+		,  	  	     			 f.award_bala
+             ,(select sum(a.award_bala) from f_award_assign a where a.award_id = f.uuid) as yf_bala
+		,  	  	     			 f.assess_team
+		,(select text from sys_organization where f.assess_team = sys_organization.id) as assess_team_name
+		,  	  	     			 f.sign_emp
+		,  	  	     			 f.assess_cate
+		,  	  	     			 f.standard
+		,  	  	     			 f.modi_date
+		,  	  	     			 f.modi_user
+		,  	  	     			 f.modi_user_name
+		,  	  	     			 f.assign_date
+		,  	  	     			 f.assign_user
+		,  	  	     			 f.assign_user_name
+		,  	  	     			 f.status
+		,  	  	     			 f.check_no
+		,  	  	     			 f.is_del
+		,  	  	     			 f.is_execute
+		,  	  	     			 f.dept_type
+		,  	  	     			 f.del_status
+		,  	  	     			 f.del_reason
+		,  	  	     			 f.upd_status
+		,  	  	     			 f.upd_reason
+		,  	  	     			 f.old_bala
+		,  	  	     			 f.modi_team
+		,(select text from sys_organization where f.modi_team = sys_organization.id) as modi_team_name
+		,  	  	     			 f.old_date
+		,  	  	     			 f.old_team
+		,  	  	     			 f.uuid
+		,  	  	     			 f.create_time
+		,  	  	     			 f.creator
+		,  	  	     			 f.creator_id
+		,  	  	     			 f.creator_org_id
+		,  	  	     			 f.modifier_id
+		,  	  	     			 f.modifier
+		,  	  	     			 f.modify_time
+		,p.process_name as audit_step_name
+        from f_award f
+		left join sys_audit_process p on f.status = p.uuid
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="getPageSetJoinAssign" resultType="cn.ewsd.cost.model.FAward">
+		select
+		f.award_id
+		,  	  	     			 f.team_no
+		,(select text from sys_organization where f.team_no = sys_organization.id) as team_no_name
+		,  	  	     			 f.ass_month
+		,  	  	     			 f.reason
+		,  	  	     			 f.occ_date
+		,  	  	     			 f.notice_no
+		,  	  	     			 f.assess_type
+		,  	  	     			 f.item_id
+		,  	  	     			 f.award_bala
+		,(select sum(a.award_bala) from f_award_assign a where a.award_id = f.uuid) as yf_bala
+		,  	  	     			 f.assess_team
+		,(select text from sys_organization where f.assess_team = sys_organization.id) as assess_team_name
+		,  	  	     			 f.sign_emp
+		,  	  	     			 f.assess_cate
+		,  	  	     			 f.standard
+		,  	  	     			 f.modi_date
+		,  	  	     			 f.modi_user
+		,  	  	     			 f.modi_user_name
+		,  	  	     			 f.assign_date
+		,  	  	     			 f.assign_user
+		,  	  	     			 f.assign_user_name
+		,  	  	     			 f.status
+		,  	  	     			 f.check_no
+		,  	  	     			 f.is_del
+		,  	  	     			 f.is_execute
+		,  	  	     			 f.dept_type
+		,  	  	     			 f.del_status
+		,  	  	     			 f.del_reason
+		,  	  	     			 f.upd_status
+		,  	  	     			 f.upd_reason
+		,  	  	     			 f.old_bala
+		,  	  	     			 f.modi_team
+		,(select text from sys_organization where f.modi_team = sys_organization.id) as modi_team_name
+		,  	  	     			 f.old_date
+		,  	  	     			 f.old_team
+		,  	  	     			 f.uuid
+		,  	  	     			 f.create_time
+		,  	  	     			 f.creator
+		,  	  	     			 f.creator_id
+		,  	  	     			 f.creator_org_id
+		,  	  	     			 f.modifier_id
+		,  	  	     			 f.modifier
+		,  	  	     			 f.modify_time
+		,p.process_name as audit_step_name
+		from f_award f
+		left join sys_audit_process p on f.status = p.uuid
+		join f_award_assign a on a.award_id = f.uuid
+		<where>
+			<if test="filterSort != null">
+				${filterSort}
+			</if>
+		</where>
+	</select>
+
+
+	<select id="queryObject" resultType="cn.ewsd.cost.model.FAward">
+		select  <include refid="Base_Column_List" />  from f_award where uuid = #{value}
+	</select>
+
+	<select id="queryObject2" resultType="cn.ewsd.cost.model.FAward">
+		select
+			f.award_id
+			 ,  	  	     			 f.team_no
+			 ,(select text from sys_organization where f.team_no = sys_organization.id) as team_no_name
+			 ,  	  	     			 f.ass_month
+			 ,  	  	     			 f.reason
+			 ,  	  	     			 f.occ_date
+			 ,  	  	     			 f.notice_no
+			 ,  	  	     			 f.assess_type
+			 ,  	  	     			 f.item_id
+			 ,  	  	     			 f.award_bala
+			 ,  	  	     			 f.assess_team
+			 ,(select text from sys_organization where f.assess_team = sys_organization.id) as assess_team_name
+			 ,  	  	     			 f.sign_emp
+		     ,(select text from sys_dic_item where value = f.assess_cate) as assess_cate
+			 ,  	  	     			 f.standard
+			 ,  	  	     			 f.modi_date
+			 ,  	  	     			 f.modi_user
+			 ,  	  	     			 f.modi_user_name
+			 ,  	  	     			 f.assign_date
+			 ,  	  	     			 f.assign_user
+			 ,  	  	     			 f.assign_user_name
+			 ,  	  	     			 f.status
+			 ,  	  	     			 f.check_no
+			 ,  	  	     			 f.is_del
+			 ,  	  	     			 f.is_execute
+			 ,  	  	     			 f.dept_type
+			 ,  	  	     			 f.del_status
+			 ,  	  	     			 f.del_reason
+			 ,  	  	     			 f.upd_status
+			 ,  	  	     			 f.upd_reason
+			 ,  	  	     			 f.old_bala
+			 ,  	  	     			 f.modi_team
+			 ,(select text from sys_organization where f.modi_team = sys_organization.id) as modi_team_name
+			 ,  	  	     			 f.old_date
+			 ,  	  	     			 f.old_team
+			 ,  	  	     			 f.uuid
+			 ,  	  	     			 f.create_time
+			 ,  	  	     			 f.creator
+			 ,  	  	     			 f.creator_id
+			 ,  	  	     			 f.creator_org_id
+			 ,  	  	     			 f.modifier_id
+			 ,  	  	     			 f.modifier
+			 ,  	  	     			 f.modify_time
+		from f_award f
+		 where f.uuid = #{value}
+	</select>
+
+	<select id="queryObjectSum" resultType="cn.ewsd.cost.model.FAward">
+		select
+		f.*,
+		(select sum(award_bala) from f_award_assign where f.uuid = f_award_assign.award_id) as assign_sum,
+		(select count(uuid) from f_award_assign where f.uuid = f_award_assign.award_id) as assign_count
+		from f_award f
+		where f.uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.cost.model.FAward">
+		select  <include refid="Base_Column_List" />  from f_award
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by award_id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from f_award 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.cost.model.FAward">
+		insert into f_award
+		(
+			`award_id`, 
+			`team_no`, 
+			`ass_month`, 
+			`reason`, 
+			`occ_date`, 
+			`notice_no`, 
+			`assess_type`, 
+			`item_id`, 
+			`award_bala`, 
+			`assess_team`, 
+			`sign_emp`, 
+			`assess_cate`, 
+			`standard`, 
+			`modi_date`, 
+			`modi_user`, 
+			`modi_user_name`, 
+			`assign_date`, 
+			`assign_user`, 
+			`assign_user_name`, 
+			`status`, 
+			`check_no`, 
+			`is_del`, 
+			`is_execute`, 
+			`dept_type`, 
+			`del_status`, 
+			`del_reason`, 
+			`upd_status`, 
+			`upd_reason`, 
+			`old_bala`, 
+			`modi_team`, 
+			`old_date`, 
+			`old_team`, 
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`
+		)
+		values
+		(
+			#{award_id}, 
+			#{team_no}, 
+			#{ass_month}, 
+			#{reason}, 
+			#{occ_date}, 
+			#{notice_no}, 
+			#{assess_type}, 
+			#{item_id}, 
+			#{award_bala}, 
+			#{assess_team}, 
+			#{sign_emp}, 
+			#{assess_cate}, 
+			#{standard}, 
+			#{modi_date}, 
+			#{modi_user}, 
+			#{modi_user_name}, 
+			#{assign_date}, 
+			#{assign_user}, 
+			#{assign_user_name}, 
+			#{status}, 
+			#{check_no}, 
+			#{is_del}, 
+			#{is_execute}, 
+			#{dept_type}, 
+			#{del_status}, 
+			#{del_reason}, 
+			#{upd_status}, 
+			#{upd_reason}, 
+			#{old_bala}, 
+			#{modi_team}, 
+			#{old_date}, 
+			#{old_team}, 
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.cost.model.FAward">
+		update f_award 
+		<set>
+			<if test="team_no != null">`team_no` = #{team_no}, </if>
+			<if test="ass_month != null">`ass_month` = #{ass_month}, </if>
+			<if test="reason != null">`reason` = #{reason}, </if>
+			<if test="occ_date != null">`occ_date` = #{occ_date}, </if>
+			<if test="notice_no != null">`notice_no` = #{notice_no}, </if>
+			<if test="assess_type != null">`assess_type` = #{assess_type}, </if>
+			<if test="item_id != null">`item_id` = #{item_id}, </if>
+			<if test="award_bala != null">`award_bala` = #{award_bala}, </if>
+			<if test="assess_team != null">`assess_team` = #{assess_team}, </if>
+			<if test="sign_emp != null">`sign_emp` = #{sign_emp}, </if>
+			<if test="assess_cate != null">`assess_cate` = #{assess_cate}, </if>
+			<if test="standard != null">`standard` = #{standard}, </if>
+			<if test="modi_date != null">`modi_date` = #{modi_date}, </if>
+			<if test="modi_user != null">`modi_user` = #{modi_user}, </if>
+			<if test="modi_user_name != null">`modi_user_name` = #{modi_user_name}, </if>
+			<if test="assign_date != null">`assign_date` = #{assign_date}, </if>
+			<if test="assign_user != null">`assign_user` = #{assign_user}, </if>
+			<if test="assign_user_name != null">`assign_user_name` = #{assign_user_name}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="check_no != null">`check_no` = #{check_no}, </if>
+			<if test="is_del != null">`is_del` = #{is_del}, </if>
+			<if test="is_execute != null">`is_execute` = #{is_execute}, </if>
+			<if test="dept_type != null">`dept_type` = #{dept_type}, </if>
+			<if test="del_status != null">`del_status` = #{del_status}, </if>
+			<if test="del_reason != null">`del_reason` = #{del_reason}, </if>
+			<if test="upd_status != null">`upd_status` = #{upd_status}, </if>
+			<if test="upd_reason != null">`upd_reason` = #{upd_reason}, </if>
+			<if test="old_bala != null">`old_bala` = #{old_bala}, </if>
+			<if test="modi_team != null">`modi_team` = #{modi_team}, </if>
+			<if test="old_date != null">`old_date` = #{old_date}, </if>
+			<if test="old_team != null">`old_team` = #{old_team}, </if>
+			<if test="uuid != null">`uuid` = #{uuid}, </if>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+
+	<update id="executeUpdate2" parameterType="cn.ewsd.cost.model.FAward">
+		update f_award
+		<set>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="delStatus != null">`del_status` = #{delStatus}, </if>
+			<if test="delReason != null">`del_reason` = #{delReason}, </if>
+			<if test="updStatus != null">`upd_status` = #{updStatus}, </if>
+			<if test="updReason != null">`upd_reason` = #{updReason}, </if>
+			<if test="isDel != null">`is_del` = #{isDel}, </if>
+		    uuid = uuid
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from f_award where uuid = #{value}
+	</delete>
+	
+	<update id="executeDeleteBatch">
+		update f_award
+		set is_del = 1
+		where uuid in
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</update>
+
+</mapper>

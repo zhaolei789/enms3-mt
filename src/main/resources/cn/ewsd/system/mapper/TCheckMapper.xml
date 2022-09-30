@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.TCheckMapper">
+    <insert id="executeSave" parameterType="cn.ewsd.system.model.TCheck">
+        INSERT INTO t_check (`check_no`, `step_key`, `step_code`, `check_type`, `direct`, `idea`, `user_id`, `user_name`, `emp_id`, `team_no`, `occ_date`, `occ_time`, `log_info`, `bef_amount`,
+                             `bef_price`, `aft_amount`, `aft_price`,
+                             `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+        VALUES (#{checkNo}, #{stepKey}, #{stepCode}, #{checkType}, #{direct}, #{idea}, #{userId}, #{userName}, #{empId}, #{teamNo}, #{occDate}, #{occTime}, #{logInfo}, #{befAmount},
+                #{befPrice}, #{aftAmount}, #{aftPrice},
+                #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+    </insert>
+
+    <select id="getTCheckByNo" resultType="cn.ewsd.system.model.TCheck">
+        SELECT c.*, ap.process_name step_code_name, di.text direct_name
+        FROM t_check c
+        LEFT JOIN sys_audit_process ap ON ap.process_no=c.step_code
+        LEFT JOIN sys_dic_item di ON di.value=c.direct
+        WHERE c.check_no=#{_parameter}
+        ORDER BY CONCAT(c.occ_date, c.occ_time) DESC
+    </select>
+
+    <select id="getTCheckList" resultType="cn.ewsd.system.model.TCheck">
+        SELECT a.check_no, a.step_code, a.user_id, b.user_name, a.user_name tc_user_name
+        FROM t_check a
+        LEFT JOIN sys_user b ON a.user_id=b.uuid
+        WHERE a.check_no IN
+        <foreach collection="checkNos.split(',')" open="(" separator="," close=")" item="checkNo">
+            #{checkNo}
+        </foreach>
+        AND a.direct='sys.checkDirect.0'
+    </select>
+</mapper>

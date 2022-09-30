@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.mdata.mapper.UserMapper">
+
+    <sql id="Base_Column_List">*</sql>
+
+
+    <update id="updateByUuidAndIsDel">
+		UPDATE sys_user SET is_del = 1 WHERE uuid = #{arg0}
+	</update>
+
+    <update id="updateByPasswordAndUserNameId">
+		UPDATE sys_user set password = #{password} where user_name_id = #{userNameId}
+	</update>
+
+    <update id="updateByPasswordAndUuid">
+		update sys_user  set password =#{password} where uuid = #{uuid}
+	</update>
+
+    <select id="getListByUserNameId" resultType="cn.ewsd.mdata.model.User">
+		SELECT * FROM sys_user WHERE user_name_id = #{arg0}
+	</select>
+
+
+    <select id="getListById" resultType="cn.ewsd.mdata.model.User">
+			SELECT * FROM sys_user WHERE user_name_id = #{arg0}
+	</select>
+
+    <select id="getPageSet" resultType="cn.ewsd.mdata.model.User">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_user
+        <where>
+            <if test="filterSort != null">
+                ${filterSort}
+            </if>
+        </where>
+    </select>
+
+    <select id="getUserByCuuid" resultType="cn.ewsd.mdata.model.User">
+		SELECT * FROM sys_user WHERE user_name_id = #{arg0}
+	</select>
+
+    <select id="getDataAuth" resultType="java.lang.String">
+		select  data_auth from sys_user where user_name_id = #{arg0}
+	</select>
+
+    <select id="getUserGroup" resultType="java.lang.String">
+		select user_group from sys_user where user_name_id = #{arg0}
+	</select>
+
+    <select id="getUserByOrgIdAndPosition" resultType="cn.ewsd.mdata.model.User">
+		select * from sys_user where org_id = #{arg0} and org_name = #{arg1}
+	</select>
+
+    <select id="getListByUserDutyNameAndOrgId" resultType="cn.ewsd.mdata.model.User">
+		select * from sys_user where org_name = #{arg0} and org_id = #{arg1}
+	</select>
+
+    <select id="getUserByUserNameId" resultType="cn.ewsd.mdata.model.User">
+		select * from sys_user WHERE user_name_id = #{arg0} and  is_del != 1 limit 1
+	</select>
+
+    <select id="getCountByHql" resultType="java.lang.Integer">
+		SELECT count(1) FROM sys_user WHERE user_name_id = #{arg0} and password = #{arg1} or user_account = #{arg0} and password = #{arg1}  AND is_del != 1 AND status !=0
+	</select>
+
+    <select id="getCountByRemoteUser" resultType="java.lang.Integer">
+		SELECT count(1) FROM sys_user WHERE usernameid = #{arg0}
+	</select>
+
+    <select id="getDetailByHql" resultType="cn.ewsd.mdata.model.User">
+		SELECT * FROM sys_user WHERE usernameid = #{arg0}
+	</select>
+
+    <select id="getDetailByLikeUserAndPass" resultType="cn.ewsd.mdata.model.User">
+		SELECT * FROM sys_user WHERE user_name_id = #{arg0} and password = #{arg1} or user_account = #{arg0} AND password = #{arg1} AND is_del != 1 AND status !=0
+	</select>
+
+    <update id="updateByUsernameAndNameAndUuid">
+			UPDATE sys_user SET username = #{arg0},name = #{arg1} WHERE uuid = #{arg2}
+	</update>
+
+    <update id="updateSexAndAgeAndTelephoneAndEmailAndCellphonByUuid">
+        UPDATE sys_user SET sex = #{sex},age = #{age},email = #{email},telephone = #{telephone},cellphone = #{cellphon} WHERE uuid = #{uuid}
+    </update>
+
+    <update id="updateCellphone">
+       UPDATE sys_user SET cellphone = #{cellphone} WHERE openid = #{openid}
+    </update>
+
+    <select id="getLimitedListByHql" resultType="cn.ewsd.mdata.model.User">
+        SELECT * FROM sys_user WHERE user_name LIKE concat(concat('%',#{arg0}),'%') OR user_name_id LIKE concat(concat('%',#{arg0}),'%') limit {arg1},{arg2}
+	</select>
+
+    <select id="getListByHql" resultType="cn.ewsd.mdata.model.User">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_user
+        <where>
+            <if test="filterSort != null">
+                ${hql}
+            </if>
+        </where>
+    </select>
+
+    <select id="getLimitedListByQ" resultType="cn.ewsd.mdata.model.User">
+          SELECT * FROM sys_user WHERE (user_name LIKE concat(concat('%',#{arg0}),'%') OR user_name_id LIKE concat(concat('%',#{arg0}),'%') ) AND is_del <![CDATA[<>]]> 1
+
+	</select>
+    <select id="getCountBySql" resultType="java.lang.Integer">
+          SELECT count(1) FROM sys_user WHERE user_name_id = #{userNameId} and password = #{passwordEncode} AND status !=0
+    </select>
+
+    <select id="selectAllList" resultType="cn.ewsd.mdata.model.User">
+         SELECT * FROM sys_user  WHERE is_del <![CDATA[<>]]> 1
+    </select>
+
+    <select id="getUserByOpenid" resultType="cn.ewsd.mdata.model.User">
+         SELECT * FROM sys_user  WHERE is_del != 1 and openid=#{openid}
+    </select>
+
+    <select id="getListByUserNameIdAndUuid" resultType="cn.ewsd.mdata.model.User">
+        SELECT * FROM sys_user WHERE user_name_id = #{userNameId} and uuid != #{uuid}
+    </select>
+
+    <select id="getDataByTablesAndField" resultType="cn.ewsd.mdata.model.User">
+        SELECT ${field} from ${tables}
+    </select>
+
+    <select id="getUserByOpenid2" resultType="cn.ewsd.mdata.model.User">
+        select * from sys_user WHERE openid = #{arg0} and  is_del != 1 limit 1
+    </select>
+
+    <update id="updateUserOpenid">
+        UPDATE sys_user SET openid = #{openid} WHERE uuid = #{uuid}
+    </update>
+
+    <update id="cleanOpenidByOpenid">
+        UPDATE sys_user SET openid = '' WHERE openid = #{openid}
+    </update>
+
+    <select id="getListByIds" resultType="cn.ewsd.mdata.model.User">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_user
+        where uuid in
+        <foreach item="uuid" collection="array" open="(" separator="," close=")">
+            #{uuid}
+        </foreach>
+    </select>
+
+    <select id="getListByUserNameIds" resultType="cn.ewsd.mdata.model.User">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_user
+        where user_name_id in
+        <foreach item="uuid" collection="array" open="(" separator="," close=")">
+            #{uuid}
+        </foreach>
+    </select>
+
+    <update id="updateTokenByUserId">
+        UPDATE sys_user SET
+                            assess_token = #{assessToken},
+                            refresh_token = #{refreshToken},
+                            token_refresh_time = now()
+        WHERE uuid = #{uuid}
+    </update>
+
+    <update id="updateTokenAndTenantIdByUserId">
+        UPDATE sys_user SET
+                            assess_token = #{assessToken},
+                            refresh_token = #{refreshToken},
+                            tenant_id = #{tenantId},
+                            token_refresh_time = now()
+        WHERE uuid = #{uuid}
+    </update>
+
+    <select id="getNewAssessTokenByTenantId" resultType="String">
+        select
+            assess_token
+        from sys_user
+        where
+        tenant_id = #{tenantId}
+        order by token_refresh_time desc limit 1
+    </select>
+
+    <update id="executeDeleteUserByTenantId">
+        UPDATE sys_user SET is_del = 1
+        WHERE uuid not in
+        <foreach item="uuid" collection="uuids" open="(" separator="," close=")">
+            #{uuid}
+        </foreach>
+        and tenant_id = #{tenantId}
+        and entry_way = 1
+        and is_del = 0
+    </update>
+
+    <update id="executeUnDeleteUserByTenantId">
+        UPDATE sys_user SET is_del = 0
+        WHERE uuid in
+        <foreach item="uuid" collection="uuids" open="(" separator="," close=")">
+            #{uuid}
+        </foreach>
+        and tenant_id = #{tenantId}
+        and entry_way = 1
+        and is_del = 1
+    </update>
+
+    <select id="getUserByUnionId" resultType="cn.ewsd.mdata.model.User">
+        SELECT * FROM sys_user  WHERE unionid = #{unionid} limit 1
+    </select>
+
+
+</mapper>

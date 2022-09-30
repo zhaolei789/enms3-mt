@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="classMatQryForm" style="height:50%">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+			<table id="classMatQryDg"></table>
+		</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="classMatQryDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'classMatQryDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">日期：</label>
+	<input id="date1Qry" name="date1Qry" th:value="${date1Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+	<label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+	<input id="date2Qry" name="date2Qry" th:value="${date2Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">单位：</label>
+	<input data-toggle="topjui-combobox" id="teamNoQry" name="teamNoQry" th:value="${teamNoQry}" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',width:'150px',onChange:function(newValue, oldValue){
+		$('#deptNoQry').iCombobox('reload', '/mdata/organization/getTeamDownClass?teamNo='+newValue);
+		$('#deptNoQry').iCombobox('setValue', '')
+	}">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">班组：</label>
+	<input id="deptNoQry" name="deptNoQry" value="">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">核算类型：</label>
+	<input data-toggle="topjui-combobox" id="typeQry" name="typeQry" value="" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=r.accountType',width:'150px',loadFilter:function(data){
+		data.unshift({value:'', text:'--全部--'});
+		return data
+	}">
+
+	<label class="topjui-form-label" style="width:100px;float:none;display:inline-block">用料工程：</label>
+	<input id="prjNameQry" data-toggle="topjui-textbox" name="prjNameQry" data-options="width:'150px'" value="">
+
+	<label class="topjui-form-label" style="width:100px;float:none;display:inline-block">编码名称：</label>
+	<input id="matNameQry" data-toggle="topjui-textbox" name="matNameQry" data-options="width:'150px'" value="">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+	</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#deptNoQry').iCombobox({
+				valueField:'id',
+				textField:'text',
+				url:'/mdata/organization/getTeamDownClass?teamNo='+$('#teamNoQry').iCombobox('getValue'),
+				width:'150px',
+				loadFilter:function(data){
+					data.unshift({id:'', text:'--全部--'});
+					return data
+				}
+			})
+
+			$('#classMatQryDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/repository/classMatQry/getPageSet',
+				queryParams:{
+					date1Qry:$('#date1Qry').iDatebox('getValue'),
+					date2Qry:$('#date2Qry').iDatebox('getValue'),
+					teamNoQry:$('#teamNoQry').iCombobox('getValue'),
+					deptNoQry:$('#deptNoQry').iCombobox('getValue'),
+					typeQry:$('#typeQry').iCombobox('getValue'),
+					prjNameQry:$('#prjNameQry').iTextbox('getValue'),
+					matNameQry:$('#matNameQry').iTextbox('getValue')
+				},
+				columns:[ [
+					{
+						field:'occDate', sortable:false, title:'发生日期', formatter:function(value, row, index){
+							if(value!=null && value!=undefined && value!=''){
+								return value.substring(0, 4) + "-" + value.substring(4, 6) + "-" + value.substring(6, 8)
+							}else{
+								return ''
+							}
+						}
+					},{
+						field:'teamName', sortable:false, title:'区队名称'
+					},{
+						field:'deptName', sortable:false, title:'班组名称'
+					},{
+						field:'storeName', sortable:false, title:'领料仓库'
+					},{
+						field:'accountTypeName', sortable:false, title:'核算类型'
+					},{
+						field:'erpType', sortable:false, title:'物料分类'
+					},{
+						field:'typeName', sortable:false, title:'分类描述'
+					},{
+						field:'matCode', sortable:false, title:'物料编码', fomatter:function(value, row, index){
+							if(value!=null && value!='' && value!=undefined){
+								return value.substring(0, 1) == 'X' ? value.substring(1) : value
+							}else{
+								return ''
+							}
+						}
+					},{
+						field:'matName', sortable:false, title:'物料描述'
+					},{
+						field:'matUnit', sortable:false, title:'单位'
+					},{
+						field:'matPrice', sortable:false, title:'单价', align:'right'
+					},{
+						field:'occAmount', sortable:false, title:'消耗数量', align:'right'
+					},{
+						field:'bala', sortable:false, title:'金额', align:'right'
+					},{
+						field:'prjName', sortable:false, title:'用料工程'
+					},{
+						field:'useAddr', sortable:false, title:'使用地点'
+					}
+				] ],
+				onClickRow:function(index, row){
+					$('#matNo').val(row.matNo)
+					reloadDetail();
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#downloadBtn').click(function(){
+				$('#classMatQryForm').iForm('submit', {
+					url:'/repository/classMatQry/download',
+					success:function(data){
+
+					}
+				});
+			});
+		})
+
+		function reloadData(){
+			$('#classMatQryDg').iDatagrid('reload',{
+				date1Qry:$('#date1Qry').iDatebox('getValue'),
+				date2Qry:$('#date2Qry').iDatebox('getValue'),
+				teamNoQry:$('#teamNoQry').iCombobox('getValue'),
+				deptNoQry:$('#deptNoQry').iCombobox('getValue'),
+				typeQry:$('#typeQry').iCombobox('getValue'),
+				prjNameQry:$('#prjNameQry').iTextbox('getValue'),
+				matNameQry:$('#matNameQry').iTextbox('getValue')
+			});
+		}
+	</script>
+
+</th:block>
+</body>
+</html>

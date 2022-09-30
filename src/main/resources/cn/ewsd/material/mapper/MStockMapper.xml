@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MStockMapper">
+	<select id="getCountByMatNo" resultType="java.lang.Integer">
+		SELECT COUNT(mat_no) FROM m_stock WHERE mat_no=#{matNo}
+	</select>
+
+	<select id="getMaterialInStockByStoreNo" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT a.mat_no, b.mat_code
+		FROM m_stock a
+		INNER JOIN m_material b ON a.mat_no=b.mat_no
+		WHERE a.store_no=#{storeNo}
+	</select>
+
+	<select id="getTgAmount" resultType="cn.ewsd.material.model.MStock">
+		SELECT s.mat_no, IFNULL(SUM(stock_amount), 0) stock_amount
+		FROM m_stock s
+		LEFT JOIN m_store st ON st.store_no=s.store_no
+		WHERE st.if_stock='1'
+		GROUP BY s.mat_no
+	</select>
+
+	<select id="getSfAmount" resultType="cn.ewsd.material.model.MStock">
+		SELECT ss.mat_no, IFNULL(SUM(red_warn), 0) stock_amount
+		FROM m_safe_stock ss
+		LEFT JOIN m_store st ON ss.store_no=st.store_no
+		WHERE st.if_stock="1"
+		GROUP BY ss.mat_no
+	</select>
+
+	<update id="updateStock" parameterType="cn.ewsd.material.model.MStock">
+		UPDATE m_stock
+		<set>
+			<if test="inAmount!=null">in_amount=in_amount+#{inAmount},</if>
+			<if test="outAmount!=null">out_amount=out_amount+#{outAmount},</if>
+			<if test="stockAmount!=null">stock_amount=stock_amount+#{stockAmount},</if>
+			<if test="packAmount!=null">pack_amount=pack_amount+#{packAmount},</if>
+			<if test="lockAmount!=null">lock_amount=lock_amount+#{lockAmount},</if>
+			<if test="bulkAmount!=null">bulk_amount=bulk_amount+#{bulkAmount},</if>
+			<if test="siteCode!=null">site_code=#{siteCode}</if>
+		</set>
+		WHERE store_no=#{storeNo} AND mat_no=#{matNo}
+	</update>
+
+	<insert id="insertStock" parameterType="cn.ewsd.material.model.MStock">
+		INSERT INTO m_stock (`store_no`, `mat_no`, `in_amount`, `out_amount`, `stock_amount`, `pack_amount`, `lock_amount`, `bulk_amount`, `site_code`,
+							 `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`
+		) VALUES (
+			#{storeNo}, #{matNo}, #{inAmount}, #{outAmount}, #{stockAmount}, #{packAmount}, #{lockAmount}, #{bulkAmount}, #{siteCode},
+			#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime}
+		)
+	</insert>
+
+	<select id="getStock" resultType="cn.ewsd.material.model.MStock">
+		SELECT * FROM m_stock WHERE store_no=#{storeNo} AND mat_no=#{matNo}
+	</select>
+
+	<select id="getKKXL" resultType="cn.ewsd.material.model.MStock">
+		SELECT SUM(s.stock_amount) stock_amount, st.store_name site_code
+		FROM m_stock s
+		LEFT JOIN m_store st ON st.store_no=s.store_no
+		WHERE s.mat_no=#{_parameter} AND stock_amount&gt;0
+		GROUP BY s.store_no
+	</select>
+
+	<select id="getStockAmount" resultType="java.lang.Double">
+		SELECT IFNULL(SUM(stock_amount), 0) mat_amount FROM m_stock WHERE mat_no=#{_parameter}
+	</select>
+	
+	<select id="getStockPackMat" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT m.erp_type, m.type_name, m.mat_code, m.mat_name, di.text mat_unit_name, s.mat_no
+		FROM m_stock s
+		INNER JOIN m_material m ON s.mat_no=m.mat_no
+		LEFT JOIN sys_dic_item di ON di.value=m.mat_unit
+		WHERE EXISTS (SELECT '1' FROM sys_user_store WHERE store_no=s.store_no AND user_id=#{userId})
+		<if test="storeQry!=''">
+			AND s.store_no=#{storeQry}
+		</if>
+		<if test="flagQry!=''">
+			AND NOT EXISTS (SELECT '1' FROM m_team_mat WHERE s.mat_no=mat_no)
+		</if>
+		<if test="matQry!=''">
+			AND (m.mat_code LIKE CONCAT('_', #{matQry}, '%') OR m.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+		GROUP BY m.erp_type, m.type_name, m.mat_code, m.mat_name, di.text, s.mat_no
+		ORDER BY m.mat_code
+	</select>
+
+	<select id="getStockPackStore" resultType="cn.ewsd.material.model.MStock">
+		SELECT s.store_no, st.store_name, s.stock_amount, s.site_code, s.mat_no, tm.team_no
+		FROM m_stock s
+		LEFT JOIN m_team_mat tm ON tm.mat_no=s.mat_no
+		LEFT JOIN m_store st ON st.store_no=s.store_no
+		WHERE s.mat_no=#{_parameter} AND s.stock_amount &gt; 0
+	</select>
+
+	<select id="getStockByStoreNo" resultType="cn.ewsd.material.model.MStock">
+		SELECT mat_no, store_no, stock_amount, site_code FROM m_stock WHERE store_no=#{_parameter}
+	</select>
+
+	<update id="updStock">
+		UPDATE m_stock
+		SET in_amount=in_amount-#{inAmount}, stock_amount=#{stockAmount}, bulk_amount=#{bulkAmount}, site_code=#{siteCode}
+		WHERE store_no=#{storeNo} AND mat_no=#{matNo}
+	</update>
+
+	<update id="updStock1">
+		UPDATE m_stock
+		SET in_amount=in_amount+#{inAmount}, stock_amount=#{stockAmount}, bulk_amount=bulk_amount-#{bulkAmount}, site_code=#{siteCode}
+		WHERE store_no=#{storeNo} and mat_no=#{matNo}
+	</update>
+	
+	<select id="getDxStockList" resultType="cn.ewsd.material.model.MStock">
+		SELECT st.mat_no, st.site_code, st.store_no, st.bulk_amount, st.pack_amount, st.stock_amount, (st.stock_amount*m.mat_price) mat_bala,
+			   m.mat_code, m.mat_name, di.text mat_unit, m.abc_type, m.mat_price, m.erp_type, m.type_name, (SELECT store_name FROM m_store WHERE st.store_no=store_no) store_name
+		FROM m_stock st
+		LEFT JOIN m_material m ON m.mat_no=st.mat_no
+		LEFT JOIN sys_dic_item di ON di.value=m.mat_unit
+		WHERE EXISTS (SELECT '1' FROM m_store WHERE st.store_no=store_no AND store_type='r.storeType2.21')
+		<if test="storeNoQry!=''">
+			AND st.store_no LIKE CONCAT(#{storeNoQry}, '%')
+		</if>
+		<if test="flagQry!=''">
+			AND st.stock_amount &gt; 0
+		</if>
+		<if test="matCodeQry!=''">
+			AND (m.mat_code LIKE CONCAT('_', #{matCodeQry}, '%') OR m.mat_code LIKE CONCAT(#{matCodeQry}, '%'))
+		</if>
+		<if test="matNameQry!=''">
+			AND m.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+		ORDER BY m.erp_type
+	</select>
+
+	<select id="getStockQryList" resultType="cn.ewsd.material.model.MStock">
+		SELECT st.mat_no, st.site_code, st.store_no, m.mat_code, m.mat_name, m.mat_unit, m.abc_type, CASE WHEN ms.store_type='r.storeType2.61' THEN 0 ELSE m.mat_price END mat_price,
+			   m.erp_type, m.type_name, st.bulk_amount, st.pack_amount, st.stock_amount, vo.old_amount, ss.red_warn, (st.stock_amount - IFNULL(ss.red_warn,0)) diff_amount,
+			   (st.stock_amount*(CASE WHEN ms.store_type='r.storeType2.61' THEN 0 ELSE m.mat_price END)) mat_bala, ms.store_name
+		FROM m_stock st
+		LEFT JOIN m_material m ON m.mat_no=st.mat_no
+		LEFT JOIN (SELECT mat_no, IFNULL(SUM(stock_amount), 0) old_amount
+				   FROM vo_stock
+				   GROUP BY mat_no) vo ON st.mat_no=vo.mat_no
+		LEFT JOIN m_store ms ON st.store_no=ms.store_no
+		LEFT JOIN m_safe_stock ss ON st.store_no=ss.store_no AND st.mat_no=ss.mat_no
+		WHERE 1=1
+		<if test="storeNoQry!=''">
+			AND st.store_no LIKE CONCAT(#{storeNoQry}, '%')
+		</if>
+		<if test="abcTypeQry!=''">
+			AND m.abc_type=#{abcTypeQry}
+		</if>
+		<if test="flagQry!=''">
+			AND st.stock_amount &gt; 0
+		</if>
+		<if test="!ifPower">
+			AND st.store_no!='1S'
+		</if>
+		<if test="matCodeQry!=''">
+			AND RIGHT(m.mat_code, 8) IN
+			<foreach collection="matCodeQry.split(',')" item="matCode" open="(" separator="," close=")">
+				#{matCode}
+			</foreach>
+		</if>
+		<if test="erpTypeQry!=''">
+			AND (m.erp_type LIKE CONCAT(#{erpTypeQry}, '%') OR m.type_name LIKE CONCAT('%', #{erpTypeQry}, '%'))
+		</if>
+		<if test="matNameQry!=''">
+			AND m.mat_name LIKE CONCAT ('%', #{matNameQry}, '%')
+		</if>
+		<if test="warnFlag!=''">
+			AND ss.red_warn>0 AND ss.red_warn>st.stock_amount
+		</if>
+	</select>
+
+	<select id="getOldApplyList" resultType="cn.ewsd.material.model.MStock">
+		SELECT a.store_no, a.mat_no, a.stock_amount, b.mat_code, b.mat_name, b.mat_unit, b.mat_price, b.erp_type, b.type_name,
+			   (SELECT store_name FROM m_store WHERE store_no=a.store_no) store_name, CONCAT(a.store_no, '_', b.mat_no) uuid
+		FROM m_stock a
+		LEFT JOIN m_material b ON a.mat_no = b.mat_no
+		WHERE a.stock_amount &gt; 0
+		  AND EXISTS (SELECT '1' FROM m_store WHERE store_no=a.store_no AND store_type='r.storeType2.14')
+		<if test="storeQry!=''">
+			AND a.store_no=#{storeQry}
+		</if>
+		<if test="matQry!=''">
+			AND (b.mat_name LIKE CONCAT('%', #{matQry}, '%') OR b.mat_code LIKE CONCAT(#{matQry}, '%') OR b.mat_code LIKE CONCAT('_', #{matQry}, '%'))
+		</if>
+	</select>
+
+	<select id="getUrgentPlanStock" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT ms.store_no, ms.mat_no, mm.erp_type, mm.type_name, mm.mat_code, mm.mat_name, mm.mat_unit, mm.mat_price,
+			   st.store_name, (ms.stock_amount - IFNULL(vp.amount,0)) stock_amount, '0' reserve_no, 'C1202G0004' center_no, '经营管理科' center_name
+		FROM m_stock ms
+		LEFT JOIN m_store st ON ms.store_no=st.store_no
+		LEFT JOIN m_material mm ON ms.mat_no=mm.mat_no
+		LEFT JOIN (SELECT store_no, mat_no, SUM(stock_amount) amount
+				   FROM vm_plan_ios
+			  	   GROUP BY store_no,mat_no) vp ON ms.store_no=vp.store_no AND ms.mat_no=vp.mat_no
+		WHERE st.store_type='r.storeType2.11' AND st.store_level='r.storeLevel.1'
+		  AND (ms.stock_amount - IFNULL(vp.amount,0)) > 0
+		  AND NOT EXISTS (SELECT '1' FROM m_plan
+		  				  WHERE if_urgent='1' AND team_no=#{teamNo}
+			  				AND plan_step NOT IN ('7105F','7105X')
+			  				AND ms.store_no=mat_addr AND ms.mat_no=mat_no)
+		<if test="storeQry!=''">
+			AND ms.store_no=#{storeQry}
+		</if>
+		<if test="matQry!=''">
+			AND (mm.mat_code LIKE CONCAT('_', #{matQry}, '%') OR mm.mat_code LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+		UNION
+		SELECT vp.store_no, vp.mat_no, mm.erp_type, mm.type_name, mm.mat_code, mm.mat_name, mm.mat_unit, ep.mat_price,
+			   st.store_name, vp.stock_amount, vp.reserve_no, ep.center_no,
+			   (SELECT center_name FROM t_cost_center WHERE center_no=ep.center_no) center_name
+		FROM vm_plan_ios vp
+		LEFT JOIN m_material mm ON vp.mat_no=mm.mat_no
+		LEFT JOIN m_store st ON vp.store_no=st.store_no
+		LEFT JOIN m_ep_plan ep ON vp.reserve_no=ep.ep_id
+		WHERE vp.stock_amount>0
+		  AND NOT EXISTS (SELECT '1' FROM m_plan
+		  				  WHERE if_urgent='1' AND team_no=#{teamNo}
+						 	AND plan_step NOT IN ('7105F','7105X')
+						 	AND vp.store_no=mat_addr AND vp.mat_no=mat_no AND vp.reserve_no=reserve_no
+						 	AND plan_month=#{planMonth})
+		<if test="storeQry!=''">
+			AND vp.store_no=#{storeQry}
+		</if>
+		<if test="reserveQry!=''">
+			AND vp.reserve_no LIKE CONCAT('%', #{reserveQry}, '%')
+		</if>
+		<if test="matQry!=''">
+			AND (mm.mat_code LIKE CONCAT('_', #{matQry}, '%') OR mm.mat_code LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+	</select>
+
+	<select id="getPlanIosStockAmount" resultType="java.lang.Double">
+		SELECT IFNULL(stock_amount, 0) FROM vm_plan_ios WHERE reserve_no=#{reserveNo} AND store_no=#{storeNo} AND mat_no=#{matNo}
+	</select>
+	
+	<select id="getWarnStock" resultType="cn.ewsd.material.model.MStock">
+		SELECT a.store_no, a.mat_no, b.mat_code, b.mat_name, b.mat_unit, a.stock_amount, c.warn_amount,
+		(SELECT store_name FROM m_store WHERE store_no=a.store_no) as store_name,
+		b.erp_type, b.type_name
+		FROM m_stock a
+		INNER JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN (SELECT b.store_no, a.mat_no, IFNULL(b.${warnCol}, 0) warn_amount
+				   FROM (SELECT mat_no FROM m_stock GROUP BY mat_no) a, m_safe_stock b
+				   WHERE a.mat_no=b.mat_no
+		<if test="storeQry!=''">
+					 AND b.store_no=#{storeQry}
+		</if>
+				  ) c ON a.mat_no=c.mat_no AND a.store_no=c.store_no
+		WHERE 1=1
+		<if test="flagQry=='yellow'">
+		  AND c.warn_amount &lt; a.stock_amount
+		</if>
+		<if test="flagQry!='yellow'">
+		  AND c.warn_amount &gt; a.stock_amount
+		</if>
+		<if test="storeQry!=''">
+		  AND a.store_no=#{storeQry}
+		</if>
+		<if test="codeQry!=''">
+		  AND (b.mat_code LIKE CONCAT('_', #{codeQry}, '%') OR b.mat_code LIKE CONCAT(#{codeQry}, '%'))
+		</if>
+		<if test="nameQry!=''">
+		  AND b.mat_name LIKE CONCAT('%', #{nameQry}, '%')
+		</if>
+		ORDER BY b.mat_code
+	</select>
+
+	<select id="getInOutStock" resultType="cn.ewsd.material.model.MStock">
+		SELECT a.mat_no, m.mat_code, m.mat_name, m.mat_unit, m.erp_type, m.type_name,
+			   IFNULL(qqrk.mat_amount, 0) - IFNULL(qqck.mat_amount, 0) qq_amount,
+			   IFNULL(qqrk.set_bala, 0) - IFNULL(qqck.set_bala, 0) qq_bala,
+			   IFNULL(bqrk.mat_amount, 0) bqr_amount,
+			   IFNULL(bqrk.set_bala, 0) bqr_bala,
+			   IFNULL(bqck.mat_amount, 0) bqc_amount,
+			   IFNULL(bqck.set_bala, 0) bqc_bala,
+			   IFNULL(qqrk.mat_amount, 0) + IFNULL(bqrk.mat_amount, 0) - IFNULL(qqck.mat_amount, 0) - IFNULL(bqck.mat_amount, 0) jy_amount,
+			   IFNULL(qqrk.set_bala, 0) + IFNULL(bqrk.set_bala, 0) - IFNULL(qqck.set_bala, 0) - IFNULL(bqck.set_bala, 0) jy_bala
+		FROM (SELECT mat_no
+			  FROM m_stock
+			  WHERE EXISTS (SELECT '1' FROM sys_user_store WHERE store_no=m_stock.store_no AND user_id=#{userId})
+		<if test="storeQry!=''">
+				AND store_no IN
+			<foreach collection="storeQry.split(',')" item="storeNo" open="(" separator="," close=")">
+				#{storeNo}
+			</foreach>
+		</if>
+		<if test="!ifPower">
+				AND store_no NOT IN ('1S')
+		</if>
+			  GROUP BY mat_no) a
+		LEFT JOIN m_material m ON a.mat_no=m.mat_no
+		LEFT JOIN (SELECT mat_no, SUM(IFNULL(bill_amount, 0)) mat_amount, SUM(IFNULL(bill_amount, 0)*IFNULL(set_price, 0)) set_bala
+				   FROM m_in
+				   WHERE bill_date &lt; #{beginDateQry} AND in_step='7201F'
+					 AND EXISTS (SELECT '1' FROM sys_user_store WHERE store_no=m_in.store_no AND user_id=#{userId})
+		<if test="storeQry!=''">
+					 AND store_no IN
+			<foreach collection="storeQry.split(',')" item="storeNo" open="(" separator="," close=")">
+				#{storeNo}
+			</foreach>
+		</if>
+		<if test="!ifPower">
+					 AND store_no NOT IN ('1S')
+		</if>
+				   GROUP BY mat_no) qqrk ON a.mat_no=qqrk.mat_no
+		LEFT JOIN (SELECT mat_no, SUM(IFNULL(out_amount, 0)) mat_amount, SUM(IFNULL(out_amount, 0)*IFNULL(mat_price, 0)) set_bala
+				   FROM m_out
+				   WHERE out_date &lt; #{beginDateQry} AND draw_step='7202F'
+					 AND EXISTS (SELECT '1' FROM sys_user_store WHERE store_no=m_out.store_no AND user_id=#{userId})
+		<if test="storeQry!=''">
+					 AND store_no IN
+			<foreach collection="storeQry.split(',')" item="storeNo" open="(" separator="," close=")">
+				#{storeNo}
+			</foreach>
+		</if>
+		<if test="!ifPower">
+					 AND store_no NOT IN ('1S')
+		</if>
+				   GROUP BY mat_no) qqck ON a.mat_no=qqck.mat_no
+		LEFT JOIN (SELECT mat_no, SUM(IFNULL(bill_amount, 0)) mat_amount, SUM(IFNULL(bill_amount, 0)*IFNULL(set_price, 0)) set_bala
+				   FROM m_in
+				   WHERE bill_date &gt;= #{beginDateQry} AND bill_date &lt;= #{endDateQry}
+					 AND EXISTS (SELECT '1' FROM sys_user_store WHERE store_no=m_in.store_no AND user_id=#{userId})
+					 AND in_step='7201F'
+		<if test="storeQry!=''">
+					 AND store_no IN
+			<foreach collection="storeQry.split(',')" item="storeNo" open="(" separator="," close=")">
+				#{storeNo}
+			</foreach>
+		</if>
+		<if test="!ifPower">
+					 AND store_no NOT IN ('1S')
+		</if>
+				   GROUP BY mat_no) bqrk ON a.mat_no=bqrk.mat_no
+		LEFT JOIN (SELECT mat_no, SUM(IFNULL(out_amount, 0)) mat_amount, SUM(IFNULL(out_amount, 0)*IFNULL(mat_price, 0)) set_bala
+				   FROM m_out
+				   WHERE out_date &gt;= #{beginDateQry} AND out_date &lt;= #{endDateQry}
+					 AND draw_step='7202F'
+					 AND EXISTS (SELECT '1' FROM sys_user_store WHERE store_no=m_out.store_no AND user_id=#{userId})
+		<if test="storeQry!=''">
+					 AND store_no IN
+			<foreach collection="storeQry.split(',')" item="storeNo" open="(" separator="," close=")">
+				#{storeNo}
+			</foreach>
+		</if>
+		<if test="!ifPower">
+					 AND store_no NOT IN ('1S')
+		</if>
+				   GROUP BY mat_no) bqck ON a.mat_no=bqck.mat_no
+		WHERE ((IFNULL(qqrk.mat_amount, 0) - IFNULL(qqck.mat_amount, 0))!=0
+				OR IFNULL(bqrk.mat_amount, 0)!=0
+		   		OR IFNULL(bqck.mat_amount, 0)!=0
+		   		OR (IFNULL(qqrk.mat_amount, 0) + IFNULL(bqrk.mat_amount, 0) - IFNULL(qqck.mat_amount, 0) - IFNULL(bqck.mat_amount, 0))!=0)
+		<if test="matCodeQry!=''">
+		  AND m.mat_code LIKE CONCAT('_', #{matCodeQry}, '%')
+		</if>
+		<if test="matNameQry!=''">
+		  AND m.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+	</select>
+
+	<select id="getAllStockQryList" resultType="cn.ewsd.material.model.MStock">
+		SELECT a.store_no, a.mat_no, a.site_code, a.amount, ms.store_name, ms.store_level, mm.mat_code, mm.mat_name, mm.mat_unit,
+			   CASE WHEN ms.store_type='r.storeType2.61' THEN 0 ELSE mm.mat_price END mat_price, mm.erp_type, mm.type_name,
+			   (a.amount*(CASE WHEN ms.store_type='r.storeType2.61' THEN 0 ELSE mm.mat_price END)) mat_bala,
+			   (SELECT text FROM sys_dic_item WHERE value=ms.store_level) store_level_name
+		FROM (SELECT store_no, mat_no, site_code, stock_amount amount
+			  FROM m_stock
+			  WHERE stock_amount &gt; 0
+			  UNION
+			  SELECT store_no, mat_no, site_code, mat_amount amount
+			  FROM m_team_stock
+			  WHERE mat_amount &gt; 0) a
+		LEFT JOIN m_store ms ON a.store_no=ms.store_no
+		LEFT JOIN m_material mm ON a.mat_no=mm.mat_no
+		WHERE 1=1
+		<if test="storeNoQry!=''">
+		  AND a.store_no=#{storeNoQry}
+		</if>
+		<if test="stLevelQry!=''">
+		  AND ms.store_level=#{stLevelQry}
+		</if>
+		<if test="!ifPower">
+		  AND a.store_no NOT IN ('1S')
+		</if>
+		<if test="matCodeQry!=''">
+		  AND (mm.mat_code LIKE CONCAT('_', #{matCodeQry}, '%') OR mm.mat_code LIKE CONCAT(#{matCodeQry}, '%'))
+		</if>
+		<if test="erpTypeQry!=''">
+		  AND (mm.erp_type LIKE CONCAT(#{erpTypeQry}, '%') OR mm.type_name LIKE CONCAT('%', #{erpTypeQry}, '%'))
+		</if>
+		<if test="matNameQry!=''">
+		  AND mm.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+	</select>
+	
+	<select id="getStockSumList" resultType="cn.ewsd.material.model.MStock">
+		SELECT st.store_no, st.mat_no, SUM(st.stock_amount) stock_amount, SUM(st.stock_amount)*a.mat_price mat_bala
+		FROM m_stock st
+		INNER JOIN (SELECT s.mat_no, m.mat_name, m.mat_code, m.mat_unit, m.mat_price, m.erp_type, m.type_name
+			 		FROM m_stock s
+			 		LEFT JOIN m_material m ON s.mat_no=m.mat_no
+			 		WHERE 1=1
+		<if test="matCodeQry!=''">
+					  AND m.mat_code LIKE CONCAT('_', #{matCodeQry}, '%')
+		</if>
+		<if test="matNameQry!=''">
+					  AND m.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+		<if test="xjFlagQry=='X'.toString()">
+					  AND m.new_old='X'
+		</if>
+		<if test="xjFlagQry=='J'.toString()">
+					  AND (m.new_old='J' OR m.mat_code LIKE '_930%')
+		</if>
+		<if test="!ifPower">
+					  AND s.store_no != '1S'
+		</if>
+					GROUP BY s.mat_no, m.mat_name, m.mat_code, m.mat_unit, m.mat_price, m.erp_type, m.type_name) a ON st.mat_no=a.mat_no
+		WHERE st.stock_amount &gt; 0
+		<if test="!ifPower">
+		  AND st.store_no!='1S'
+		</if>
+		GROUP BY st.mat_no, st.store_no, a.mat_price
+	</select>
+
+	<select id="getStockSumMat" resultType="java.util.HashMap">
+		SELECT s.mat_no, m.mat_name, m.mat_code, m.mat_unit, m.mat_price, m.erp_type, m.type_name
+		FROM m_stock s
+		LEFT JOIN m_material m ON s.mat_no=m.mat_no
+		WHERE 1=1
+		<if test="matCodeQry!=''">
+		  AND m.mat_code LIKE CONCAT('_', #{matCodeQry}, '%')
+		</if>
+		<if test="matNameQry!=''">
+		  AND m.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+		<if test="xjFlagQry=='X'.toString()">
+		  AND m.new_old='X'
+		</if>
+		<if test="xjFlagQry=='J'.toString()">
+		  AND (m.new_old='J' OR m.mat_code LIKE '_930%')
+		</if>
+		<if test="!ifPower">
+		  AND s.store_no != '1S'
+		</if>
+		GROUP BY s.mat_no, m.mat_name, m.mat_code, m.mat_unit, m.mat_price, m.erp_type, m.type_name
+	</select>
+
+	<select id="getStockSumDetailList" resultType="cn.ewsd.material.model.MStock">
+		SELECT s.mat_no, m.mat_name, m.mat_code, m.mat_unit, m.mat_price, m.erp_type, m.type_name,
+			   SUM(s.stock_amount) stock_amount, SUM(s.stock_amount*m.mat_price) mat_bala
+		FROM m_stock s
+		LEFT JOIN m_material m ON s.mat_no=m.mat_no
+		WHERE s.store_no=#{storeNoQry} AND s.stock_amount &gt; 0
+		<if test="matCodeQry!=''">
+		  AND m.mat_code LIKE CONCAT('_', #{matCodeQry}, '%')
+		</if>
+		<if test="matNameQry!=''">
+		  AND m.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+		<if test="xjFlagQry=='X'.toString()">
+		  AND m.new_old='X'
+		</if>
+		<if test="xjFlagQry=='J'.toString()">
+		  AND (m.new_old='J' OR m.mat_code LIKE '_930%')
+		</if>
+		GROUP BY s.mat_no, m.mat_name, m.mat_code, m.mat_unit, m.mat_price, m.erp_type, m.type_name
+	</select>
+
+	<select id="getExpirationAlertList" resultType="cn.ewsd.material.model.MStock">
+		SELECT d.bill_no, (d.bill_amount - IFNULL(d.out_amount,0)) amount, m.mat_code, m.mat_name, m.mat_unit, m.erp_type, m.type_name, d.set_price,
+			   ((d.bill_amount - IFNULL(d.out_amount,0))*d.set_price) as bala, d.bill_date,
+			   (SELECT offer_name FROM m_offer WHERE d.offer_no=offer_no) as supplier,
+			   (SELECT store_name FROM m_store WHERE d.store_no=store_no) as store_name,
+			   ep.center_no, (SELECT center_name FROM t_cost_center WHERE ep.center_no=center_no) center_name
+		FROM m_in d
+		LEFT JOIN m_material m ON d.mat_no=m.mat_no
+		LEFT JOIN m_ep_plan ep ON d.reserve_no=ep.ep_id
+		WHERE d.data_src IN ('m.dataSrc.1') AND d.in_step='7201F'
+		  AND (IFNULL(m.qa_period,0) &gt; 0
+		  AND (d.bill_amount - IFNULL(d.out_amount,0)) &gt; 0
+		  AND DATE_FORMAT(DATE_ADD(STR_TO_DATE(d.reserve4, '%Y%m%d'), INTERVAL IFNULL(m.qa_period, 0) day), '%Y%m%d') &lt; #{nowDate})
+		<if test="matQry!=''">
+			AND (m.mat_code LIKE CONCAT('_', #{matQry}, '%') OR m.mat_code LIKE CONCAT(#{matQry}, '%'))
+		</if>
+		ORDER BY d.apply_date DESC
+	</select>
+</mapper>

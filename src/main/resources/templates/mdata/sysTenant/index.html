@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <table data-toggle="topjui-datagrid"
+                   data-options="id:'sysTenantDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/mdata/sysTenant/getPageSet'">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'租户ID',sortable:true,checkbox:true"></th>
+                    <th data-options="field:'tenantName',title:'企业名称',sortable:true"></th>
+					<th data-options="field:'status',title:'状态',sortable:true,
+                                formatter:function(value,row,index){
+                                if (value == '1') {
+                                    return '启用';
+                                } else if (value == '2') {
+                                    return '禁用';
+                                } else {
+                                    return '--';
+                                }
+                            }"></th>
+                    <th data-options="field:'establishDate',title:'建立时间',sortable:true"></th>
+                    <th data-options="field:'businessEmail',title:'邮箱',sortable:true"></th>
+                    <th data-options="field:'businessPhone',title:'电话',sortable:true"></th>
+                    <th data-options="field:'businessName',title:'业务名称',sortable:true"></th>
+                    <th data-options="field:'legalPerson',title:'法人',sortable:true"></th>
+                    <th data-options="field:'corpAddress',title:'地址',sortable:true"></th>
+                    <th data-options="field:'businessScope',title:'业务范围',sortable:true"></th>
+                    <th data-options="field:'adminName',title:'管理员名称',sortable:true"></th>
+                    <th data-options="field:'adminPhone',title:'管理员电话',sortable:true"></th>
+					<th data-options="field:'createTime',title:'创建时间',sortable:true"></th>
+                    <th data-options="field:'enableTime',title:'启用时间',sortable:true"></th>
+                    <!--<th data-options="field:'overdueTime',title:'过期时间',sortable:true"></th>-->
+                    <th data-options="field:'note',title:'备注',sortable:true"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- 表格工具栏 -->
+    <div id="sysTenantDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'sysTenantDg'
+       }" style="display:none">
+        <ewsd:rbac str="sysTenantAddDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#sysTenantDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'sysTenantAddDg',
+               href:'/mdata/sysTenant/add',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/mdata/sysTenant/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+        </ewsd:rbac>
+
+        <ewsd:rbac str="sysTenantEditDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#sysTenantDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'sysTenantEditDg',
+               href:'/mdata/sysTenant/edit',
+               url:'/mdata/sysTenant/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/mdata/sysTenant/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'sysTenantDg'}]}
+               ]
+           }">编辑</a>
+        </ewsd:rbac>
+
+        <ewsd:rbac str="/mdata/sysTenant/deleteBatch">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'doAjax',
+           extend:'#sysTenantDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的数据',param:'uuid:uuid'},
+	       url:'/mdata/sysTenant/deleteBatch'">删除</a>
+        </ewsd:rbac>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#sysTenantDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#sysTenantDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

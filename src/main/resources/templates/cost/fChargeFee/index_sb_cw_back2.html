@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<div data-options="region:'west',iconCls:'icon-reload',width:'30%',title:'分管领导',split:true,border:false">
+		<table data-toggle="topjui-datagrid"
+			   data-options="id:'barMasterDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               childGrid:{
+                    param:'leader:uuid',
+                    grid:[
+                    {type:'datagrid',id:'fChargeFeeDg'}
+                    ]
+               }">
+			<thead>
+			<tr>
+				<!--<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>-->
+				<!--<th data-options="field:'positionName',title:'职务',sortable:true"></th>-->
+				<th data-options="field:'userName',title:'姓名',sortable:true"></th>
+				<th data-options="field:'yearBudSum',title:'年度指标',sortable:true"></th>
+				<th data-options="field:'financeBalaSum',title:'财务上报',sortable:true"></th>
+			</tr>
+			</thead>
+		</table>
+	</div>
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <table data-toggle="topjui-edatagrid"
+               data-options="id:'fChargeFeeDg',
+               reloadAfterSave:true,
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/cost/fChargeFee/getPageSetSbCw'
+		">
+            <thead>
+            <tr>
+				<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+				<th data-options="field:'teamNoName',title:'责任单位',sortable:true"></th>
+				<th data-options="field:'itemName',title:'费用项目',sortable:true"></th>
+				<th data-options="field:'yearBud',title:'年度指标',sortable:true"></th>
+				<th data-options="field:'calcWay',title:'测算依据',sortable:true"></th>
+				<th data-options="field:'assPeriod',title:'考核周期',sortable:true"></th>
+				<th data-options="field:'financeBala',sortable:true,
+					editor:{
+						type:'numberbox',
+						options:{required:true,height:30,min:0,precision:2}
+					}">财务上报
+				</th>
+			</tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="fChargeFeeDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'fChargeFeeDg'
+       }" style="display:none">
+
+	<a href="javascript:void(0)"
+	   data-toggle="topjui-menubutton"
+	   data-options="method:'edatagrid',
+       extend:'#fChargeFeeDg-toolbar',
+       btnCls:'topjui-btn-blue',
+       type:'saveRow',
+       iconCls:'fa fa-save'">保存</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#fChargeFeeDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#fChargeFeeDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+	<form class="search-box" id="queryForm" name="dataForm" method="post">
+		年份:
+		<input type="text" name="query_year" id="query_year"
+			   data-toggle="topjui-combobox"
+			   data-options="prompt:'默认当年',
+                   		width:100,
+                   		panelHeight:150,
+                   		url:'/system/dicSet/getDicItemByCode?code=sys.year',
+                   		valueField:'value',
+    					textField:'text'"
+		>
+		月份:
+		<input type="text" name="query_month" id="query_month"
+			   data-toggle="topjui-combobox"
+			   data-options="prompt:'默认当月',
+                   		width:100,
+                   		panelHeight:150,
+                   		url:'/system/dicSet/getDicItemByCode?code=sys.month',
+                   		valueField:'value',
+    					textField:'text'"
+		>
+		<a href="javascript:void(0)" id="query_button"
+		   data-toggle="topjui-menubutton"
+		   data-options="method:'query',
+            iconCls:'fa fa-search',
+            btnCls:'topjui-btn-red',
+            form:{id:'queryForm'},
+            grid:{type:'datagrid','id':'fChargeFeeDg'}">查询</a>
+	</form>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script th:inline="javascript">
+		//页面前置参数
+		var request_query_year = [[${query_year}]];
+		var request_query_month = [[${query_month}]];
+
+		$(function () {
+
+			//页面选择框初始赋值
+			$('#query_year').iCombobox('setValue', request_query_year);
+			$('#query_month').iCombobox('setValue', request_query_month);
+
+
+			//页面初始时
+			$('#fChargeFeeDg').iEdatagrid({
+				url:'/cost/fChargeFee/getPageSetSbCw?query_year='+request_query_year+'&query_month='+request_query_month,
+				updateUrl: '/cost/fChargeFee/eUpdateSbCw?query_year='+request_query_year+'&query_month='+request_query_month
+			});
+			/*$('#barMasterDg').iDatagrid({
+				url:'/cost/barMaster/getPageSetSbCw?query_year='+request_query_year+'&query_month='+request_query_month
+			});*/
+
+			//点击查询按钮时,将选择框中的参数赋予页面前置参数,刷新页面
+			$('#query_button').bind('click', function(){
+				request_query_year = $('#query_year').iCombobox('getValue');
+				request_query_month = $('#query_month').iCombobox('getValue');
+				$('#fChargeFeeDg').iEdatagrid({
+					url:'/cost/fChargeFee/getPageSetSbCw?query_year='+request_query_year+'&query_month='+request_query_month,
+					updateUrl: '/cost/fChargeFee/eUpdateSbCw?query_year='+request_query_year+'&query_month='+request_query_month
+				});
+				$('#barMasterDg').iDatagrid({
+					url:'/cost/barMaster/getPageSetSbCw?query_year='+request_query_year+'&query_month='+request_query_month
+				});
+			});
+
+
+			$('#fChargeFeeDg').iEdatagrid({
+				onLoadSuccess: function(){
+					$('#barMasterDg').iDatagrid({
+						url:'/cost/barMaster/getPageSetSbCw?query_year='+request_query_year+'&query_month='+request_query_month
+					});
+				}
+			});
+
+
+
+		})
+	</script>
+</th:block>
+</body>
+</html>

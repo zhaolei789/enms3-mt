@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MItemMapper">
+    <select id="getPageSet" resultType="cn.ewsd.material.model.MItem">
+        select i.*, o.text pay_team_name, di1.text pay_type_name, di2.text item_use_name
+        from m_item i
+        LEFT JOIN sys_organization o ON o.id=i.pay_team
+        LEFT JOIN sys_dic_item di1 ON di1.value=i.pay_type
+        LEFT JOIN sys_dic_item di2 ON di2.value=i.item_use
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.material.model.MItem">
+		select  *  from m_item where item_no = #{itemNo}
+	</select>
+
+	<insert id="executeSave" parameterType="cn.ewsd.material.model.MItem">
+		insert into m_item ( `item_no`, `item_name`, `warn_line`, `pay_type`, `pay_team`, `if_on`, `item_type`, `item_use`, `bmcbjs_coe`, `bmfjkh_coe`, `order_no`,
+							 `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`
+		) values ( #{itemNo}, #{itemName}, #{warnLine}, #{payType}, #{payTeam}, #{ifOn}, #{itemType}, #{itemUse}, #{bmcbjsCoe}, #{bmfjkhCoe}, #{orderNo},
+				   #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.material.model.MItem">
+		update m_item 
+		<set>
+			<if test="itemName != null">`item_name` = #{itemName}, </if>
+			<if test="itemNo != null">`item_no` = #{itemNo}, </if>
+			<if test="warnLine != null">`warn_line` = #{warnLine}, </if>
+			<if test="payType != null">`pay_type` = #{payType}, </if>
+			<if test="payTeam != null">`pay_team` = #{payTeam}, </if>
+			<if test="ifOn != null">`if_on` = #{ifOn}, </if>
+			<if test="itemType != null">`item_type` = #{itemType}, </if>
+			<if test="itemUse != null">`item_use` = #{itemUse}, </if>
+			<if test="bmcbjsCoe != null">`bmcbjs_coe` = #{bmcbjsCoe}, </if>
+			<if test="bmfjkhCoe != null">`bmfjkh_coe` = #{bmfjkhCoe}, </if>
+			<if test="orderNo != null">`order_no` = #{orderNo}, </if>
+			<if test="uuid != null">`uuid` = #{uuid}, </if>
+			<if test="createTime != null">`create_time` = #{createTime}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creatorId != null">`creator_id` = #{creatorId}, </if>
+			<if test="creatorOrgId != null">`creator_org_id` = #{creatorOrgId}, </if>
+			<if test="modifierId != null">`modifier_id` = #{modifierId}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modifyTime != null">`modify_time` = #{modifyTime}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDeleteBatch">
+		delete from m_item where uuid in
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+	<select id="getItemByItemNoAndNotByUuid" resultType="cn.ewsd.material.model.MItem">
+		SELECT * FROM m_item WHERE item_no=#{itemNo} AND uuid!=#{uuid}
+	</select>
+	
+	<select id="getMatItemSet" resultType="cn.ewsd.material.model.MItem">
+		SELECT item_no, item_name
+		FROM m_item
+		WHERE IFNULL(if_on, '1')='1'
+		<if test="isMyItem">
+			AND item_no IN (SELECT item_no FROM sys_user_item WHERE user_id=#{userNo})
+		</if>
+		ORDER BY item_no, item_name
+	</select>
+
+	<select id="getItemSet"  resultType="cn.ewsd.material.model.MItem">
+		SELECT item_no, item_name
+    	FROM m_item
+    	WHERE item_no IN (SELECT item_no FROM m_prj_item WHERE prj_no=#{prjNo})
+    	ORDER BY item_no
+	</select>
+
+	<select id="getItemList" resultType="cn.ewsd.material.model.MItem">
+		SELECT p.item_no, i.item_name
+		FROM m_plan p
+		LEFT JOIN m_item i ON i.item_no=p.item_no
+		WHERE 1=1
+		<if test="prjNo!=null">
+			AND p.prj_no=#{prjNo}
+		</if>
+		<if test="planType!=null">
+			AND p.plan_type=#{planType}
+		</if>
+		<if test="planMonth!=null">
+			AND p.plan_month=#{planMonth}
+		</if>
+		<if test="planStep!=null">
+			AND p.plan_step=#{planStep}
+		</if>
+		GROUP BY p.item_no
+	</select>
+
+	<select id="getItemList1" resultType="cn.ewsd.material.model.MItem">
+		SELECT mb.item_no, CONCAT(i.item_name, '[', FORMAT(mb.bud_bala-IFNULL(mo.bala, 0), 2), ']') item_name
+		FROM m_budget mb
+		LEFT JOIN m_item i ON i.item_no=mb.item_no
+        LEFT JOIN (SELECT item_no, SUM(out_amount*mat_price) bala
+        		   FROM m_out
+        	  	   WHERE data_src='m.dataSrc.3' AND draw_step NOT IN ('7202X', '72020') AND team_no=#{teamNo} AND LEFT(agree_date, 6)=#{fMonth}
+        	  	   GROUP BY item_no) mo ON mb.item_no=mo.item_no
+		WHERE mb.team_no=#{teamNo} AND mb.occ_month=#{fMonth} AND mb.bud_bala&gt;0
+	</select>
+</mapper>

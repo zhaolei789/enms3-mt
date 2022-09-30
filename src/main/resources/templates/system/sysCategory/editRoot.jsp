@@ -1,0 +1,59 @@
+<%@ page language="java" pageEncoding="UTF-8" %>
+<input type="hidden" id="uuid" name="uuid">
+<input type="hidden" name="levelId" value="1">
+<input type="hidden" name="pid" value="1">
+<input type="hidden" name="id">
+<input type="hidden" name="type" value="${param.type}">
+<div class="topjui-fluid">
+
+    <div class="topjui-row">
+
+        <div class="topjui-col-sm6"><label class="topjui-form-label">名称</label>
+            <div class="topjui-input-block">
+                <input type="text" name="text" data-toggle="topjui-textbox"
+                       data-options="prompt:'',required:true,prompt:'必填'
+                       ">
+            </div>
+        </div>
+        <div class="topjui-col-sm6"><label class="topjui-form-label">排序</label>
+            <div class="topjui-input-block">
+                <input type="text" name="sort" data-toggle="topjui-textbox"
+                       data-options="prompt:'排序'">
+            </div>
+        </div>
+    </div>
+
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">是否首页显示</label>
+            <div class="topjui-input-block">
+                <input type="text" name="portalDisplay" value="" data-toggle="topjui-combobox"
+                       data-options="
+                        panelHeight:63,
+                           url:'/system/dicSet/getDicItemByCode?code=yesOrNo',
+                           param:'portalDisplay:text'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6"><label class="topjui-form-label">有无子节点</label>
+            <div class="topjui-input-block">
+                <input type="text" name="state" value="" data-toggle="topjui-combobox"
+                       data-options="
+                           panelHeight:63,
+                           url:'/system/dicSet/getDicItemByCode?code=nodeState',
+                           param:'state:text'">
+            </div>
+        </div>
+    </div>
+
+    <div class="topjui-row">
+        <div class="topjui-col-sm12">
+            <label class="topjui-form-label">资源图标</label>
+            <div class="topjui-input-block">
+                <input type="text" name="iconCls" data-toggle="topjui-textbox" data-options="">
+            </div>
+        </div>
+
+    </div>
+
+
+</div>

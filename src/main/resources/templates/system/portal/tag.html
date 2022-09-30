@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml" xmlns:ewsd="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <!-- 避免IE使用兼容模式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+    <meta name="renderer" content="webkit">
+    <title></title>
+    <link type="text/css" href="/public/css/font.css" rel="stylesheet"/>
+    <link type="text/css" href="/public/css/main.css" rel="stylesheet"/>
+    <!-- TopJUI框架样式 -->
+    <!--<link type="text/css" href="${staticServer}/topjui/css/topjui.core.min.css" rel="stylesheet">
+    <link type="text/css" href="${staticServer}/topjui/themes/default/topjui.blue.css" rel="stylesheet" id="dynamicTheme"/>-->
+    <!-- FontAwesome字体图标 -->
+    <link type="text/css" href="/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
+    <!-- layui框架样式 -->
+    <link type="text/css" href="/plugins/layui/css/layui.css" rel="stylesheet"/>
+    <!-- jQuery相关引用 -->
+    <script type="text/javascript" src="/plugins/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/plugins/jquery/jquery.cookie.js"></script>
+    <!-- TopJUI框架配置 -->
+    <script type="text/javascript" src="/public/js/topjui.config.js"></script>
+    <!-- TopJUI框架核心-->
+    <script type="text/javascript" src="/topjui/js/topjui.core.min.js"></script>
+    <!-- TopJUI中文支持 -->
+    <script type="text/javascript" src="/topjui/js/locale/topjui.lang.zh_CN.js"></script>
+    <!-- layui框架js -->
+    <script src="/plugins/layui/layui.js" charset="utf-8"></script>
+    <!--<script type="text/javascript" src="/public/js/topjui.im.js" charset="utf-8"></script>-->
+    <style>
+        body {
+            font: 12px/normal "microsoft yahei", "Times New Roman", "宋体", Times, serif;
+            margin: 5px;
+        }
+
+        blockquote p {
+            padding: 5px;
+        }
+
+        .layui-table {
+            margin-top: 0 !important;
+        }
+
+        .layui-elem-quote {
+            margin-bottom: 0 !important;
+        }
+
+        .layui-table {
+            margin-top: 0;
+            border-left: 5px solid #e2e2e2 !important;
+        }
+
+        .layui-table td, .layui-table th {
+            font-size: 12px;
+        }
+
+        .title .icon-new1 {
+            margin-left: 10px;
+            color: #f00;
+        }
+    </style>
+</head>
+
+<body>
+
+<table class="layui-table">
+    <thead>
+    <tr>
+        <th>序号</th>
+        <th>登录名</th>
+        <th>用户名</th>
+        <th>状态</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="user: ${users}">
+        <td th:text="${userStat.count}">1</td>
+        <td ewsd:sample1="${user.status}" th:text="${user.status}"></td>
+        <ewsd:sample3 status="${user.status}"/>
+        <td th:text="${user.status}"></td>
+        <td>
+            <ewsd:contains status="${user.status}" strList="1,2,3" str="1"><a href="">编辑</a></ewsd:contains>
+            <ewsd:rbac str="/system/menu/index?levelId=0"><a href="">删除</a></ewsd:rbac>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="layui-container-fluid">
+    <div class="panel_box row">
+        <div class="panel col">
+            <a href="javascript:;" data-url="page/message/message.html">
+                <div class="panel_icon">
+                    <i class="layui-icon" data-icon=""></i>
+                </div>
+                <div class="panel_word newMessage">
+                    <span>5</span>
+                    <cite>新消息</cite>
+                </div>
+            </a>
+        </div>
+        <div class="panel col">
+            <a href="javascript:;" data-url="page/user/allUsers.html">
+                <div class="panel_icon" style="background-color:#FF5722;">
+                    <i class="iconfont icon-dongtaifensishu" data-icon="icon-dongtaifensishu"></i>
+                </div>
+                <div class="panel_word userAll">
+                    <span>3</span>
+                    <cite>新增人数</cite>
+                </div>
+            </a>
+        </div>
+        <div class="panel col">
+            <a href="javascript:;" data-url="page/user/allUsers.html">
+                <div class="panel_icon" style="background-color:#009688;">
+                    <i class="layui-icon" data-icon=""></i>
+                </div>
+                <div class="panel_word userAll">
+                    <span>3</span>
+                    <cite>用户总数</cite>
+                </div>
+            </a>
+        </div>
+        <div class="panel col">
+            <a href="javascript:;" data-url="page/img/images.html">
+                <div class="panel_icon" style="background-color:#5FB878;">
+                    <i class="layui-icon" data-icon=""></i>
+                </div>
+                <div class="panel_word imgAll">
+                    <span>31</span>
+                    <cite>图片总数</cite>
+                </div>
+            </a>
+        </div>
+        <div class="panel col">
+            <a href="javascript:;" data-url="page/news/newsList.html">
+                <div class="panel_icon" style="background-color:#F7B824;">
+                    <i class="iconfont icon-wenben" data-icon="icon-wenben"></i>
+                </div>
+                <div class="panel_word waitNews">
+                    <span>13</span>
+                    <cite>待审核文章</cite>
+                </div>
+            </a>
+        </div>
+        <div class="panel col max_panel">
+            <a href="javascript:;" data-url="page/news/newsList.html">
+                <div class="panel_icon" style="background-color:#2F4056;">
+                    <i class="iconfont icon-text" data-icon="icon-text"></i>
+                </div>
+                <div class="panel_word allNews">
+                    <span>30</span>
+                    <em>文章总数</em>
+                    <cite>文章列表</cite>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="layui-row layui-col-space10">
+        <div class="layui-col-md4">
+            <blockquote class="layui-elem-quote title">某地区蒸发量和降水量</blockquote>
+            <table class="layui-table" lay-skin="line">
+                <tbody>
+                <tr>
+                    <td>
+                        <div data-toggle="topjui-echarts"
+                             data-options="id:'barChart',url:'/json/echarts/bar.json',height:400"></div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="layui-col-md4">
+            <blockquote class="layui-elem-quote title">未来一周气温变化</blockquote>
+            <table class="layui-table" lay-skin="line">
+                <tbody>
+                <tr>
+                    <td align="left">
+                        <div data-toggle="topjui-echarts"
+                             data-options="id:'lineChart',url:'/json/echarts/line.json',height:400"></div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="layui-col-md4">
+            <blockquote class="layui-elem-quote title">某站点用户访问来源</blockquote>
+            <table class="layui-table" lay-skin="line">
+                <tbody>
+                <tr>
+                    <td>
+                        <div data-toggle="topjui-echarts"
+                             data-options="id:'pieChart',url:'/json/echarts/pie.json',height:400"></div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="layui-row layui-col-space10">
+        <div class="layui-col-md4">
+            <blockquote class="layui-elem-quote title">EMIS快速开发平台 - 微服务版技术选型<i class="iconfont icon-new1"></i>
+            </blockquote>
+            <table class="layui-table" lay-skin="line">
+                <colgroup>
+                    <col>
+                    <col width="110">
+                </colgroup>
+                <tbody class="hot_news">
+                <tr>
+                    <td>
+                        开发框架：Spring Boot 2.0.5.RELEASE
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        微服务：Spring Cloud Finchley.SR1
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        服务注册：Spring Cloud Eureka
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        配置中心：Spring Cloud Config
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        应用通信：Spring Cloud Feign
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="layui-col-md4">
+            <blockquote class="layui-elem-quote title">EMIS快速开发平台 - 微服务版技术选型<i class="iconfont icon-new1"></i>
+            </blockquote>
+            <table class="layui-table" lay-skin="line">
+                <colgroup>
+                    <col>
+                    <col width="110">
+                </colgroup>
+                <tbody class="hot_news">
+                <tr>
+                    <td>
+                        服务网关：Spring Cloud Zuul
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        负载均衡：Spring Cloud Ribbon
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        服务容错：Spring Cloud Hystrix
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        数据缓存：Redis 4.0.11
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        消息队列：RabbitMQ 3.7.8
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="layui-col-md4">
+            <blockquote class="layui-elem-quote title">EMIS快速开发平台 - 微服务版技术选型</blockquote>
+            <table class="layui-table" lay-skin="line">
+                <colgroup>
+                    <col>
+                    <col width="110">
+                </colgroup>
+                <tbody class="hot_news">
+                <tr>
+                    <td>
+                        数据持久：Mybatis 1.3.1
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        模板引擎：Thymeleaf 2.0.5
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        表单中心：EForm 2.3.0
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        流程引擎：Activiti 6.0.0
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        报表中心：Ureport 2.2.9
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript" src="/plugins/echarts/echarts.min.js"></script>
+<script>
+    var _hmt = _hmt || [];
+    (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?535aba9c920624592e3386b639507c1d";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+</body>
+</html>

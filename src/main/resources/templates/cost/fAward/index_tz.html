@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'west',iconCls:'icon-reload',width:'70%',title:'',split:true,border:false">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'fAwardDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               childGrid:{
+                    param:'awardId:uuid',
+                    grid:[
+                    {type:'datagrid',id:'fAwardAssignDg'}
+                    ]
+               },
+               url:'/cost/fAward/getPageSetTz'">
+            <thead>
+            <tr>
+				<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+				<th data-options="field:'auditStepName',title:'状态',sortable:true"></th>
+				<th data-options="field:'delStatus',title:'调整类型',sortable:true,
+					formatter:function(value,row,index){
+                        if (value != '0') {
+                            return '数据删除';
+                        } else {
+                            return '数据调整';
+                        }
+                    }"></th>
+				<th data-options="field:'delReason',title:'调整信息',sortable:true"></th>
+				<th data-options="field:'occDate',title:'发生日期',sortable:true"></th>
+				<th data-options="field:'modiDate',title:'上报日期',sortable:true"></th>
+				<th data-options="field:'assignDate',title:'应分日期',sortable:true"></th>
+				<th data-options="field:'noticeNo',title:'通知单号',sortable:true"></th>
+				<th data-options="field:'teamNoName',title:'责任单位',sortable:true"></th>
+				<th data-options="field:'assessType',title:'考核类别',sortable:true,
+					formatter:function(value,row,index){
+                        if (value == '1') {
+                            return '个人';
+                        }
+                    }"></th>
+				<th data-options="field:'awardBala',title:'考核金额',sortable:true"></th>
+				<th data-options="field:'yfBala',title:'分配金额',sortable:true"></th>
+				<th data-options="field:'assessTeamName',title:'考核单位',sortable:true"></th>
+				<th data-options="field:'modiTeamName',title:'上报单位',sortable:true"></th>
+				<th data-options="field:'signEmp',title:'签发人员',sortable:true"></th>
+				<th data-options="field:'assessCate',title:'考核分类',sortable:true"></th>
+				<!--<th data-options="field:'oldBala',title:'考核金额',sortable:true"></th>-->
+				<th data-options="field:'reason',title:'考核原因',sortable:true"></th>
+			</tr>
+            </thead>
+        </table>
+    </div>
+	<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+		<table data-toggle="topjui-datagrid"
+			   data-options="id:'fAwardAssignDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/cost/fAwardAssign/getPageSet'">
+			<thead>
+			<tr>
+				<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+				<th data-options="field:'empName',title:'员工姓名',sortable:true"></th>
+				<th data-options="field:'awardBala',title:'考核金额',sortable:true"></th>
+				<th data-options="field:'remark',title:'分配说明',sortable:true"></th>
+			</tr>
+			</thead>
+		</table>
+	</div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="fAwardDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'fAwardDg'
+       }" style="display:none">
+
+        <ewsd:rbac str="fAwardEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#fAwardDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'fAwardEditDg',
+               href:'/cost/fAward/editAudit1?uuid={uuid}',
+               url:'/cost/fAward/getDetailByUuidE?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'审核通过',url:'/cost/fAward/auditSave?Type=1',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'fAwardDg'}]},
+                   {text:'退回数据',url:'/cost/fAward/auditSave?Type=2',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'fAwardDg'}]}
+               ]
+           }">审核</a>
+		</ewsd:rbac>
+
+
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#fAwardDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#fAwardDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+	<form class="search-box" id="queryForm" name="dataForm" method="post">
+		责任单位:
+		<input type="text" name="query_teamNo"
+			   data-toggle="topjui-combobox"
+			   data-options="prompt:'责任单位',
+					valueField:'id',
+                    textField:'text',
+                    width:150,
+                    panelHeight:'200',
+                      icons:[{
+                          iconCls:'fa fa-remove',
+                          handler: function(e){
+                              $(e.data.target).combobox('clear');
+                          }
+                      }],
+                    url:'/cost/fAward/getOrgByFaward'"
+		>
+		考核分类:
+		<input type="text" name="query_assessCate"
+			   data-toggle="topjui-combobox"
+			   data-options="prompt:'考核分类',
+                   panelHeight:190,
+                   width:135,
+                   icons:[{
+                          iconCls:'fa fa-remove',
+                          handler: function(e){
+                              $(e.data.target).combobox('clear');
+                          }
+                      }],
+                   url:'/system/dicSet/getDicItemByCode?code=f.awardType',
+                   valueField:'value',
+    				textField:'text'"
+		>
+		<a href="javascript:void(0)"
+		   data-toggle="topjui-menubutton"
+		   data-options="method:'query',
+            iconCls:'fa fa-search',
+            btnCls:'topjui-btn-red',
+            form:{id:'queryForm'},
+            grid:{type:'datagrid','id':'fAwardDg'}">查询</a>
+	</form>
+</div>
+	<!--关联员工-->
+	<div id="fAwardAssignDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'fAwardAssignDg'
+       }" style="display:none">
+
+		<a href="javascript:void(0)"
+		   data-toggle="topjui-menubutton"
+		   data-options="method:'filter',
+       extend:'#fAwardAssignDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+		<a href="javascript:void(0)"
+		   data-toggle="topjui-menubutton"
+		   data-options="method:'search',
+       extend:'#fAwardAssignDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+	</div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

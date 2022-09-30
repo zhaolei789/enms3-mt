@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <form id="makeBackForm" style="height: 50%">
+    <div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+        <table id="makeBackDg"></table>
+    </div>
+    </form>
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <div data-toggle="topjui-layout" data-options="fit:true">
+            <div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'50%'">
+                <table id="detailDg"></table>
+            </div>
+            <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+                <table id="makeFormDg"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="makeBackDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'makeBackDg'
+       }" style="display:none">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">回收预期：</label>
+    <input id="date1Qry" name="date1Qry" value="" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">申请日期：</label>
+    <input id="day1Qry" name="day1Qry" th:value="${day1Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+    <label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+    <input id="day2Qry" name="day2Qry" th:value="${day2Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">用料单位：</label>
+    <input data-toggle="topjui-combobox" id="teamQry" name="teamQry" value="" data-options="width:'150px',valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',loadFilter:function(data){
+        data.unshift({id:'', text:'--全部--'});
+        return data
+    }">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料信息：</label>
+    <input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">预期类型：</label>
+    <input data-toggle="topjui-combobox" id="needTypeQry" name="needTypeQry" value="" data-options="width:'80px',valueField:'id',textField:'text',
+        data:[{id:'', text:'&nbsp;'}, {id:'0', text:'普通'}, {id:'1', text:'永久使用'}, {id:'2', text:'一次性投入'}]">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">已到期：</label>
+    <input data-toggle="topjui-combobox" id="flagQry" name="flagQry" value="" data-options="width:'70px',valueField:'id',textField:'text',
+        data:[{id:'', text:'&nbsp;'}, {id:'', text:'否'}, {id:'1', text:'是'}]">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">回收地点：</label>
+    <input id="addrQry" data-toggle="topjui-textbox" name="addrQry" data-options="width:'150px'">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">步骤：</label>
+    <input data-toggle="topjui-combobox" id="stepQry" name="stepQry" value="7300F" data-options="valueField:'processNo',textField:'processName',url:'/system/sysAuditProcess/getListByFuuid?fuuid=FF4F9BA295E54443A81BCD2D0FAD2A00',width:'150px',loadFilter:function(data){
+        data.unshift({processNo:'', processName:'--全部--'});
+        return data
+    }">
+
+    <a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+    </a>
+
+    <a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">确认回收</span>
+            <span class="l-btn-icon fa fa-save">&nbsp;</span>
+        </span>
+    </a>
+
+    <a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+    </a>
+
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'openDialog',
+           extend:'#makeBackDg-toolbar',
+           btnCls:'topjui-btn-purple',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'askEditDg',
+               href:'/material/makeBack/edit',
+               url:'/material/makeBack/getAsk?askNo={askNo}',
+               height:450,
+               width:800,
+               buttonsGroup:[
+                   {text:'更新',url:'/material/makeBack/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'askEditDg'}]}
+               ]
+           }">调整预期</a>
+</div>
+
+    <div id="detailDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'detailDg'
+       }" style="display:none">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">回收日期：</label>
+        <input id="startDateQry" name="startDateQry" th:value="${startDateQry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+        <label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+        <input id="endDateQry" name="endDateQry" th:value="${day2Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料信息：</label>
+        <input id="matNameQry" data-toggle="topjui-textbox" name="matNameQry" data-options="width:'150px'">
+
+        <a href="javascript:void(0)" id="searchBtn1" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+        </a>
+    </div>
+
+    <div id="makeFormDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'makeFormDg'
+       }" style="display:none">
+
+        <label class="topjui-form-label" style="width:100px;float:none;display:inline-block">编码/名称：</label>
+        <input id="matQry1" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'" value="">
+        <input id="pAskNo" name="pAskNo" value="" type="hidden" />
+
+        <a href="javascript:void(0)" id="searchBtn2" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+        </a>
+
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        $(document).ready(function(){
+            $('#makeBackDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                url: '/material/makeBack/getPageSet',
+                queryParams:{
+                    date1Qry: $('#date1Qry').iDatebox('getValue'),
+                    teamQry:$('#teamQry').iCombobox('getValue'),
+                    matQry:$('#matQry').iTextbox('getValue'),
+                    flagQry:$('#flagQry').iCombobox('getValue'),
+                    addrQry:$('#addrQry').iTextbox('getValue'),
+                    day1Qry: $('#day1Qry').iDatebox('getValue'),
+                    day2Qry: $('#day2Qry').iDatebox('getValue'),
+                    stepQry:$('#stepQry').iCombobox('getValue'),
+                    needTypeQry:$('#needTypeQry').iCombobox('getValue')
+                },
+                columns:[ [
+                    {
+                        field:'askNo', sortable:false, title:'', checkbox:true
+                    },{
+                        field:'askTeamName', sortable:false, title:'使用区队'
+                    },{
+                        field:'askName', sortable:false, title:'物料信息', formatter:function(value, row, index){
+                            return value + ' ' + row.askModel
+                        }
+                    },{
+                        field:'askUnitName', sortable:false, title:'单位'
+                    },{
+                        field:'matFee', sortable:false, title:'单价', align:'right'
+                    },{
+                        field:'doDate', sortable:false, title:'申请日期', formatter:function(value, row, index){
+                            return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+                        }
+                    },{
+                        field:'needType', sortable:false, title:'预期类型', formatter:function(value, row, index){
+                            return '0'==value ? '普通' : '1'==value ? '永久使用' : '2'==value ? '一次性投入' : ''
+                        }
+                    },{
+                        field:'needDate', sortable:false, title:'回收预期', formatter:function(value, row, index){
+                            if(value != '' && value != null && value != undefined){
+                                return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+                            }else{
+                                return ''
+                            }
+                        }
+                    },{
+                        field:'preTeamName', sortable:false, title:'预计回收单位'
+                    },{
+                        field:'useAddr', sortable:false, title:'使用地点'
+                    },{
+                        field:'remark', sortable:false, title:'计划备注'
+                    },{
+                        field:'checkAmount', sortable:false, title:'计划数', align: 'right'
+                    },{
+                        field:'backAmount', sortable:false, title:'已回收', align: 'right'
+                    },{
+                        field:'wh', sortable:false, title:'完好数', align:'right', width:'80px', formatter:function (value, row, index){
+                            return '<span class="textbox"><input style="text-align:right; width: 54px" class="textbox-text" type="number" name="wh_'+row.askNo+'" id="wh_'+row.askNo+'" disabled value="'+ (row.checkAmount - row.backAmount) +'" /></span>'
+                        }
+                    },{
+                        field:'dx', sortable:false, title:'待修数', align:'right', width:'80px', formatter:function (value, row, index){
+                            return '<span class="textbox"><input style="text-align:right; width: 54px" class="textbox-text" type="number" name="dx_'+row.askNo+'" id="dx_'+row.askNo+'" disabled value="" /></span>'
+                        }
+                    },{
+                        field:'info', sortable:false, title:'回收备注', formatter: function(value, row, index){
+                            return '<span class="textbox"><input class="textbox-text" type="text" name="remark_'+row.askNo+'" id="remark_'+row.askNo+'" disabled value="" /></span>'
+                        }
+                    },{
+                        field:'askCnt', sortable:false, title:'浏览图纸', formatter:function(value, row, index){
+                            var fileName = row.fileName;
+                            var filePath = row.filePath;
+                            var names = fileName==null ? [] : fileName.split(',');
+                            var paths = filePath==null ? [] : filePath.split(',');
+                            var ret = "";
+                            for(var i=0; i<names.length; i++){
+                                ret += '<a style="font-weight: bold; color:#00b7ee; cursor:pointer" target="_blank" href="/system/attachment/download?uuid='+ paths[i] +'">'+ names[i] +'</a>';
+                            }
+                            return ret;
+                        }
+                    }
+                ] ],
+                onCheck:function(index, row){
+                    var askNo = row.askNo;
+                    $('#wh_'+ askNo +', #dx_'+ askNo + ', #remark_' + askNo).removeAttr('disabled');
+                },
+                onUncheck:function(index, row){
+                    var askNo = row.askNo;
+                    $('#wh_'+ askNo +', #dx_'+ askNo + ', #remark_' + askNo).attr('disabled', 'disabled');
+                },
+                onCheckAll:function(rows){
+                    $('[name^="wh_"], [name^="dx_"], [name^="remark_"]').removeAttr("disabled");
+                },
+                onUncheckAll:function(rows){
+                    $('[name^="wh_"], [name^="dx_"], [name^="remark_"]').attr("disabled", 'disabled');
+                },
+                onClickRow:function(index, row){
+                    $('#pAskNo').val(row.askNo);
+                    reloadForm(row.askNo);
+                }
+            });
+
+            $('#searchBtn').click(function(){
+                reloadData();
+            });
+
+            $('#detailDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                url: '/material/makeBack/getDetailPageSet',
+                queryParams:{
+                    startDateQry:$('#startDateQry').iDatebox('getValue'),
+                    endDateQry:$('#endDateQry').iDatebox('getValue'),
+                    matNameQry:$('#matNameQry').iTextbox('getValue')
+                },
+                columns:[ [
+                    {
+                        field:'teamName', sortable:false, title:'回收单位'
+                    },{
+                        field:'inTypeName', sortable:false, title:'回收类型'
+                    },{
+                        field:'storeName', sortable:false, title:'接收仓库'
+                    },{
+                        field:'needDate', sortable:false, title:'回收预期', formatter:function (value, row, index){
+                            return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+                        }
+                    },{
+                        field:'useAddr', sortable:false, title:'使用地点'
+                    },{
+                        field:'matCode', sortable:false, title:'材料编码', formatter:function (value, row, index){
+                            return value.substring(0, 1)=='X' ? value.substring(1) : value
+                        }
+                    },{
+                        field:'matName', sortable:false, title:'材料描述'
+                    },{
+                        field:'matUnit', sortable:false, title:'单位'
+                    },{
+                        field:'setPrice', sortable:false, title:'单价', align: 'right'
+                    },{
+                        field:'billAmount', sortable:false, title:'回收数', align:'right'
+                    },{
+                        field:'billDate', sortable:false, title:'操作日期', formatter:function (value, row, index){
+                            return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+                        }
+                    },{
+                        field:'checkAddr', sortable:false, title:'回收地点'
+                    },{
+                        field:'remark', sortable:false, title:'备注'
+                    }
+                ] ]
+            });
+
+            $('#makeFormDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                pagination:false,
+                url: '/material/matAskEdit/getMakeFormList',
+                queryParams:{
+                    matQry:$('#matQry1').iTextbox("getValue"),
+                    askNo:$('#pAskNo').val()
+                },
+                columns:[ [
+                    {
+                        field:'matCode', sortable:false, title:'物料编码', formatter:function(value, row, index){
+                            return value.substring(0, 1)=='X' ? value.substring(1) : value
+                        }
+                    },{
+                        field:'matName', sortable:false, title:'物料名称'
+                    },{
+                        field:'matUnit', sortable:false, title:'计量单位'
+                    },{
+                        field:'matPrice', sortable:false, title:'单价', align:'right'
+                    },{
+                        field:'matAmount', sortable:false, title:'数量', align:'right'
+                    }
+                ] ]
+            });
+
+            $('#searchBtn1').click(function(){
+                reloadDetail();
+            });
+
+            $('#searchBtn2').click(function(){
+                reloadForm(null);
+            });
+
+            $('#submitBtn').click(function(){
+                $.iMessager.confirm('确认对话框', '您确定回收吗？', function (r) {
+                    if (r) {
+                        $('#makeBackForm').iForm('submit', {
+                            url: '/material/makeBack/submit',
+                            success: function (data) {
+                                data = $.parseJSON(data);
+                                if (data.statusCode == 200) {
+                                    $.iMessager.show({
+                                        title: data.title,
+                                        msg: data.message
+                                    })
+                                    $('#checkIndexDg').iDatagrid('reload');
+                                } else {
+                                    $.iMessager.alert({
+                                        icon: 'messager-error',
+                                        title: data.title,
+                                        msg: data.message
+                                    });
+                                }
+                            }
+                        });
+                    }
+                })
+            });
+
+            $('#downloadBtn').click(function(){
+                $('#makeBackForm').iForm('submit', {
+                    url:'/material/makeBack/download',
+                    success:function(data){
+
+                    }
+                });
+            });
+        });
+
+        function reloadData(){
+            $('#makeBackDg').iDatagrid('reload',{
+                date1Qry: $('#date1Qry').iDatebox('getValue'),
+                teamQry:$('#teamQry').iCombobox('getValue'),
+                matQry:$('#matQry').iTextbox('getValue'),
+                flagQry:$('#flagQry').iCombobox('getValue'),
+                addrQry:$('#addrQry').iTextbox('getValue'),
+                day1Qry: $('#day1Qry').iDatebox('getValue'),
+                day2Qry: $('#day2Qry').iDatebox('getValue'),
+                stepQry:$('#stepQry').iCombobox('getValue'),
+                needTypeQry:$('#needTypeQry').iCombobox('getValue')
+            });
+        }
+
+        function reloadDetail(){
+            $('#detailDg').iDatagrid('reload',{
+                startDateQry:$('#startDateQry').iDatebox('getValue'),
+                endDateQry:$('#endDateQry').iDatebox('getValue'),
+                matNameQry:$('#matNameQry').iTextbox('getValue')
+            });
+        }
+
+        function reloadForm(askNo){
+            $('#makeFormDg').iDatagrid('reload',{
+                matQry:$('#matQry1').iTextbox("getValue"),
+                askNo:askNo == null ? $('#pAskNo').val() : askNo
+            });
+        }
+    </script>
+</th:block>
+</body>
+</html>

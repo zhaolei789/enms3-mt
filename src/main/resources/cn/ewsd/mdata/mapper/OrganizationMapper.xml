@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.mdata.mapper.OrganizationMapper">
+
+    <sql id="Base_Column_List">*</sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.mdata.model.Organization">
+		select
+		<include refid="Base_Column_List"></include>
+		from sys_organization
+		<where>
+			<if test="filterSort != null">
+				${filterSort}
+			</if>
+		</where>
+    </select>
+
+    <select id="queryObject" resultType="cn.ewsd.mdata.model.Organization">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_organization where uuid = #{uuid}
+    </select>
+
+    <select id="queryList" resultType="cn.ewsd.mdata.model.Organization">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_organization
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by uuid desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+		select count(*) from sys_organization
+	</select>
+
+
+	<update id="executeUpdate">
+		UPDATE sys_organization SET name = ${paramsMap.name} WHERE uuid = #{paramsMap.uuid}
+	</update>
+
+	<delete id="executeDelete">
+		delete from sys_organization where uuid = #{value}
+	</delete>
+
+    <delete id="executeDeleteBatch">
+        delete from sys_organization where uuid in
+        <foreach item="uuid" collection="uuids" open="(" separator="," close=")">
+            #{uuid}
+        </foreach>
+    </delete>
+
+	<!--<insert id="executeSave" parameterType="cn.ewsd.erp.model.CntPartnerBase">
+		insert into cnt_partner_base
+		(
+		`uuid`,
+		`creatorId`,
+		`creator`,
+		`createTime`,
+		`modifierId`,
+		`modifier`,
+		`modifyTime`,
+		`prtName`,
+		`prnNamePinyin`,
+		`prnType`,
+		`prnKind`,
+		`prnCredited`,
+		`prnJuridicalperson`,
+		`prnProsecutionStart`,
+		`prnProsecutionEnd`,
+		`prnAddress`,
+		`prnProsecutionContent`,
+		`prnSource`,
+		`prnCompany`,
+		`prnRegCapital`,
+		`prnRegCode`,
+		`prnOrganCode`,
+		`prnCount`,
+		`prnOperationTime`,
+		`prnAudit`,
+		`prnOperationUserId`,
+		`prnOperationUserName`,
+		`isDel`,
+		`prnLinkman`,
+		`prnLinkmanTel`,
+		`prnIspublish`,
+		`prnCreditedText`,
+		`prnAuditText`,
+		`prnIspublishText`,
+		`id`,
+		`pid`,
+		`leveId`,
+		`state`
+		)
+		values
+		(
+		#{uuid},
+		#{creatorId},
+		#{creator},
+		#{createTime},
+		#{modifierId},
+		#{modifier},
+		#{modifyTime},
+		#{prtName},
+		#{prnNamePinyin},
+		#{prnType},
+		#{prnKind},
+		#{prnCredited},
+		#{prnJuridicalperson},
+		#{prnProsecutionStart},
+		#{prnProsecutionEnd},
+		#{prnAddress},
+		#{prnProsecutionContent},
+		#{prnSource},
+		#{prnCompany},
+		#{prnRegCapital},
+		#{prnRegCode},
+		#{prnOrganCode},
+		#{prnCount},
+		#{prnOperationTime},
+		#{prnAudit},
+		#{prnOperationUserId},
+		#{prnOperationUserName},
+		#{isDel},
+		#{prnLinkman},
+		#{prnLinkmanTel},
+		#{prnIspublish},
+		#{prnCreditedText},
+		#{prnAuditText},
+		#{prnIspublishText},
+		#{id},
+		#{pid},
+		#{leveId},
+		#{state}
+		)
+	</insert>-->
+
+	<select id="getListByCode" resultType="cn.ewsd.mdata.model.Organization">
+         SELECT * FROM sys_organization WHERE CODE = #{arg0} and is_del != 1
+	</select>
+
+	<select id="getMaxById" resultType="java.lang.Integer">
+		SELECT MAX(t.id) FROM sys_organization t
+	</select>
+
+	<select id="getListByCodeAndUuid" resultType="java.lang.Integer">
+		SELECT count(code) FROM sys_organization WHERE code = #{code} AND uuid != #{uuid} and is_del != 1
+	</select>
+
+	<select id="getListByCodeSetIdAndLevelId" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT * FROM sys_organization WHERE codeSetId = #{arg0} AND levelId  = #{arg1} and is_del != 1
+	</select>
+
+	<select id="getListByLevelId" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT org.uuid,org.text,item.text as org_type ,org.id,org.pid,org.level_id,org.state,org.sort,org.code,org.status, org.dept_code, org.work_team, org.dept_type2
+		 FROM sys_organization org
+		 LEFT JOIN sys_dic_item item on  item.value  = org.org_type
+		 WHERE org.is_del != 1 AND  org.level_id = 1 ORDER BY org.sort ASC;
+	</select>
+
+	<select id="getOrgListByTypeAndTenant" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT * FROM sys_organization
+		WHERE is_del != 1
+		AND org_type = #{orgType}
+		AND tenant_id = #{tenantId}
+		ORDER BY sort ASC;
+	</select>
+
+<!--    <select id="getListByLevelId" resultType="cn.ewsd.mdata.model.Organization">-->
+<!--		SELECT uuid,text,f_get_dic_item_text(org_type) as org_type,id,pid,level_id,state,sort,code,status FROM sys_organization WHERE is_del != 1 AND level_id = #{arg0} ORDER BY sort ASC-->
+<!--	</select>-->
+
+	<select id="getListByPid" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT * FROM sys_organization WHERE  pid = #{arg0} and is_del != 1 ORDER BY sort ASC
+	</select>
+
+	<select id="getListByCodeSetIdAndPid" resultType="cn.ewsd.mdata.model.Organization">
+        SELECT * FROM sys_organization WHERE codeSetId = #{arg0} and is_del != 1 AND pid = #{arg1} ORDER BY sort ASC
+	</select>
+
+	<select id="getListByCodesetidAndLevelId" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT * FROM sys_organization o WHERE o.codesetid = 'UN' AND o.levelId = 1 and o.is_del != 1
+	</select>
+
+<!--	<select id="getListByIsDelAndPidAndLevelId" resultType="cn.ewsd.mdata.model.Organization">-->
+<!--		SELECT uuid,text,f_get_dic_item_text(org_type) as org_type,id,pid,level_id,state,sort,code,status FROM sys_organization  WHERE is_del != 1 AND pid = #{arg0} AND level_id !=0 ORDER BY sort ASC-->
+<!--	</select>-->
+    <select id="getListByIsDelAndPidAndLevelId" resultType="cn.ewsd.mdata.model.Organization">
+         SELECT  org.uuid,org.text,item.text as org_type ,org.id,org.pid,org.level_id,org.state,org.sort,org.code,org.status,org.work_team, org.dept_code, org.dept_type2
+         FROM sys_organization org
+          LEFT JOIN sys_dic_item item
+         ON item.value = org.org_type
+         WHERE  org.is_del != 1 AND pid = #{arg0} AND level_id !=0 ORDER BY sort ASC;
+	</select>
+
+	<update id="updateByIsDelAndUuid">
+     UPDATE sys_organization SET is_del = 1 WHERE uuid = #{arg0};
+	</update>
+
+	<select id="getChildIds" parameterType="map" statementType="CALLABLE" resultType="java.lang.String">
+      {
+            call p_get_child_ids(
+                #{p1,mode=IN,jdbcType=VARCHAR},
+                #{p2,mode=IN,jdbcType=NUMERIC},
+                #{p3,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+
+	</select>
+	<select id="getListById" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT * FROM  sys_organization WHERE id = #{arg0}
+	</select>
+	<select id="getOrgByCode" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT * FROM sys_organization WHERE code = concat(concat('%',#{arg0}),'%')
+	</select>
+	<select id="getFatherIds" parameterType="map" statementType="CALLABLE" resultType="java.lang.String">
+		  {
+            call p_get_father_ids(
+                #{p1,mode=IN,jdbcType=NUMERIC},
+                #{p2,mode=IN,jdbcType=NUMERIC},
+                #{p3,mode=IN,jdbcType=NUMERIC},
+                #{p4,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+	</select>
+
+	<select id="getListByOrgType" resultType="cn.ewsd.mdata.model.Organization">
+select * from (SELECT id,pid,leader,text,org_type,uuid,f_get_dic_item_text(org_type) as a from sys_organization where FIND_IN_SET(id,#{ids}) ) b where b.a=#{groupLeader}
+	</select>
+	<select id="getUserInfo" resultType="java.lang.String">
+		select  user_name_id from sys_user where user_name_id in (select user_name_id from sys_user_post where org_id=#{orgId}) and post_text=#{postText}
+	</select>
+	<select id="getOrganizationById" resultType="cn.ewsd.mdata.model.Organization">
+		select * from sys_organization where id = #{id}
+	</select>
+
+	<select id="getMaxCodeByPid" resultType="java.lang.String">
+		SELECT code FROM sys_organization WHERE pid=#{arg0} ORDER BY code desc limit 1
+	</select>
+
+	<select id="getOrgByLevel" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT * FROM sys_organization WHERE level_id=#{_parameter} and is_del != 1 ORDER BY sort
+	</select>
+
+	<select id="getUserDeptSet" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT id, text
+		FROM sys_organization
+		WHERE id IN
+		<foreach collection="deptIds.split(',')" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		<if test="minus!=''">
+			AND code NOT LIKE CONCAT(#{minus}, '%')
+		</if>
+		<if test="levelId!=''">
+			AND level_id=#{levelId}
+		</if>
+		and is_del != 1
+		ORDER BY sort
+	</select>
+
+	<select id="getOrgByCenterNo" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT * FROM sys_organization WHERE dept_code=#{_parameter} and is_del != 1 limit 1
+	</select>
+
+	<select id="getOrgEpPlan" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT id FROM sys_organization WHERE dept_code=(SELECT center_no FROM m_ep_plan WHERE ep_id=#{_parameter}) and is_del != 1 LIMIT 1
+	</select>
+	
+	<select id="getWorkDeptSet" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT o.id, o.text
+		FROM sys_dic_item di
+		LEFT JOIN sys_organization o ON o.id=SUBSTRING_INDEX(di.value, '.', -1)
+		WHERE di.value LIKE 'm.makeTeam.%'
+		and o.is_del != 1
+		ORDER BY o.sort
+	</select>
+
+	<select id="getTeamDownClass" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT o.id, o.text
+		FROM sys_organization o
+		LEFT JOIN sys_organization o1 ON o.pid=o1.id
+		WHERE o1.id=#{_parameter}
+	</select>
+
+	<select id="getListByIdsLevel3" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT * FROM sys_organization WHERE
+		   level_id = 3
+		   and
+		   is_del != 1
+		   and id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</select>
+
+	<update id="executeDeleteByTenantBatch">
+		UPDATE sys_organization SET is_del = 1
+		where uuid not in
+		<foreach item="uuid" collection="uuids" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+		and tenant_id = #{tenantId}
+		and level_id = #{levelId}
+		and pid = #{pid}
+		and entry_way = 1
+		and is_del != 1
+	</update>
+</mapper>

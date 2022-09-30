@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MMakeMatDeptMapper">
+	<update id="updateByMatNo">
+		UPDATE m_make_mat_dept
+		<set>
+			<if test="makeDept!=null">
+				make_dept=#{makeDept},
+			</if>
+			<if test="makePrice!=null">
+				make_price=#{makePrice}
+			</if>
+		</set>
+		WHERE mat_no=#{matNo}
+	</update>
+
+	<delete id="deleteByMatNo" parameterType="java.lang.Long">
+		DELETE m_make_mat_dept WHERE mat_no=#{matNo}
+	</delete>
+
+	<select id="findByMatNo" parameterType="java.lang.String" resultType="cn.ewsd.material.model.MMakeMatDept">
+		SELECT m.*, o.text make_dept_name
+		FROM m_make_mat_dept m
+		LEFT JOIN sys_organization o ON o.id=m.make_dept
+		WHERE m.mat_no=#{matNo}
+	</select>
+
+	<insert id="insertData" parameterType="cn.ewsd.material.model.MMakeMatDept">
+		INSERT INTO m_make_mat_dept VALUES (#{matNo}, #{makeDept}, #{makePrice}, #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+</mapper>

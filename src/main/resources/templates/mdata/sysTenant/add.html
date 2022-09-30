@@ -1,0 +1,132 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<div class="topjui-fluid">
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">租户ID</label>
+            <div class="topjui-input-block">
+                <input type="text" name="uuid"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'租户ID',required:true">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">企业名称</label>
+            <div class="topjui-input-block">
+                <input type="text" name="tenantName"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'企业名称',required:true">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">建立时间</label>
+            <div class="topjui-input-block">
+                <input type="text" name="establishDate"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'建立时间'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">邮箱</label>
+            <div class="topjui-input-block">
+                <input type="text" name="businessEmail"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'邮箱'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">电话</label>
+            <div class="topjui-input-block">
+                <input type="text" name="businessPhone"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'电话'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">业务名称</label>
+            <div class="topjui-input-block">
+                <input type="text" name="businessName"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'业务名称'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">法人</label>
+            <div class="topjui-input-block">
+                <input type="text" name="legalPerson"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'法人'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">地址</label>
+            <div class="topjui-input-block">
+                <input type="text" name="corpAddress"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'地址'">
+            </div>
+        </div>
+        <div class="topjui-col-sm12">
+            <label class="topjui-form-label">业务范围</label>
+            <div class="topjui-input-block">
+                <input type="text" name="businessScope"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'业务范围'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">管理员名称</label>
+            <div class="topjui-input-block">
+                <input type="text" name="adminName"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'管理员名称'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">管理员电话</label>
+            <div class="topjui-input-block">
+                <input type="text" name="adminPhone"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'管理员电话'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">启用时间</label>
+            <div class="topjui-input-block">
+                <input type="text" name="enableTime"
+                       data-toggle="topjui-datetimebox"
+                       data-options="prompt:'启用时间'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">租户状态</label>
+            <div class="topjui-input-block">
+                <input type="text" name="status"
+                       data-toggle="topjui-combobox"
+                       data-options="prompt:'租户状态',required:true,
+                       valueField:'value',
+                       textField:'text',
+                       data: [
+						{
+							text: '启用',
+							value: '1'
+						},
+						{
+							text: '禁用',
+							value: '2'
+						}]">
+            </div>
+        </div>
+        <div class="topjui-col-sm12">
+            <label class="topjui-form-label">备注</label>
+            <div class="topjui-input-block">
+                <input type="text" name="note"
+                       data-toggle="topjui-textarea"
+                       data-options="prompt:'备注'">
+            </div>
+        </div>
+    </div>
+</div>

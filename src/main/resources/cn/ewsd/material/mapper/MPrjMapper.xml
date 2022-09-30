@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MPrjMapper">
+	<select id="getPageSet" resultType="cn.ewsd.material.model.MPrj">
+        SELECT p.*, b.mat_bala, o.text team_name, d1.text prj_type2_name, d2.text plan_period_name, d3.text prj_status_name
+        FROM m_prj p
+        LEFT JOIN sys_organization o ON o.id=p.team_no
+        LEFT JOIN sys_dic_item d1 ON d1.value=p.prj_type2
+        LEFT JOIN sys_dic_item d2 ON d2.value=p.plan_period
+        LEFT JOIN sys_dic_item d3 ON d3.value=p.prj_status
+        LEFT JOIN (SELECT prj_no, SUM(IFNULL(mat_bala, 0)) mat_bala
+                   FROM m_prj_item
+                   GROUP BY prj_no) b ON p.prj_no=b.prj_no
+        <!-- WHERE p.team_no IN   需要处理员工对应部门的权限-->
+        <where>
+            <if test="filterSort != null">
+                ${filterSort}
+            </if>
+        </where>
+    </select>
+
+    <insert id="executeSave" parameterType="cn.ewsd.material.model.MPrj">
+        INSERT INTO m_prj (`prj_no`, `prj_name`, `prj_status`, `up_name`, `prj_type1`, `prj_type2`, `prod_type`, `plan_period`, `team_no`, `prj_addr`, `begin_date`, `end_date`, `prj_info`,
+                           `accessory`, `check_team`, `bud_finish`, `bud_bala`, `team_mng`, `opt_emp`, `in_date`,
+                           `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+        VALUES (#{prjNo}, #{prjName}, #{prjStatus}, #{upName}, #{prjType1}, #{prjType2}, #{prodType}, #{planPeriod}, #{teamNo}, #{prjAddr}, #{beginDate}, #{endDate}, #{prjInfo},
+                #{accessory}, #{checkTeam}, #{budFinish}, #{budBala}, #{teamMng}, #{optEmp}, #{inDate},
+                #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+    </insert>
+
+    <select id="queryObject" resultType="cn.ewsd.material.model.MPrj">
+        SELECT * FROM m_prj WHERE uuid=#{uuid}
+    </select>
+
+    <update id="executeUpdate" parameterType="cn.ewsd.material.model.MPrj">
+        UPDATE m_prj
+        <set>
+            <if test="prjNo != null">`prj_no` = #{prjNo}, </if>
+            <if test="prjName != null">`prj_name` = #{prjName}, </if>
+            <if test="prjStatus != null">`prj_status` = #{prjStatus}, </if>
+            <if test="upName != null">`up_name` = #{upName}, </if>
+            <if test="prjType1 != null">`prj_type1` = #{prjType1}, </if>
+            <if test="prjType2 != null">`prj_type2` = #{prjType2}, </if>
+            <if test="prodType != null">`prod_type` = #{prodType}, </if>
+            <if test="planPeriod != null">`plan_period` = #{planPeriod}, </if>
+            <if test="teamNo != null">`team_no` = #{teamNo}, </if>
+            <if test="prjAddr != null">`prj_addr` = #{prjAddr}, </if>
+            <if test="beginDate != null">`begin_date` = #{beginDate}, </if>
+            <if test="endDate != null">`end_date` = #{endDate}, </if>
+            <if test="prjInfo != null">`prj_info` = #{prjInfo}, </if>
+            <if test="accessory != null">`accessory` = #{accessory}, </if>
+            <if test="checkTeam != null">`check_team` = #{checkTeam}, </if>
+            <if test="budFinish != null">`bud_finish` = #{budFinish}, </if>
+            <if test="budBala != null">`bud_bala` = #{budBala}, </if>
+            <if test="teamMng != null">`team_mng` = #{teamMng}, </if>
+            <if test="optEmp != null">`opt_emp` = #{optEmp}, </if>
+            <if test="inDate != null">`in_date` = #{inDate}, </if>
+            <if test="modifierId != null">`modifier_id` = #{modifierId}, </if>
+            <if test="modifier != null">`modifier` = #{modifier}, </if>
+            <if test="modifyTime != null">`modify_time` = #{modifyTime}</if>
+        </set>
+        WHERE uuid = #{uuid}
+    </update>
+
+    <delete id="executeDelete">
+        DELETE FROM m_prj WHERE uuid = #{value}
+    </delete>
+
+    <select id="getUpNameAll" resultType="cn.ewsd.material.model.MPrj">
+        SELECT DISTINCT up_name FROM m_prj
+    </select>
+
+    <select id="getPrjByStatusAndTeamNoAndItemNo" resultType="cn.ewsd.material.model.MPrj">
+        SELECT p.*, d1.text prj_type2_name
+        FROM m_prj p
+        LEFT JOIN sys_dic_item d1 ON d1.value=p.prj_type2
+        WHERE prj_status=#{prjStatus} AND team_no=#{teamNo}
+        <if test="itemNo!=''.toString()">
+            AND EXISTS (SELECT '1' FROM m_prj_item pi WHERE pi.prj_no=p.prj_no AND pi.item_no=#{itemNo})
+        </if>
+        ORDER BY p.prj_no DESC
+    </select>
+
+    <select id="getPrjByPrjNo" resultType="cn.ewsd.material.model.MPrj">
+        SELECT * FROM m_prj WHERE prj_no=#{prjNo}
+    </select>
+
+    <select id="getPrjList" resultType="cn.ewsd.material.model.MPrj">
+        SELECT p.prj_no, p.prj_name, CONCAT(p.prj_name, '_', o.text) team_name
+        FROM m_prj p
+        LEFT JOIN sys_organization o ON o.id=p.team_no
+        WHERE p.prj_status=#{prjStatus}
+        <if test="teamNo != null">
+            AND p.team_no=#{teamNo}
+        </if>
+        ORDER BY prj_no ASC
+    </select>
+    
+    <select id="getPrjSet" resultType="cn.ewsd.material.model.MPrj">
+        SELECT prj_no, prj_name
+        FROM m_prj
+        WHERE team_no IN
+        <foreach collection="teamNos.split(',')" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        <if test="prjStatus!=''">
+            AND prj_status=#{prjStatus}
+        </if>
+    </select>
+
+    <select id="getPrjFromBackQuota" resultType="cn.ewsd.material.model.MPrj">
+        SELECT prj_no, prj_name FROM m_back_quota GROUP BY prj_no, prj_name
+    </select>
+
+    <select id="getPrjList1" resultType="cn.ewsd.material.model.MPrj">
+        SELECT prj_no FROM m_prj WHERE team_no=#{teamNo} AND prj_type1=#{prjType1}
+    </select>
+</mapper>

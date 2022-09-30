@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.mdata.mapper.SysTenantMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.mdata.model.SysTenant" id="sysTenantMap">
+        <result property="uuid" column="uuid"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="create_time" column="create_time"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+        <result property="tenant_name" column="tenant_name"/>
+        <result property="logo" column="logo"/>
+        <result property="establish_date" column="establish_date"/>
+        <result property="business_email" column="business_email"/>
+        <result property="business_phone" column="business_phone"/>
+        <result property="business_name" column="business_name"/>
+        <result property="legal_person" column="legal_person"/>
+        <result property="corp_address" column="corp_address"/>
+        <result property="business_scope" column="business_scope"/>
+        <result property="admin_name" column="admin_name"/>
+        <result property="admin_phone" column="admin_phone"/>
+        <result property="enable_time" column="enable_time"/>
+        <result property="overdue_time" column="overdue_time"/>
+        <result property="note" column="note"/>
+        <result property="type" column="type"/>
+        <result property="status" column="status"/>
+        <result property="is_del" column="is_del"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 create_time
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 tenant_name
+		  ,  	  	     			 logo
+		  ,  	  	     			 establish_date
+		  ,  	  	     			 business_email
+		  ,  	  	     			 business_phone
+		  ,  	  	     			 business_name
+		  ,  	  	     			 legal_person
+		  ,  	  	     			 corp_address
+		  ,  	  	     			 business_scope
+		  ,  	  	     			 admin_name
+		  ,  	  	     			 admin_phone
+		  ,  	  	     			 enable_time
+		  ,  	  	     			 overdue_time
+		  ,  	  	     			 note
+		  ,  	  	     			 type
+		  ,  	  	     			 status
+		  ,  	  	     			 is_del
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.mdata.model.SysTenant">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_tenant
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.mdata.model.SysTenant">
+		select  <include refid="Base_Column_List" />  from sys_tenant where uuid = #{value}
+	</select>
+
+	<select id="getOneOld" resultType="cn.ewsd.mdata.model.SysTenant">
+		select  <include refid="Base_Column_List" />  from sys_tenant where status = 1 order by create_time asc limit 1
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.mdata.model.SysTenant">
+		select  <include refid="Base_Column_List" />  from sys_tenant
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_tenant 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.mdata.model.SysTenant">
+		insert into sys_tenant
+		(
+			`uuid`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`create_time`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`, 
+			`tenant_name`, 
+			`logo`, 
+			`establish_date`, 
+			`business_email`, 
+			`business_phone`, 
+			`business_name`, 
+			`legal_person`, 
+			`corp_address`, 
+			`business_scope`, 
+			`admin_name`, 
+			`admin_phone`, 
+			`enable_time`, 
+			`overdue_time`, 
+			`note`, 
+			`type`, 
+			`status`, 
+			`is_del`
+		)
+		values
+		(
+			#{uuid}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{create_time}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time}, 
+			#{tenant_name}, 
+			#{logo}, 
+			#{establish_date}, 
+			#{business_email}, 
+			#{business_phone}, 
+			#{business_name}, 
+			#{legal_person}, 
+			#{corp_address}, 
+			#{business_scope}, 
+			#{admin_name}, 
+			#{admin_phone}, 
+			#{enable_time}, 
+			#{overdue_time}, 
+			#{note}, 
+			#{type}, 
+			#{status}, 
+			#{is_del}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.mdata.model.SysTenant">
+		update sys_tenant 
+		<set>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}, </if>
+			<if test="tenant_name != null">`tenant_name` = #{tenant_name}, </if>
+			<if test="logo != null">`logo` = #{logo}, </if>
+			<if test="establish_date != null">`establish_date` = #{establish_date}, </if>
+			<if test="business_email != null">`business_email` = #{business_email}, </if>
+			<if test="business_phone != null">`business_phone` = #{business_phone}, </if>
+			<if test="business_name != null">`business_name` = #{business_name}, </if>
+			<if test="legal_person != null">`legal_person` = #{legal_person}, </if>
+			<if test="corp_address != null">`corp_address` = #{corp_address}, </if>
+			<if test="business_scope != null">`business_scope` = #{business_scope}, </if>
+			<if test="admin_name != null">`admin_name` = #{admin_name}, </if>
+			<if test="admin_phone != null">`admin_phone` = #{admin_phone}, </if>
+			<if test="enable_time != null">`enable_time` = #{enable_time}, </if>
+			<if test="overdue_time != null">`overdue_time` = #{overdue_time}, </if>
+			<if test="note != null">`note` = #{note}, </if>
+			<if test="type != null">`type` = #{type}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="is_del != null">`is_del` = #{is_del}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from sys_tenant where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from sys_tenant where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+	<select id="queryListByIds" resultType="cn.ewsd.mdata.model.SysTenant">
+		select  <include refid="Base_Column_List" />  from sys_tenant
+		where uuid in
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</select>
+
+</mapper>

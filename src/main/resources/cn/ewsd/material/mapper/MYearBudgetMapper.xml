@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MYearBudgetMapper">
+    <select id="getYearBudgetList" resultType="cn.ewsd.material.model.MBudget">
+        SELECT o.id team_no ,o.text team_name, (b.ini_bala/10000) ini_bala, (b.add_bala/10000) add_bala, (b.bud_bala/10000) bud_bala
+        FROM sys_organization o
+        LEFT JOIN m_budget b ON o.id=b.team_no AND b.item_no=#{itemNo} AND b.occ_month=#{useYear}
+        LEFT JOIN t_dept_type da ON da.dept_id=o.id AND dict_key='deptAttr.matBudget'
+        WHERE o.level_id=3 AND IFNULL(da.sub_key, '')!='deptAttr.matBudget.0'
+        <if test="sysNo!=''.toString()">
+            AND o.pid=#{sysNo}
+        </if>
+        ORDER BY o.sort
+    </select>
+
+    <delete id="deleteData">
+        DELETE FROM m_budget WHERE team_no=#{teamNo} AND item_no=#{itemNo} AND occ_month=#{useYear}
+    </delete>
+
+    <update id="updateData">
+        UPDATE m_budget SET ini_bala=#{iniBala}, add_bala=#{addBala}, over_add=#{overBala}, bud_bala=#{budBala} WHERE team_no=#{teamNo} AND item_no=#{itemNo} AND occ_month=#{useYear}
+    </update>
+
+    <insert id="saveData">
+        INSERT INTO m_budget (bud_id, item_no, team_no, occ_month, ini_bala, add_bala, over_add, bud_bala) VALUES (#{budId}, #{itemNo}, #{teamNo}, #{useYear}, #{iniBala}, #{addBala}, #{overBala}, #{budBala})
+    </insert>
+
+    <select id="getMonthBudgetList" resultType="cn.ewsd.material.model.MBudget">
+        SELECT b1.team_no, (b1.bud_bala/10000) year_budget, IFNULL(b2.ini_bala/10000, 0) ini_bala, IFNULL(b2.add_bala/10000, 0) add_bala, IFNULL(b2.over_add/10000, 0) over_add, IFNULL(a.sum_budget/10000, 0) sum_budget, o.text team_name
+        FROM m_budget b1
+        LEFT JOIN m_budget b2 ON b1.team_no=b2.team_no AND b1.item_no=b2.item_no AND b2.occ_month=#{monthQry}
+        LEFT JOIN (SELECT team_no, SUM(ini_bala+IFNULL(add_bala, 0) + IFNULL(over_add, 0)) sum_budget
+                   FROM m_budget
+                   WHERE item_no=#{itemNo} AND LENGTH(occ_month)=6 AND LEFT(occ_month, 4)=#{useYear}
+                   GROUP BY team_no) a ON a.team_no=b1.team_no
+        LEFT JOIN sys_organization o ON b1.team_no=o.id
+        WHERE b1.item_no=#{itemNo} AND b1.occ_month=#{useYear} AND o.code NOT LIKE 'C0ZZ%' AND b1.bud_bala>0
+        <if test="sysNo!=''.toString()">
+            AND o.pid=#{sysNo}
+        </if>
+        ORDER BY o.sort
+    </select>
+
+    <select id="getSumBudBala" resultType="java.lang.Double">
+        SELECT IFNULL(SUM(bud_bala), 0) FROM m_budget WHERE team_no=#{payTeam} AND occ_month=#{planMonth} AND item_no=#{itemNo}
+    </select>
+
+    <select id="getUrgBudBala" resultType="java.lang.Double">
+        SELECT SUM(IFNULL(bud_bala,0)) bala FROM m_budget WHERE occ_month=#{occMonth} AND team_no =#{teamNo} AND item_no=''
+    </select>
+    
+    <select id="getUrgPlanBala" resultType="java.lang.Double">
+        SELECT SUM(a.mat_amount*a.mat_price) bala FROM m_plan
+		WHERE team_no=#{teamNo} AND plan_month=#{planMonth} AND if_urgent='1' AND plan_step NOT IN ('71050', '7105X')
+    </select>
+
+    <select id="getBudOccAnalItem" resultType="cn.ewsd.material.model.MBudget">
+        SELECT DISTINCT b.item_no, i.item_name
+        FROM m_budget b
+        LEFT JOIN m_item i ON i.item_no=b.item_no
+        WHERE b.occ_month=#{monthQry} AND b.bud_bala>0 AND team_no IN
+        <foreach collection="userDeptIds.split(',')" item="deptId" open="(" separator="," close=")">
+            #{deptId}
+        </foreach>
+        <if test="itemNoQry!=''">
+            AND b.item_no=#{itemNoQry}
+        </if>
+        <if test="teamNoQry!=''">
+            AND b.team_no=#{teamNoQry}
+        </if>
+    </select>
+
+    <select id="getBudOccAnalTeam" resultType="cn.ewsd.material.model.MBudget">
+        SELECT DISTINCT team_no, o.text team_name
+        FROM m_budget b
+        LEFT JOIN sys_organization o ON o.id=b.team_no
+        WHERE b.occ_month=#{monthQry} AND b.bud_bala>0 AND team_no IN
+        <foreach collection="userDeptIds.split(',')" item="deptId" open="(" separator="," close=")">
+            #{deptId}
+        </foreach>
+        <if test="itemNoQry!=''">
+            AND b.item_no=#{itemNoQry}
+        </if>
+        <if test="teamNoQry!=''">
+            AND b.team_no=#{teamNoQry}
+        </if>
+    </select>
+
+    <select id="getBudOccAnalYear" resultType="cn.ewsd.material.model.MBudget">
+        139.186.10.59
+    </select>
+
+
+    <select id="getDeptYearBudget" resultType="java.lang.Double">
+        SELECT IFNULL(SUM(bud_bala), 0) bala
+        FROM m_budget
+	    WHERE occ_month = #{year} AND team_no=#{teamNo} AND bud_bala>0
+	    GROUP BY team_no
+    </select>
+
+    <select id="getDeptYearOccBudget" resultType="java.lang.Double">
+        SELECT IFNULL(SUM(bud_bala), 0) bala
+        FROM m_budget
+        WHERE occ_month &lt;= #{month} AND team_no=#{teamNo} AND bud_bala>0 AND LENGTH(occ_month)=6 AND occ_month LIKE CONCAT(#{year}, '%')
+        GROUP BY team_no
+    </select>
+
+    <select id="getDeptYearOutBudget" resultType="java.lang.Double">
+        SELECT IFNULL(SUM(a.out_amount*a.mat_price), 0) bala
+        FROM m_out a
+        WHERE a.pay_team=#{teamNo}
+        AND a.f_month &gt;= #{month} AND a.f_month LIKE CONCAT(#{year}, '%') AND a.data_src='m.dataSrc.3'
+        GROUP BY a.pay_team
+    </select>
+
+    <select id="getDeptMonthBudget" resultType="java.lang.Double">
+        SELECT IFNULL(SUM(bud_bala), 0) bala
+        FROM m_budget
+        WHERE occ_month &gt;= #{month1} AND occ_month &lt;= #{month2} AND team_no=#{teamNo} AND bud_bala>0 AND LENGTH(occ_month)=6 AND occ_month LIKE CONCAT(#{year}, '%')
+        GROUP BY team_no
+    </select>
+
+    <select id="getDeptMonthOccBudget" resultType="java.lang.Double">
+        SELECT IFNULL(SUM(a.out_amount*a.mat_price), 0) bala
+	    FROM m_out a
+	    WHERE a.pay_team=#{teamNo}
+	    AND a.f_month &gt;= #{month1} AND a.f_month &lt;= #{month2} AND a.data_src='m.dataSrc.3'
+	    GROUP BY a.pay_team
+    </select>
+
+    <select id="getDeptPlanSum" resultType="java.lang.Double">
+        SELECT IFNULL(SUM(a.mat_amount*a.mat_price), 0) bala
+        FROM m_plan a
+        WHERE a.pay_team=#{teamNo}
+        AND a.plan_month &gt;= #{month1} AND a.plan_month &lt;= #{month2}
+        AND a.plan_step IN ('7105F','7105O')
+        AND a.if_urgent!='1'
+        GROUP BY pay_team
+    </select>
+
+    <select id="getDeptAddPlan" resultType="java.lang.Double">
+        SELECT IFNULL(SUM(a.mat_amount*a.mat_price), 0) bala
+	    FROM m_plan a
+	    WHERE a.pay_team=#{teamNo}
+	    AND a.plan_month &gt;= #{month1} AND a.plan_month &lt;= #{month2}
+	    AND a.plan_step IN ('7105F', '7105O')
+	    AND a.plan_type='m.planType.2'
+	    AND a.if_urgent!='1'
+	    GROUP BY a.pay_team
+    </select>
+    
+    <select id="getDeptNoOk" resultType="java.lang.Double">
+        SELECT IFNULL(SUM(a.mat_amount*a.mat_price), 0) bala
+	    FROM m_plan a
+	    WHERE a.pay_team=#{teamNo}
+	    AND a.plan_month &gt;= #{month1} AND a.plan_month &lt;= #{month2}
+	    AND a.plan_step NOT IN ('71050', '7105F', '7105O', '7105X')
+	    AND a.if_urgent!='1'
+	    GROUP BY a.pay_team
+    </select>
+
+    <select id="getClassBudgetList" resultType="cn.ewsd.material.model.MBudget">
+        SELECT b.item_no, i.item_name, b.bud_bala, ifnull(a.yfj_bala, 0) yfj_bala, ifnull(c.occ_bala, 0) occ_bala, b.occ_month
+		FROM m_budget b
+		LEFT JOIN m_item i ON i.item_no=b.item_no
+		LEFT JOIN (SELECT SUM(bud_bala) yfj_bala, item_no
+				   FROM m_budget
+				   WHERE occ_month=CONCAT(#{useYear}, #{useMonth})
+				     AND team_no IN (SELECT id FROM sys_organization WHERE pid=#{teamNo})
+				   GROUP BY item_no) a on a.item_no=b.item_no
+		LEFT JOIN (SELECT SUM(occ_amount * mat_price) occ_bala, item_no
+				   FROM m_team_bill
+				   WHERE occ_date LIKE CONCAT(#{useYear}, #{useMonth}, '%') AND team_no=#{teamNo}
+				   GROUP BY item_no) c ON c.item_no=b.item_no
+		WHERE b.team_no=#{teamNo} AND occ_month=CONCAT(#{useYear}, #{useMonth})
+    </select>
+
+    <select id="getClassForm" resultType="cn.ewsd.material.model.MBudget">
+       SELECT o.id team_no, o.text team_name, IFNULL(b.bud_bala, 0) bud_bala, ${itemNo} item_no, ${occMonth} occ_month
+       FROM sys_organization o
+       LEFT JOIN m_budget b ON o.id=b.team_no AND b.item_no=#{itemNo} AND b.occ_month=#{occMonth}
+       WHERE o.pid=#{teamNo}
+    </select>
+
+    <select id="getClassCheck" resultType="cn.ewsd.material.model.MBudget">
+        SELECT IFNULL(SUM(b.bud_bala), 0) bud_bala, o.pid team_no
+        FROM m_budget b
+        LEFT JOIN sys_organization o on b.team_no=o.id
+        WHERE b.item_no=#{itemNo} and b.occ_month=#{occMonth} and (o.id=#{teamNo} OR o.pid=#{teamNo})
+        GROUP BY o.pid
+    </select>
+</mapper>

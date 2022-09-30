@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <form id="planForm">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+			<table id="backPlanQryDg"></table>
+		</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="backPlanQryDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'backPlanQryDg'
+       }" style="display:none">
+
+
+	<label class="topjui-form-label" style="width:70px">计划月份：</label>
+	<select id="yearQry" data-toggle="topjui-combobox" name="yearQry" data-options="width:80" >
+		<option th:each="i:${#numbers.sequence(2015, endYear)}" th:value="${i}" th:text="${i}" th:selected="${i==currentYear}"></option>
+	</select>
+	<select id="monQry" data-toggle="topjui-combobox" name="monQry" data-options="width:80" >
+		<option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}" th:selected="${i==currentMonth}"></option>
+	</select>
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">业务科室：</label>
+	<input data-toggle="topjui-combobox" id="ksTeamQry" name="ksTeamQry" data-options="valueField:'id',textField:'text',url:'/fix/mBackPlan/getBackPlanTeam',width:'150px'">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">回收单位：</label>
+	<input data-toggle="topjui-combobox" id="teamNoQry" name="teamNoQry" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',width:'150px'">
+
+	<label class="topjui-form-label" style="width:100px;float:none;display:inline-block">物料：</label>
+	<input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'100px'" value="">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+	</a>
+
+	<a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+	</a>
+
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#backPlanQryDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/fix/mBackPlan/getPageSet',
+				queryParams:{
+					yearQry:$('#yearQry').iCombobox('getValue'),
+					monQry:$('#monQry').iCombobox('getValue'),
+					ksTeamQry:$('#ksTeamQry').iCombobox('getValue'),
+					teamNoQry:$('#teamNoQry').iCombobox('getValue'),
+					matQry:$('#matQry').iTextbox('getValue')
+				},
+				columns:[ [
+					{
+						field:'planStepName', sortable:false, title:'状态'
+					},{
+						field:'planMonth', sortable:false, title:'计划月份', formatter:function(value, row, index){
+							return value.substring(0, 4) + '-' + value.substring(4, 6)
+						}
+					},{
+						field:'matCode', sortable:false, title:'物料编码'
+					},{
+						field:'matName', sortable:false, title:'物料描述'
+					},{
+						field:'matUnit', sortable:false, title:'单位'
+					},{
+						field:'backNorm', sortable:false, title:'定额', align:'right'
+					},{
+						field:'planAmount', sortable:false, title:'计划数', formatter:function(value, row, index){
+							if(row.planStep=='7700F' && row.creator=='true'){
+								return '<a style="cursor:pointer; font-weight: bold; color: #00b7ee" modiBtn="'+row.planNo+'">'+ value +'</a>'
+							}else{
+								return value;
+							}
+						}
+					},{
+						field:'matPrice', sortable:false, title:'单价', align:'right'
+					},{
+						field:'uuid', sortable:false, title:'金额', align:'right', formatter:function(value, row, index){
+							return (parseFloat(row.matPrice)*parseFloat(row.planAmount)).toFixed(2);
+						}
+					},{
+						field:'hsAmount', sortable:false, title:'已回收数', align:'right'
+					},{
+						field:'zzAmount', sortable:false, title:'周转回收数', align:'right'
+					},{
+						field:'teamName', sortable:false, title:'回收单位'
+					},{
+						field:'prjName', sortable:false, title:'回收地点'
+					},{
+						field:'remark', sortable:false, title:'备注'
+					},{
+						field:'endDate', sortable:false, title:'截止日期', formatter:function(value, row, index){
+							return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+						}
+					},{
+						field:'planDate', sortable:false, title:'下达日期', formatter:function(value, row, index){
+							return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+						}
+					},{
+						field:'planNo', sortable:false, title:'计划号'
+					}
+				] ],
+				onLoadSuccess:function(data){
+					$('[modiBtn]').click(function(value, row, index){
+						var planNo = $(this).attr('modiBtn');
+						$('#'+planNo).iDialog('openDialog', {
+							id:planNo,
+							title:'调整计划',
+							href:'/fix/mBackPlan/modiPlan?planNo='+planNo,
+							buttons:[{
+								text:'关闭',
+								iconClass:'fa fa-close',
+								btnCls:'topjui-btn-red',
+								handler:function(){
+									$('#'+planNo).iDialog('close');
+								}
+							},{
+								text:'确认调整',
+								iconClass:'fa fa-save',
+								btnCls:'topjui-btn-blue',
+								handler:function(){
+									$('#'+planNo).iForm('submit', {
+										url:'/fix/mBackPlan/updatePlan',
+										success:function(data){
+											data = $.parseJSON(data);
+											if(data.statusCode == 200){
+												$.iMessager.show({
+													title:data.title,
+													msg:data.message
+												})
+												$('#'+planNo).iDialog('close');
+												reloadData()
+											} else {
+												$.iMessager.alert({
+													icon:'messager-error',
+													title:data.title,
+													msg:data.message
+												});
+											}
+										}
+									});
+								}
+							}]
+						});
+					})
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#downloadBtn').click(function(){
+				$('#planForm').iForm('submit', {
+					url:'/fix/mBackPlan/download',
+					success:function(data){
+
+					}
+				});
+			});
+		})
+
+		function reloadData(){
+			$('#backPlanQryDg').iDatagrid('reload',{
+				yearQry:$('#yearQry').iCombobox('getValue'),
+				monQry:$('#monQry').iCombobox('getValue'),
+				ksTeamQry:$('#ksTeamQry').iCombobox('getValue'),
+				teamNoQry:$('#teamNoQry').iCombobox('getValue'),
+				matQry:$('#matQry').iTextbox('getValue')
+			});
+		}
+	</script>
+</th:block>
+</body>
+</html>

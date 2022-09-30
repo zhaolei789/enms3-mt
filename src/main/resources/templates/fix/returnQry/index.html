@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<!--井下周转登记-->
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="returnQryForm" style="height:100%">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+			<table id="returnQryDg"></table>
+		</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="returnQryDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'returnQryDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">日期：</label>
+	<input id="date1Qry" name="date1Qry" th:value="${date1Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+	<label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+	<input id="date2Qry" name="date2Qry" th:value="${date2Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">回收类型：</label>
+	<input data-toggle="topjui-combobox" id="typeQry" name="typeQry" value="" data-options="valueField:'val',textField:'text',width:'150px',data:[{
+		val:'', text:'---全部---'
+	},{
+		val:'r.inBillType.A', text:'周转回收'
+	},{
+		val:'r.inBillType.B', text:'上井回收'
+	}]">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料：</label>
+	<input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'" value="">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<ewsd:rbac str="/fix/returnQry/back">
+	<a href="javascript:void(0)" id="backBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">退回</span>
+            <span class="l-btn-icon fa fa-reply">&nbsp;</span>
+        </span>
+	</a>
+	</ewsd:rbac>
+
+	<ewsd:rbac str="/fix/returnQry/download">
+	<a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+	</a>
+	</ewsd:rbac>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#returnQryDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/fix/returnQry/getPageSet',
+				queryParams:{
+					date1Qry:$('#date1Qry').iCombobox('getValue'),
+					date2Qry:$('#date2Qry').iCombobox('getValue'),
+					typeQry:$('#typeQry').iCombobox('getValue'),
+					matQry:$('#matQry').iTextbox('getValue')
+				},
+				columns:[ [
+					{
+						field:'billNo', sortable:false, title:'', checkbox:true
+					},{
+						field:'inTypeName', sortable:false, title:'回收类型'
+					},{
+						field:'storeName', sortable:false, title:'仓库'
+					},{
+						field:'planSrcName', sortable:false, title:'物料状态'
+					},{
+						field:'matCode', sortable:false, title:'物料编码'
+					},{
+						field:'matName', sortable:false, title:'物料描述'
+					},{
+						field:'matUnit', sortable:false, title:'单位'
+					},{
+						field:'setPrice', sortable:false, title:'单价', align:'right'
+					},{
+						field:'billAmount', sortable:false, title:'回收数', align:'right'
+					},{
+						field:'applyDate', sortable:false, title:'申请日期', formatter:function(value, row, index){
+							return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+						}
+					},{
+						field:'teamName', sortable:false, title:'回收单位'
+					},{
+						field:'reserve2', sortable:false, title:'回收地点'
+					},{
+						field:'offerTeamName', sortable:false, title:'业务科室'
+					},{
+						field:'offerName', sortable:false, title:'接收单位', formatter:function(value, row, index){
+							if(row.inType == 'r.inBillType.A'){
+								return value
+							}else{
+								return ''
+							}
+						}
+					},{
+						field:'bill', sortable:false, title:'记录号', formatter:function(value, row, index){
+							return row.billNo
+						}
+					},{
+						field:'remark', sortable:false, title:'备注'
+					}
+				] ]
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#downloadBtn').click(function(){
+				$('#returnQryForm').iForm('submit', {
+					url:'/fix/returnQry/download',
+					success:function(data){
+
+					}
+				});
+			});
+
+			$('#backBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '您确定退回回收吗？', function (r) {
+					if (r) {
+						$.ajax({
+							url: '/fix/returnQry/back',
+							dataType:'json',
+							type:'post',
+							data: $("#returnQryForm").serialize(),
+							success: function (data, textStatus, jqXHR) {
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadData();
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				})
+			});
+		})
+
+		function reloadData(){
+			$('#returnQryDg').iDatagrid('reload',{
+				date1Qry:$('#date1Qry').iCombobox('getValue'),
+				date2Qry:$('#date2Qry').iCombobox('getValue'),
+				typeQry:$('#typeQry').iCombobox('getValue'),
+				matQry:$('#matQry').iTextbox('getValue')
+			});
+		}
+	</script>
+
+</th:block>
+</body>
+</html>

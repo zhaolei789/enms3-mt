@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.CategoryMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.system.model.Category" id="CategoryMap">
+        <result property="uuid" column="uuid"/>
+        <result property="id" column="id"/>
+        <result property="pid" column="pid"/>
+        <result property="text" column="text"/>
+        <result property="state" column="state"/>
+        <result property="type" column="type"/>
+        <result property="code" column="code"/>
+        <result property="levelId" column="levelId"/>
+        <result property="creatorId" column="creatorId"/>
+        <result property="creator" column="creator"/>
+        <result property="createTime" column="createTime"/>
+        <result property="modifierId" column="modifierId"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modifyTime" column="modifyTime"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 id
+		  ,  	  	     			 pid
+		  ,  	  	     			 text
+		  ,  	  	     			 state
+		  ,  	  	     			 type
+		  ,  	  	     			 code
+		  ,  	  	     			 level_id
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator
+		  ,  	  	     			 create_time
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,							 sort
+		  ,                          icon_cls
+		  ,                          portal_display
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.Category">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_category
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.system.model.Category">
+		select  <include refid="Base_Column_List" />  from sys_category where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.system.model.Category">
+		select  <include refid="Base_Column_List" />  from sys_category
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_category 
+	</select>
+
+	<select id="getCategorysByTypeAndLevelId" resultType="cn.ewsd.system.model.Category">
+		select
+		<include refid="Base_Column_List"></include>
+		from sys_category WHERE level_id = #{param1} AND type = #{param2} ORDER BY sort
+	</select>
+	<select id="selectListByPid" resultType="cn.ewsd.system.model.Category">
+		select
+		<include refid="Base_Column_List"></include>
+		from sys_category WHERE pid = #{param1} AND type = #{param2} And  level_id != 0
+	</select>
+	<select id="getIncreasementId" resultType="java.lang.Integer">
+		SELECT MAX(a.id)+1 FROM sys_category a
+	</select>
+	<select id="getChildIds" parameterType="map" statementType="CALLABLE" resultType="java.lang.String">
+      {
+            call p_get_child_ids(
+                #{p1,mode=IN,jdbcType=NUMERIC},
+                #{p2,mode=IN,jdbcType=NUMERIC},
+                #{p3,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+
+	</select>
+	<select id="getFatherId" parameterType="map" statementType="CALLABLE" resultType="java.lang.String">
+		  {
+            call p_get_father_ids(
+                #{p1,mode=IN,jdbcType=NUMERIC},
+                #{p2,mode=IN,jdbcType=NUMERIC},
+                #{p3,mode=IN,jdbcType=NUMERIC},
+                #{p4,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+	</select>
+	<select id="getCategorysByPortalDisplayAndTypeAndLevelId" resultType="cn.ewsd.system.model.Category">
+		select
+		<include refid="Base_Column_List"></include>
+		from sys_category WHERE portal_display = 1 AND level_id = #{param1} AND type = #{param2} ORDER BY sort
+	</select>
+
+
+	<insert id="executeSave" parameterType="cn.ewsd.system.model.Category">
+		insert into sys_category
+		(
+			`uuid`, 
+			`id`, 
+			`pid`, 
+			`text`, 
+			`state`, 
+			`type`, 
+			`code`, 
+			`level_id`,
+			`creator_id`,
+			`creator`, 
+			`create_time`,
+			`modifier_id`,
+			`modifier`, 
+			`modify_time`
+		)
+		values
+		(
+			#{uuid}, 
+			#{id}, 
+			#{pid}, 
+			#{text}, 
+			#{state}, 
+			#{type}, 
+			#{code}, 
+			#{level_id},
+			#{creator_id},
+			#{creator}, 
+			#{create_time},
+			#{modifier_id},
+			#{modifier}, 
+			#{modify_time}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.system.model.Category">
+		update sys_category 
+		<set>
+			<if test="id != null">`id` = #{id}, </if>
+			<if test="pid != null">`pid` = #{pid}, </if>
+			<if test="text != null">`text` = #{text}, </if>
+			<if test="state != null">`state` = #{state}, </if>
+			<if test="type != null">`type` = #{type}, </if>
+			<if test="code != null">`code` = #{code}, </if>
+			<if test="level_id != null">`level_id` = #{level_id}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from sys_category where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from sys_category where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

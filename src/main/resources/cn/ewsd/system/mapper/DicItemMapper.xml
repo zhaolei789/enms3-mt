@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.DicItemMapper">
+
+
+    
+  <sql id="Base_Column_List" >*</sql>
+
+  <select id="getPageSet" resultType="cn.ewsd.system.model.DicItem">
+      select
+      <include refid="Base_Column_List"></include>
+      from sys_dic_item
+      <where>
+        <if test="filterSort != null">
+          ${filterSort}
+        </if>
+      </where>
+    </select>
+    <select id="getListByPuuid" resultType="java.util.Map">
+        SELECT text,value FROM sys_dic_item WHERE puuid = #{param1}
+    </select>
+    <select id="getListByUuid" resultType="cn.ewsd.system.model.DicItem">
+        SELECT * FROM sys_dic_item WHERE puuid = #{param1} ORDER BY sort ASC
+    </select>
+
+    <select id="getDicItemByValue" resultType="cn.ewsd.system.model.DicItem">
+        SELECT * FROM sys_dic_item WHERE value=#{value}
+    </select>
+
+    <select id="getDictItemByCode" resultType="cn.ewsd.system.model.DicItem">
+        SELECT di.value, di.text
+        FROM sys_dic_item di
+        LEFT JOIN sys_dic_set ds ON di.puuid=ds.uuid
+        WHERE ds.code=#{_parameter}
+    </select>
+</mapper>

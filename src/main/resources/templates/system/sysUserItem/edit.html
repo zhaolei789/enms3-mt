@@ -1,0 +1,42 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<input type="hidden" name="userId">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+		<!--<div class="topjui-col-sm6">
+			<label class="topjui-form-label">用户</label>
+			<div class="topjui-input-block">
+				<input type="text" name="userId"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'用户'">
+			</div>
+		</div>-->
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">科目</label>
+			<div class="topjui-input-block">
+				<!--<input type="text" name="itemNo"
+					   data-toggle="topjui-combobox"
+					   data-options="
+                       multiple:true,
+                       valueField:'id',
+                       textField:'text',
+                       panelHeight:'200',
+                        icons:[{
+                            iconCls:'fa fa-remove',
+                            handler: function(e){
+                                $(e.data.target).combobox('clear');
+                            }
+                        }],
+                       url:'/material/mItem/getPageSet'
+                      ">-->
+				<input type="text" name="itemNo"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'科目编号'">
+			</div>
+		</div>
+	</div>
+</div>

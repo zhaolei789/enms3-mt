@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<!--井下周转登记-->
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="inStkChkForm" style="height:100%">
+		<div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%',width:'60%'">
+			<table data-toggle="topjui-datagrid" data-options="id:'inStkChkDg',
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/fix/inStkChk/getPageSet',
+				queryParams:{
+					date1Qry:$('#date1Qry').iCombobox('getValue'),
+					date2Qry:$('#date2Qry').iCombobox('getValue')
+				}">
+				<thead>
+					<tr>
+						<th data-options="field: 'billNo', sortable: false, title: '', checkbox: true"></th>
+						<th data-options="field: 'inStepName', sortable: false, title: '步骤'"></th>
+						<th data-options="field: 'matCode', sortable: false, title: '物料编码'"></th>
+						<th data-options="field: 'matName', sortable: false, title: '物料描述'"></th>
+						<th data-options="field: 'matUnit', sortable: false, title: '计量单位'"></th>
+						<th data-options="field: 'offerTeamName', sortable: false, title: '申请单位'"></th>
+						<th data-options="field: 'inDate', sortable: false, title: '申请日期', formatter:function(value, row, index){
+							if(value!=null && value!=undefined && value!=''){
+								return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+							}else{
+								return ''
+							}
+						}"></th>
+						<th data-options="field: 'teamName', sortable: false, title: '管理单位'"></th>
+						<th data-options="field: 'inTypeName', sortable: false, title: '修理类型'"></th>
+						<th data-options="field: 'inAmount', sortable: false, title: '审批数量（完好）', formatter:function(value, row, index){
+							if(row.inStep == '77013' || row.inStep == '77015'){
+								return '<span class=&quot;textbox&quot;><input class=&quot;textbox-text&quot; type=&quot;text&quot; id=&quot;checkAmount_' + row.billNo + '&quot; name=&quot;checkAmount_' + row.billNo + '&quot; value=&quot;'+ value +'&quot; disabled /></span>'
+							}else{
+								return ''
+							}
+						}"></th>
+						<th data-options="field: 'creator', sortable: false, title: '审批数量（报废）', formatter:function(value, row, index){
+							if(row.inStep == '77013' || row.inStep == '77015'){
+								return '<span class=&quot;textbox&quot;><input class=&quot;textbox-text&quot; type=&quot;text&quot; id=&quot;scrapAmount_' + row.billNo + '&quot; name=&quot;scrapAmount_' + row.billNo + '&quot; value=&quot;&quot; disabled /></span>'
+							}else{
+								return ''
+							}
+						}"></th>
+						<th data-options="field: 'storeName', sortable: false, title: '仓库'"></th>
+						<th data-options="field: 'checkType', sortable: false, title: '修复地点'"></th>
+						<th data-options="field: 'checkInfo', sortable: false, title: '维修人'"></th>
+						<th data-options="field: 'applyDate', sortable: false, title: '验收人', formatter:function(value, row, index){
+							return '<span class=&quot;textbox&quot;><input class=&quot;textbox-text&quot; type=&quot;text&quot; id=&quot;checkRemark_' + row.billNo + '&quot; name=&quot;checkRemark_' + row.billNo + '&quot; value=&quot;&quot; disabled /></span>'
+						}"></th>
+						<th data-options="field: 'uuid', sortable: false, title: '申请号', formatter:function(value, row, index){
+							return row.billNo
+						}"></th>
+					</tr>
+				</thead>
+			</table>
+		</div>
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+			<div data-toggle="topjui-tabs"
+				 data-options="id:'southTabs',
+                     fit:true,
+                     border:false,
+                     parentGrid:{
+                         type:'datagrid',
+                         id:'inStkChkDg',
+                         param:'puuid:billNo'
+                     }">
+				<div title="附件信息" data-options="id:'southTab0',iconCls:'fa fa-table'">
+					<!-- datagrid表格 -->
+					<table data-toggle="topjui-datagrid"
+						   data-options="id:'attachmentDg',
+                               initCreate: false,
+                               fitColumns:true,
+                               rownumbers:false,
+						       url:'/system/attachment/getListByPuuid'">
+						<thead>
+						<tr>
+							<th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+							<th data-options="field:'fileName',title:'文件名称',width:150,
+                                        formatter: function(value,row,index){
+                                        return '<a href=\'/system/attachment/download?uuid='+row.uuid+'\' target=\'_blank\'>'+value+'</a>';
+                                        }"></th>
+							<th data-options="field:'fileSize',title:'文件大小',
+                                        formatter: function(value,row,index){
+                                            return bytesToSize(value);
+                                        }"></th>
+							<th data-options="field:'creator',title:'上传人'"></th>
+							<th data-options="field:'createTime',title:'上传时间',width:100"></th>
+							<th data-options="field:'creatorId',title:'预览',formatter: picFormatter"></th>
+							<!--<th data-options="field:'creatorId',title:'下载',
+                                    formatter: function(value,row,index){
+                                    return '<a href=\'/system/attachment/download?uuid='+row.uuid+'\' target=\'_blank\'>下载</a>';
+                                    }"></th>-->
+						</tr>
+						</thead>
+					</table>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="inStkChkDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'inStkChkDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">日期区间：</label>
+	<input id="date1Qry" name="date1Qry" th:value="${date1Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+	<label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+	<input id="date2Qry" name="date2Qry" th:value="${date2Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">审核通过</span>
+            <span class="l-btn-icon fa fa-check">&nbsp;</span>
+        </span>
+	</a>
+
+	<a href="javascript:void(0)" id="backBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">退回草稿</span>
+            <span class="l-btn-icon fa fa-reply">&nbsp;</span>
+        </span>
+	</a>
+</div>
+
+	<div id="attachmentDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'attachmentDg'
+       }" style="display:none">
+
+		<a href="javascript:void(0)"
+		   data-toggle="topjui-menubutton"
+		   data-options="method:'upload',
+           extend:'#attachmentDg-toolbar',
+           iconCls:'fa fa-cloud-upload',
+           btnCls:'topjui-btn-green',
+           accept:'file',
+           dialog:{
+               title:'附件批量上传'
+           },
+           parentGrid:{type:'datagrid', id:'inStkChkDg',unselectedMsg:'请先选中上表中要添加附件的数据！'},
+           uploadUrl:'/system/attachment/upload?puuid={billNo}'">添加附件</a>
+
+		<a href="javascript:void(0)"
+		   data-toggle="topjui-menubutton"
+		   data-options="method:'doAjax',
+           extend:'#attachmentDg-toolbar',
+	       url:'/system/attachment/delete',
+	       btnCls:'topjui-btn-red'">删除</a>
+
+	</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#inStkChkDg').iDatagrid({
+				onCheck:function(index, row){
+					var billNo = row.billNo;
+					$('#checkAmount_' + billNo + ', #scrapAmount_' + billNo + ', #checkRemark_' + billNo).removeAttr('disabled');
+				},
+				onUncheck:function(index, row){
+					var billNo = row.billNo;
+					$('#checkAmount_' + billNo + ', #scrapAmount_' + billNo + ', #checkRemark_' + billNo).attr('disabled', 'disabled');
+				},
+				onCheckAll:function(rows){
+					$('[name^="checkAmount_"], [name^="scrapAmount_"], [name^="checkRemark_"]').removeAttr("disabled");
+				},
+				onUncheckAll:function(rows){
+					$('[name^="checkAmount_"], [name^="scrapAmount_"], [name^="checkRemark_"]').attr("disabled", 'disabled');
+				},
+				onClickRow:function(index, row){
+					reloadFile(row.billNo);
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#submitBtn').click(function(){
+				$('#inStkChkForm').iForm('submit', {
+					url:'/fix/inStkChk/submit',
+					success:function(data){
+						data = $.parseJSON(data);
+						if(data.statusCode == 200){
+							$.iMessager.show({
+								title:data.title,
+								msg:data.message
+							})
+							reloadData();
+						} else {
+							$.iMessager.alert({
+								icon:'messager-error',
+								title:data.title,
+								msg:data.message
+							});
+						}
+					}
+				});
+			});
+
+			$('#backBtn').click(function(){
+				$('#inStkChkForm').iForm('submit', {
+					url:'/fix/inStkChk/back',
+					success:function(data){
+						data = $.parseJSON(data);
+						if(data.statusCode == 200){
+							$.iMessager.show({
+								title:data.title,
+								msg:data.message
+							})
+							reloadData();
+						} else {
+							$.iMessager.alert({
+								icon:'messager-error',
+								title:data.title,
+								msg:data.message
+							});
+						}
+					}
+				});
+			});
+		})
+
+		function reloadData(){
+			$('#inStkChkDg').iDatagrid('reload',{
+				date1Qry:$('#date1Qry').iCombobox('getValue'),
+				date2Qry:$('#date2Qry').iCombobox('getValue')
+			});
+		}
+
+		function reloadFile(billNo){
+			$('#attachmentDg').iDatagrid('reload',{
+				puuid:billNo
+			});
+		}
+
+		function picFormatter(value, row, index) {
+			var html = ""
+			if (row.filePath) {
+				html = "<div class=\"box\" style='text-align: center;padding: 3px' data-toggle=\"topjui-viewer\">" +
+						"<img style='width: 100px;' src='/system/attachment/showPic?path=" +
+						row.filePath + "' title='点击预览' alt='" + value + "'>" +
+						"</div>"
+			}
+			return html
+		}
+
+		function pictureUrlOnChange(value) {
+			$("#imgBox").show();
+			$("#imgBox img").attr('src', "/system/attachment/showPic?path=" + value);
+			$.parser.parse('.imgBox');
+		}
+	</script>
+
+</th:block>
+</body>
+</html>

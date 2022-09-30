@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <form id="detailForm">
+            <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+                <table id="detailDg"></table>
+            </div>
+        </form>
+    </div>
+
+    <div id="detailDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'detailDg'
+       }" style="display:none">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">选择盘点：</label>
+        <input data-toggle="topjui-combobox" id="checkNoQry" name="checkNoQry" th:value="${checkNo}" data-options="valueField:'checkNo',textField:'storeName',url:'/repository/inventChk/getCheckSet',width:'200px'">
+
+        <a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">查询</span>
+                <span class="l-btn-icon fa fa-search">&nbsp;</span>
+            </span>
+        </a>
+
+        <a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">完成盘点</span>
+                <span class="l-btn-icon fa fa-save">&nbsp;</span>
+            </span>
+        </a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        $(document).ready(function(){
+            $('#detailDg').iDatagrid({
+                queryParams:{
+                    checkNoQry:$('#checkNoQry').iCombobox('getValue')
+                },
+                singleSelect:true,
+                selectOnCheck:false,
+                checkOnSelect:false,
+                url:'/repository/inventChk/getPageSet',
+                columns:[ [
+                    {
+                        field:'listId',title:'删除',sortable:false, formatter:function(value, row, index){
+                            return '<a style="font-weight: bold; color: #00b7ee" deleteBtn="'+value+','+row.checkNo+'">删除</a>'
+                        }
+                    },{
+                        field:'siteNo',title:'库位编码',sortable:false
+                    },{
+                        field:'erpType',title:'ERP分类',sortable:false
+                    },{
+                        field:'typeName',title:'分类描述',sortable:false
+                    },{
+                        field:'matCode',title:'物料编码',sortable:false
+                    },{
+                        field:'matName',title:'物料名称',sortable:false
+                    },{
+                        field:'matUnit',title:'单位',sortable:false
+                    },{
+                        field:'theoryAmount',title:'理论数',sortable:false
+                    },{
+                        field:'realAmount',title:'实际数',sortable:false, formatter:function(value, row, index){
+                            return '<span class="textbox"><input class="textbox-text" type="text" id="realAmount_'+ row.listId +'" name="realAmount_'+ row.listId +'" value="'+ value +'" /></span><input type="hidden" name="listId" value="'+ row.listId +'" />'
+                        }
+                    },{
+                        field:'siteCode',title:'货位',sortable:false, formatter:function(value, row, index){
+                            return '<span class="textbox"><input class="textbox-text" type="text" id="site_'+ row.listId +'" name="site_'+ row.listId +'" value="'+ row.siteNo +'" /></span>'
+                        }
+                    },{
+                        field:'reason',title:'修改理由',sortable:false, formatter:function(value, row, index){
+                            return '<span class="textbox"><input class="textbox-text" type="text" id="reason_'+ row.listId +'" name="reason_'+ row.listId +'" value="'+ value +'" /></span>'
+                        }
+                    }
+                ] ],
+                onLoadSuccess:function(data){
+                    $('[deleteBtn]').click(function(){
+                        var key = $(this).attr('deleteBtn');
+                        var postData = { key: key}; // 请求中携带的JSON数据
+                        var url = '/repository/inventChk/delete';//请求的地址
+                        $.post(url,postData,function (res) {
+                            if(res.statusCode == 200){
+                                $.iMessager.show({title: '我的消息', msg: res.message, timeout: 5000, showType: 'slide'});// '消息窗口'组件
+                                $('#checkNoQry').iCombobox("reload");
+                                reloadDetail();
+                            }else {
+                                $.iMessager.alert('操作提示', res.message, 'messager-error');
+                            }
+                        },"JSON")
+                    });
+                }
+            });
+
+            $('#saveBtn').click(function(){
+                $('#detailForm').iForm('submit', {
+                    url:'/repository/inventChk/finish',
+                    success:function(data){
+                        data = $.parseJSON(data);
+                        if(data.statusCode == 200){
+                            $.iMessager.show({
+                                title:data.title,
+                                msg:data.message
+                            })
+                            $('#checkNoQry').iCombobox("reload");
+                            reloadDetail();
+                        } else {
+                            $.iMessager.alert({
+                                icon:'messager-error',
+                                title:data.title,
+                                msg:data.message
+                            });
+                        }
+                    }
+                });
+            });
+
+            $('#searchBtn').click(function(){
+                reloadDetail();
+            });
+        });
+
+        function reloadDetail(){
+            $('#detailDg').iDatagrid('reload', {
+                checkNoQry:$('#checkNoQry').iCombobox('getValue')
+            })
+        }
+    </script>
+</th:block>
+</body>
+</html>

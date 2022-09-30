@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MPrjItemMapper">
+    <delete id="deleteByPrjNo">
+        DELETE FROM m_prj_item WHERE prj_no = #{_parameter}
+    </delete>
+
+    <select id="getPrjItemListByPrjNo" resultType="cn.ewsd.material.model.MPrjItem">
+        SELECT #{prjNo} prj_no, i.item_no, i.item_name, i.pay_type, di.text pay_type_name, IFNULL(mat_bala, -1) mat_bala, CASE WHEN IFNULL(pi.prj_no, 0)=0 THEN 0 ELSE 1 END is_chk
+        FROM m_item i
+        LEFT JOIN sys_dic_item di ON di.value=i.pay_type
+        LEFT JOIN m_prj_item pi ON pi.item_no=i.item_no AND pi.prj_no=#{prjNo}
+        <where>
+            <if test="filterSort != null">
+                ${filterSort}
+            </if>
+        </where>
+        ORDER BY CASE WHEN IFNULL(pi.prj_no, 0)=0 THEN 0 ELSE 1 END DESC, i.item_name
+    </select>
+
+    <insert id="saveData" parameterType="cn.ewsd.material.model.MPrjItem">
+        INSERT INTO m_prj_item (`prj_no`, `item_no`, `mat_bala`,
+                                `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+        VALUES (#{prjNo}, #{itemNo}, #{matBala},
+                #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+    </insert>
+
+    <select id="getItemNosByPrjNo" resultType="java.lang.String">
+        SELECT item_no FROM m_prj_item WHERE prj_no=#{_parameter}
+    </select>
+
+    <select id="getSumMatBala" resultType="java.lang.Double">
+        SELECT IFNULL(SUM(IFNULL(mat_bala, 0)), 0) FROM m_prj_item WHERE prj_no=#{_parameter}
+    </select>
+</mapper>

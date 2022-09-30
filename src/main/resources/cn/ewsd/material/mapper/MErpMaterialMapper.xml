@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MErpMaterialMapper">
+	<insert id="executeSave" parameterType="cn.ewsd.material.model.MErpMaterial">
+		INSERT INTO m_erp_material (`factory_no`, `mat_addr`, `mat_no`, `mat_unit`,
+		                            `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{factoryNo}, #{matAddr}, #{matNo}, #{matUnit},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<update id="deleteByMatNo">
+		DELETE FROM m_erp_material WHERE mat_no=#{matNo}
+	</update>
+
+	<select id="getErpMaterialByMatNo" resultType="cn.ewsd.material.model.MErpMaterial">
+		SELECT * FROM m_erp_material WHERE mat_no=#{_parameter}
+	</select>
+
+	<select id="getErpMaterialByMatNoAndFactoryAndAddr" resultType="cn.ewsd.material.model.MErpMaterial">
+		SELECT * FROM m_erp_material WHERE mat_no=#{matNo} and factory_no = #{factoryNo} and mat_addr = #{matAddr} limit 1
+	</select>
+</mapper>

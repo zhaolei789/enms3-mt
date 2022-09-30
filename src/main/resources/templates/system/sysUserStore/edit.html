@@ -1,0 +1,26 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<input type="hidden" name="userId">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+    				<div class="topjui-col-sm6">
+			<label class="topjui-form-label">仓库</label>
+			<div class="topjui-input-block">
+								<!--<input type="text" name="storeNo"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'仓库'">-->
+				<input type="text" name="storeNo" id="storeNo"
+					   data-toggle="topjui-combobox"
+					   data-options="required:true,
+					   prompt:'必填',
+                   url:'/repository/mStoreSafe/getStoreForSelect',
+                   valueField:'storeNo',
+    			   textField:'storeName'">
+							</div>
+		</div>
+    		</div>
+</div>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <form id="planForm" method="post">
+            <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+                <table id="planDg"></table>
+            </div>
+        </form>
+    </div>
+
+    <div id="planDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'planDg'
+       }" style="display:none">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">仓库：</label>
+        <input data-toggle="topjui-combobox" id="storeQry" name="storeQry" data-options="valueField:'storeNo',textField:'storeName',url:'/repository/mStore/getStoreList?storeType=r.storeType2.11&storeLevel=r.storeLevel.1',width:'150px',loadFilter:function(data){
+            data.unshift({storeNo:'', storeName:'--全部--'});
+            return data
+        }">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料信息：</label>
+        <input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">提报单号：</label>
+        <input id="reserveQry" data-toggle="topjui-textbox" name="reserveQry" data-options="width:'150px'">
+
+        <a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">查询</span>
+                <span class="l-btn-icon fa fa-search">&nbsp;</span>
+            </span>
+        </a>
+
+        <br />
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">工程：</label>
+        <input data-toggle="topjui-combobox" id="prjNo" name="prjNo" data-options="valueField:'prjNo',textField:'prjName',url:'/material/mPrj/getPrjList2',width:'150px',loadFilter:function(data){
+            data.unshift({prjNo:'', prjName:'--请选择--'});
+            return data
+        }">
+
+        <a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">提交应急</span>
+                <span class="l-btn-icon fa fa-save">&nbsp;</span>
+            </span>
+        </a>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        $(document).ready(function(){
+            $('#planDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                url: '/material/urgentPlan/getStockPageSet',
+                queryParams:{
+                    storeQry:$('#storeQry').iCombobox('getValue'),
+                    reserveQry:$('#reserveQry').iTextbox('getValue'),
+                    matQry:$('#matQry').iTextbox("getValue")
+                },
+                columns:[ [
+                    {
+                        field:'erpType', sortable:false, title:'物料分类'
+                    },{
+                        field:'typeName',title:'分类名称',sortable:false
+                    },{
+                        field:'matCode',title:'物料编码',sortable:false, width:'100px', formatter:function(value, row, index){
+                            return value.substring(0, 1) == 'X' ? value.substring(1) : value
+                        }
+                    },{
+                        field:'matName',title:'物料描述',sortable:false, width:'200px'
+                    },{
+                        field:'matUnit',title:'单位',sortable:true
+                    },{
+                        field:'matPrice',title:'价格',sortable:true, align:'right', width:'80px'
+                    },{
+                        field:'stockAmount',title:'库存数',sortable:false, align:'right'
+                    },{
+                        field:'amount',title:'计划数量',sortable:false, align:'right', formatter:function(value, row, index){
+                            var key = row.reserveNo+'_'+row.storeNo+'_'+row.matNo;
+                            return '<input type="hidden" name="key" value="'+ key +'" /><span class="textbox"><input style="text-align: right" class="textbox-text" type="text" name="amount_'+key+'" id="amount_'+key+'" value="" />'
+                        }
+                    },{
+                        field:'reserveNo',title:'提报单号',sortable:false, formatter:function(value, row, index){
+                            return value=='0' ? '' : value;
+                        }
+                    },{
+                        field:'centerName',title:'责任单位',sortable:false,
+                    },{
+                        field:'use',title:'用途及备注',sortable:false, formatter:function(value, row, index){
+                            var key = row.reserveNo+'_'+row.storeNo+'_'+row.matNo;
+                            return '<span class="textbox"><input class="textbox-text" type="text" name="use_'+key+'" id="use_'+key+'" value="" />'
+                        }
+                    },{
+                        field:'remark',title:'质量要求或主机生产厂',sortable:false, formatter:function(value, row, index){
+                            var key = row.reserveNo+'_'+row.storeNo+'_'+row.matNo;
+                            return '<span class="textbox"><input class="textbox-text" type="text" name="remark_'+key+'" id="remark_'+key+'" value="" />'
+                        }
+                    }
+                ] ]
+            });
+
+            $('#searchBtn').click(function(){
+                reloadPlan();
+            });
+
+            $('#saveBtn').click(function(){
+                $.iMessager.confirm('确认对话框', '您确定提交应急计划吗？', function (r) {
+                    if(r){
+                        $('#planForm').iForm('submit', {
+                            url:'/material/urgentPlan/submit',
+                            success:function(data){
+                                data = $.parseJSON(data);
+                                if(data.statusCode == 200){
+                                    $.iMessager.show({
+                                        title:data.title,
+                                        msg:data.message
+                                    })
+                                    reloadPlan();
+                                } else {
+                                    $.iMessager.alert({
+                                        icon:'messager-error',
+                                        title:data.title,
+                                        msg:data.message
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            })
+        });
+
+        function reloadPlan(){
+            $('#planDg').iDatagrid('reload',{
+                storeQry:$('#storeQry').iCombobox('getValue'),
+                reserveQry:$('#reserveQry').iTextbox('getValue'),
+                matQry:$('#matQry').iTextbox("getValue")
+            });
+        }
+    </script>
+</th:block>
+</body>
+</html>

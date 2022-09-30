@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+	  layout:decorator="public/layout-bootstrap">
+
+<head>
+	<th:block layout:fragment="css">
+
+	</th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+
+	<div class="container-fluid">
+		<div class="row margin-top-10">
+			<div class="col-md-12">
+				<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title text-center" th:text="${archive.title}"></h3>
+					</div>
+					<div class="list-group text-center">
+						<div class="list-group-item">
+							<span><i class="fa fa-user"></i> <th th:text="${archive.creator}"</th></span>
+							<span><i class="fa fa-clock-o"></i> <th th:text="${#dates.format(archive.createTime, 'yyyy-MM-dd HH:mm:ss')}"</th></span>
+						</div>
+					</div>
+					<div class="panel-body content" th:utext="${archive.description}"></div>
+					<div class="list-group">
+							<div class="list-group-item" th:each="attachment : ${attachments}">
+                                <span>
+                                    <i class="fa fa-paperclip fa-fw"></i>
+                                    <a th:href="@{'/system/attachment/download?uuid='+${attachment.uuid}}" th:text="${attachment.fileName}"></a>
+                                    <!--<th th:text="${attachment.fileSize}"></th>-->
+                                </span>
+							</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript"
+			src="/plugins/jquery/plugins/jquery.imgAutoSize.js"></script>
+	<script type="text/javascript">
+		(function ($) {
+
+			var loadImg = function (url, fn) {
+				var img = new Image();
+				img.src = url;
+				if (img.complete) {
+					fn.call(img);
+				} else {
+					img.onload = function () {
+						fn.call(img);
+						img.onload = null;
+					};
+				};
+			};
+
+			$.fn.imgAutoSize = function (padding) {
+				var maxWidth = this.innerWidth() - (padding || 0);
+				return this.find('img').each(function (i, img) {
+					loadImg(this.src, function () {
+						if (this.width > maxWidth) {
+							var height = maxWidth / this.width * this.height,
+									width = maxWidth;
+
+							img.width = width;
+							img.height = height;
+						};
+					});
+				});
+			};
+
+		})(jQuery);
+        $(function ($) {
+            $('.content').imgAutoSize(30);
+        });
+	</script>
+</th:block>
+</body>
+</html>

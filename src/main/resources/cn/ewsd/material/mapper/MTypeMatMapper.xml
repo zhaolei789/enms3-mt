@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MTypeMatMapper">
+    <select id="getTypeMatByMatNo" resultType="cn.ewsd.material.model.MTypeMat">
+        SELECT * FROM m_type_mat WHERE mat_no=#{_parameter}
+    </select>
+
+    <select id="getTypeMatList" resultType="cn.ewsd.material.model.MTypeMat">
+        SELECT a.mat_no, a.old_rate, a.old_limit, b.mat_code, b.mat_name, b.mat_unit, b.mat_price, b.erp_type, b.type_name
+	    FROM m_type_mat a
+	    LEFT JOIN m_material b ON a.mat_no=b.mat_no
+	    WHERE a.type_code = 'm.TypeCode.10'
+	    <if test="matCodeQry">
+            AND b.mat_code LIKE CONCAT('%', #{matCodeQry}, '%')
+        </if>
+        <if test="matNameQry">
+            AND b.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+        </if>
+    </select>
+    
+    <select id="getComPlanList" resultType="cn.ewsd.material.model.MTypeMat">
+        SELECT a.mat_no, b.mat_code, b.mat_name, b.mat_unit, b.mat_price, b.erp_type, b.type_name
+		FROM m_plan a
+		INNER JOIN m_material b ON a.mat_no=b.mat_no
+		WHERE a.plan_month LIKE CONCAT(#{planMonth}, '%')
+		  AND NOT EXISTS (SELECT '1' FROM m_type_mat WHERE type_code='m.TypeCode.10' AND mat_no=a.mat_no)
+		<if test="matQry!=''">
+            AND CONCAT(b.mat_code, b.mat_name) LIKE CONCAT('%', #{matQry}, '%')
+        </if>
+		GROUP BY a.mat_no,b.mat_code,b.mat_name,b.mat_unit,b.mat_price,b.erp_type,b.type_name
+    </select>
+
+    <delete id="deleteTypeMat">
+        DELETE FROM m_type_mat WHERE type_code=#{typeCode} AND mat_no=#{matNo}
+    </delete>
+
+    <insert id="insertTypeMat" parameterType="cn.ewsd.material.model.MTypeMat">
+        INSERT INTO m_type_mat (`type_code`, `type_name`, `type_unit`, `mat_no`, `mat_code`, `assess_price`, `old_rate`, `old_limit`, `open_date`,
+                                `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+        VALUES (#{typeCode}, #{typeName}, #{typeUnit}, #{matNo}, #{matCode}, #{assessPrice}, #{oldRate}, #{oldLimit}, #{openDate},
+                #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+    </insert>
+
+    <update id="updateTypeMat" parameterType="cn.ewsd.material.model.MTypeMat">
+        UPDATE m_type_mat
+        <set>
+            <if test="oldRate!=null">`old_rate`=#{oldRate},</if>
+            <if test="oldLimit!=null">`old_limit`=#{oldLimit}</if>
+        </set>
+        WHERE type_code=#{typeCode} AND mat_no=#{matNo}
+    </update>
+</mapper>

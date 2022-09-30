@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'mStoreDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/repository/mStore/getPageSet'">
+            <thead>
+				<tr>
+					<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+					<th data-options="field:'storeNo',title:'仓库编号',sortable:true"></th>
+					<th data-options="field:'storeName',title:'仓库名称',sortable:true"></th>
+					<th data-options="field:'upDownName',title:'井上井下',sortable:true"></th>
+					<th data-options="field:'mngTeamName',title:'管理部门',sortable:true"></th>
+					<th data-options="field:'reserve1Name',title:'发放审核部门',sortable:true"></th>
+					<th data-options="field:'storeTypeName',title:'仓库类型',sortable:true"></th>
+					<th data-options="field:'storeLevelName',title:'仓库级别',sortable:true"></th>
+					<th data-options="field:'ifSafe',title:'安全仓库',sortable:true,formatter:function(value, row, index){
+						if(value == '1'){
+							return '是';
+						}else{
+							return '否';
+						}
+					}"></th>
+					<th data-options="field:'ifStock',title:'利库参考',sortable:true,formatter:function(value, row, index){
+						if(value == '1'){
+							return '是';
+						}else{
+							return '否';
+						}
+					}"></th>
+					<th data-options="field:'ifAssess',title:'领料是否考核',sortable:true,formatter:function(value, row, index){
+						if(value == '1'){
+							return '是';
+						}else{
+							return '否';
+						}
+					}"></th>
+					<th data-options="field:'ifControl',title:'是否控制库存',sortable:true,formatter:function(value, row, index){
+						if(value == '1'){
+							return '是';
+						}else{
+							return '否';
+						}
+					}"></th>
+				</tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="mStoreDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'mStoreDg'
+       }" style="display:none">
+		<ewsd:rbac str="mStoreAddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#mStoreDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'mStoreAddDg',
+               href:'/repository/mStore/edit',
+               height:450,
+               width:800,
+               buttonsGroup:[
+                   {text:'保存',url:'/repository/mStore/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="mStoreEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#mStoreDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'mStoreEditDg',
+               href:'/repository/mStore/edit',
+               url:'/repository/mStore/getDetailByUuid?uuid={uuid}',
+               height:450,
+               width:800,
+               buttonsGroup:[
+                   {text:'更新',url:'/repository/mStore/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'mStoreDg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/repository/mStore/delete">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#mStoreDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的供应商',param:'uuid:uuid'},
+	       url:'/repository/mStore/delete'">删除</a>
+		</ewsd:rbac>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#mStoreDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#mStoreDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

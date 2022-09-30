@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.TopicDocumentMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.system.model.TopicDocument" id="topicDocumentMap">
+        <result property="uuid" column="uuid"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="creator" column="creator"/>
+        <result property="createTime" column="create_time"/>
+        <result property="modifierId" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modifyTime" column="modify_time"/>
+        <result property="topicUuid" column="topic_uuid"/>
+        <result property="content" column="content"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator
+		  ,  	  	     			 create_time
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 topic_uuid
+		  ,  	  	     			 content
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.TopicDocument">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_topic_document
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.system.model.TopicDocument">
+		select  <include refid="Base_Column_List" />  from sys_topic_document where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.system.model.TopicDocument">
+		select  <include refid="Base_Column_List" />  from sys_topic_document
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_topic_document 
+	</select>
+	<select id="getDetailBytopicUuid" resultType="cn.ewsd.system.model.TopicDocument">
+		select * from sys_topic_document WHERE topic_uuid = #{arg0}
+	</select>
+
+    <insert id="executeSave" parameterType="cn.ewsd.system.model.TopicDocument">
+		insert into sys_topic_document
+		(
+			`uuid`, 
+			`creator_id`, 
+			`creator`, 
+			`create_time`,
+			`modifier_id`,
+			`modifier`, 
+			`modify_time`, 
+			`topic_uuid`, 
+			`content`
+		)
+		values
+		(
+			#{uuid}, 
+			#{creator_id}, 
+			#{creator}, 
+			#{create_time},
+			#{modifier_id},
+			#{modifier}, 
+			#{modify_time}, 
+			#{topic_uuid}, 
+			#{content}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.system.model.TopicDocument">
+		update sys_topic_document 
+		<set>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modifyTime != null">`modify_time` = #{modify_time}, </if>
+			<if test="topic_uuid != null">`topic_uuid` = #{topic_uuid}, </if>
+			<if test="content != null">`content` = #{content}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	<update id="updateTopicDocumentContent">
+		UPDATE sys_topic_document SET content = #{arg0} where topic_uuid = #{arg1}
+	</update>
+
+	<delete id="executeDelete">
+		delete from sys_topic_document where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from sys_topic_document where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

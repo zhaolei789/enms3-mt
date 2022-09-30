@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <table data-toggle="topjui-datagrid"
+                   data-options="id:'mSiteDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/material/mSite/getPageSet'">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'货位',sortable:true,checkbox:true"></th>
+                    <th data-options="field:'storeNo',title:'仓库编号',sortable:true"></th>
+                    <th data-options="field:'siteCode',title:'货位编号',sortable:true"></th>
+                    <th data-options="field:'siteName',title:'货位名称',sortable:true"></th>
+                    <th data-options="field:'remark',title:'货位说明',sortable:true"></th>
+                    <th data-options="field:'wordLevel',title:'名称简拼',sortable:true"></th>
+                    <!--<th data-options="field:'note',title:'备注',sortable:true"></th>
+                    <th data-options="field:'type',title:'类型',sortable:true"></th>
+                    <th data-options="field:'status',title:'状态',sortable:true"></th>
+                    <th data-options="field:'isDel',title:'0',sortable:true"></th>-->
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- 表格工具栏 -->
+    <div id="mSiteDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'mSiteDg'
+       }" style="display:none">
+        <ewsd:rbac str="mSiteAddDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#mSiteDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'mSiteAddDg',
+               href:'/material/mSite/add',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/material/mSite/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+        </ewsd:rbac>
+
+        <ewsd:rbac str="mSiteEditDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#mSiteDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'mSiteEditDg',
+               href:'/material/mSite/edit',
+               url:'/material/mSite/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/material/mSite/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'mSiteDg'}]}
+               ]
+           }">编辑</a>
+        </ewsd:rbac>
+
+        <ewsd:rbac str="/material/mSite/deleteBatch">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'doAjax',
+           extend:'#mSiteDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的数据',param:'uuid:uuid'},
+	       url:'/material/mSite/deleteBatch'">删除</a>
+        </ewsd:rbac>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#mSiteDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#mSiteDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

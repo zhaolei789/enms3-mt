@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="oldApplyForm" style="height:50%">
+		<div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+			<table id="oldApplyDg"></table>
+		</div>
+	</form>
+	<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+		<table id="detailDg"></table>
+	</div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="oldApplyDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'oldApplyDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">旧料仓库：</label>
+	<input data-toggle="topjui-combobox" id="storeQry" name="storeQry" value="" data-options="valueField:'storeNo',textField:'storeName',url:'/repository/mStore/getStoreList?storeType=r.storeType2.14&storeLevel=r.storeLevel.1',width:'150px',loadFilter:function(data){
+					data.unshift({storeNo:'', storeName:'--全部--'});
+					return data
+				}">
+
+	<label class="topjui-form-label" style="width:100px;float:none;display:inline-block">物料信息：</label>
+	<input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'" value="">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<br/>
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">领料单位：</label>
+	<input data-toggle="topjui-combobox" id="teamNo" name="teamNo" th:value="${teamNo}" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getUserDeptSet',width:'150px'">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">领用日期：</label>
+	<input id="occDate" name="occDate" th:value="${occDate}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">是否配送：</label>
+	<input data-toggle="topjui-combobox" id="ifSend" value="0" name="ifSend" data-options="width:'150px',valueField:'value',textField:'text',data:[
+    				{value:'0', text:'否'},
+    				{value:'1', text:'是'}
+    			]">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">配送地点：</label>
+	<input data-toggle="topjui-combobox" id="useAddr" name="useAddr" data-options="editable:true,valueField:'matAddr',textField:'matAddr',url:'/repository/mAddr/getAddr',width:'150px'">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">配送时间：</label>
+	<input name="sendTime" id="sendTime" value="" data-toggle="topjui-datetimebox" data-options="width:160,showSeconds:false">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">接货人：</label>
+	<input id="getEmp" data-toggle="topjui-textbox" name="getEmp" data-options="width:'150px'" value="">
+
+	<a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">提交申请</span>
+            <span class="l-btn-icon fa fa-save">&nbsp;</span>
+        </span>
+	</a>
+</div>
+
+	<div id="detailDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'detailDg'
+       }" style="display:none">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">日期：</label>
+		<input id="date1Qry" name="date1Qry" th:value="${date1Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+		<label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+		<input id="date2Qry" name="date2Qry" th:value="${occDate}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+		<label class="topjui-form-label" style="width:100px;float:none;display:inline-block">物料信息：</label>
+		<input id="matQry1" data-toggle="topjui-textbox" name="matQry1" data-options="width:'150px'" value="">
+
+		<a href="javascript:void(0)" id="searchBtn1" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+		</a>
+
+		<a href="javascript:void(0)" id="printBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">打印领料单</span>
+			<span class="l-btn-icon fa fa-print">&nbsp;</span>
+		</span>
+		</a>
+	</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#oldApplyDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/fix/oldApply/getPageSet',
+				queryParams:{
+					storeQry:$('#storeQry').iCombobox('getValue'),
+					matQry:$('#matQry').iTextbox('getValue')
+				},
+				columns:[ [
+					{
+						field:'uuid', sortable:false, title:'', checkbox:true
+					},{
+						field:'storeName', sortable:false, title:'仓库'
+					},{
+						field:'matCode', sortable:false, title:'物料编码'
+					},{
+						field:'matName', sortable:false, title:'物料描述'
+					},{
+						field:'matUnit', sortable:false, title:'单位'
+					},{
+						field:'matPrice', sortable:false, title:'原值单价', align:'right'
+					},{
+						field:'creator', sortable:false, title:'复用单价', formatter:function(value, row, index){
+							return (parseFloat(row.matPrice)*0.3).toFixed(2)
+						}
+					},{
+						field:'stockAmount', sortable:false, title:'库存数量', align:'right'
+					},{
+						field:'creatorId', sortable:false, title:'申请数', formatter:function(value, row, index){
+							return '<span class="textbox"><input class="textbox-text" type="number" id="amount_'+ row.uuid +'" name="amount_'+ row.uuid +'" value="" disabled /></span>'
+						}
+					},{
+						field:'modifier', sortable:false, title:'备注', formatter:function(value, row, index){
+							return '<span class="textbox"><input class="textbox-text" type="text" id="remark_'+ row.uuid +'" name="remark_'+ row.uuid +'" value="" disabled /></span>'
+						}
+					}
+				] ],
+				onCheck:function(index, row){
+					$('#amount_' + row.uuid +', #remark_'+ row.uuid).removeAttr('disabled');
+				},
+				onUncheck:function(index, row){
+					$('#amount_' + row.uuid +', #remark_'+ row.uuid).attr('disabled', 'disabled');
+				},
+				onCheckAll:function(rows){
+					$('[name^="amount_"], [name^="remark_"]').removeAttr("disabled");
+				},
+				onUncheckAll:function(rows){
+					$('[name^="amount_"], [name^="remark_"]').attr("disabled", 'disabled');
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#submitBtn').click(function(){
+				$('#oldApplyForm').iForm('submit', {
+					url:'/fix/oldApply/submit',
+					success:function(data){
+						data = $.parseJSON(data);
+						if(data.statusCode == 200){
+							$.iMessager.show({
+								title:data.title,
+								msg:data.message
+							})
+							reloadData();
+						} else {
+							$.iMessager.alert({
+								icon:'messager-error',
+								title:data.title,
+								msg:data.message
+							});
+						}
+					}
+				});
+			});
+
+			$('#detailDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/fix/oldApply/getDetailPageSet',
+				queryParams:{
+					matQry1:$('#matQry1').val(),
+					date1Qry:$('#date1Qry').iCombobox('getValue'),
+					date2Qry:$('#date2Qry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'drawNo', sortable:false, title:'',checkbox:true
+					},{
+						field:'uuid', sortable:false, title:'记录号', formatter:function(value, row, index){
+							return row.reserve2
+						}
+					},{
+						field:'drawStepName', sortable:false, title:'申领状态'
+					},{
+						field:'applyDate', sortable:false, title:'申请日期', align:'right', formatter:function(value, row, index){
+							return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+						}
+					},{
+						field:'storeName', sortable:false, title:'仓库'
+					},{
+						field:'outDate', sortable:false, title:'发放日期', align:'right', formatter:function(value, row, index){
+							if(value!=null && value!=''){
+								return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+							}else{
+								return '';
+							}
+						}
+					},{
+						field:'matCode', sortable:false, title:'物料编码'
+					},{
+						field:'matName', sortable:false, title:'物料描述'
+					},{
+						field:'matUnit', sortable:false, title:'单位'
+					},{
+						field:'applyAmount', sortable:false, title:'申领数量', align:'right'
+					},{
+						field:'outAmount', sortable:false, title:'实发数量', align:'right'
+					},{
+						field:'matPrice', sortable:false, title:'原值单价', align:'right'
+					},{
+						field:'matBala', sortable:false, title:'原值金额', align:'right'
+					},{
+						field:'price1', sortable:false, title:'复用单价', align:'right'
+					},{
+						field:'fixBala', sortable:false, title:'复用金额', align:'right'
+					},{
+						field:'ifSend', sortable:false, title:'是否配送', fomatter:function(value, row, index){
+							if(value=='1'){
+								return '是'
+							}else{
+								return '否'
+							}
+						}
+					},{
+						field:'useAddr', sortable:false, title:'配送地点'
+					},{
+						field:'pickDate', sortable:false, title:'配送时间', formatter:function(value, row, index) {
+							if (value != null && value != '') {
+								var s = value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+								if (row.pickTime != '') {
+									s += ' ' + row.pickTime.substring(0, 2)
+								}
+								return s
+							} else {
+								return '';
+							}
+						}
+					},{
+						field:'applyInfo', sortable:false, title:'备注'
+					}
+				] ],
+				onLoadSuccess:function (data){
+					if(data.rows!=null && data.rows.length>0){
+						for(var i=0; i<data.rows.length; i++){
+							var row = data.rows[i];
+							if(row.drawStep!='7202T'){
+								$('[value="'+ row.drawNo +'"]').attr('disabled', 'disabled')
+							}
+						}
+					}
+				}
+			});
+
+			$('#searchBtn1').click(function(){
+				reloadDetail();
+			});
+
+			$('#printBtn').click(function(){
+				var drawNos = "";
+				$('[name="drawNo"]:checked:not(:disabled)').each(function(i){
+					drawNos += (i==0 ? "" : ",") + $(this).val();
+				});
+				if(drawNos==''){
+					$.iMessager.alert({
+						icon:'messager-error',
+						title:'提示消息',
+						msg:'请选择要打印的料单！'
+					});
+					return;
+				}
+				window.open("/fix/oldApply/print?drawNos="+drawNos, '_blank');
+			})
+		})
+
+		function reloadData(){
+			$('#oldApplyDg').iDatagrid('reload',{
+				storeQry:$('#storeQry').iCombobox('getValue'),
+				matQry:$('#matQry').iTextbox('getValue')
+			});
+		}
+
+		function reloadDetail(){
+			$('#detailDg').iDatagrid('reload', {
+				matQry1:$('#matQry1').val(),
+				date1Qry:$('#date1Qry').iCombobox('getValue'),
+				date2Qry:$('#date2Qry').iCombobox('getValue')
+			})
+		}
+	</script>
+
+</th:block>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.TCostCenterMapper">
+	<select id="getPageSet" resultType="cn.ewsd.material.model.TCostCenter">
+        SELECT cc.center_no, center_name, move_type, di.text move_type_name, GROUP_CONCAT(ct.dept_no) dept_no, GROUP_CONCAT(o.text) dept_name
+        FROM t_cost_center cc
+        LEFT JOIN t_center_team ct ON cc.center_no=ct.center_no
+        LEFT JOIN sys_organization o ON o.id=ct.dept_no
+        LEFT JOIN sys_dic_item di ON di.value=cc.move_type
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+    <select id="checkCostCenterExistByNoOrName" resultType="java.lang.Integer">
+        SELECT COUNT(center_no) FROM t_cost_center WHERE center_no=#{centerNo} OR center_name=#{centerName}
+    </select>
+    
+    <insert id="executeSave" parameterType="cn.ewsd.material.model.TCostCenter">
+        INSERT INTO t_cost_center (`center_no`, `center_name`, `move_type`,
+                             `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+        VALUES (#{centerNo}, #{centerName}, #{moveType},
+                #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+    </insert>
+
+    <insert id="saveCenterTeam">
+        INSERT INTO t_center_team (`center_no`, `dept_no`) VALUES (#{centerNo}, #{deptNo})
+    </insert>
+
+    <select id="queryObject" resultType="cn.ewsd.material.model.TCostCenter">
+        SELECT cc.center_no, center_name, move_type, GROUP_CONCAT(ct.dept_no) dept_no
+        FROM t_cost_center cc
+        LEFT JOIN t_center_team ct ON cc.center_no=ct.center_no
+        WHERE cc.center_no=#{centerNo}
+    </select>
+
+    <update id="executeUpdate" parameterType="cn.ewsd.material.model.TCostCenter">
+        UPDATE t_cost_center
+        <set>
+            <if test="centerName != null">`center_name` = #{centerName}, </if>
+            <if test="moveType != null">`move_type` = #{moveType}, </if>
+            <if test="modifierId != null">`modifier_id` = #{modifierId}, </if>
+            <if test="modifier != null">`modifier` = #{modifier}, </if>
+            <if test="modifyTime != null">`modify_time` = #{modifyTime}</if>
+        </set>
+        WHERE center_no = #{centerNo}
+    </update>
+
+    <delete id="deleteCenterTeam">
+        DELETE FROM t_center_team WHERE center_no=#{centerNo}
+        <if test="deptNo!=null">
+            AND dept_no=#{deptNo}
+        </if>
+    </delete>
+
+    <delete id="executeDelete">
+        DELETE FROM t_cost_center WHERE center_no = #{centerNo}
+    </delete>
+
+    <select id="getTeamCenter" resultType="cn.ewsd.material.model.TCostCenter">
+        SELECT cc.center_no, CONCAT(cc.center_no, '-', cc.center_name) center_name
+        FROM t_cost_center cc
+        LEFT JOIN t_center_team ct ON cc.center_no=ct.center_no
+        WHERE ct.dept_no=#{teamNo}
+    </select>
+
+    <select id="getMoveType" resultType="java.lang.String">
+        SELECT move_type FROM t_cost_center WHERE center_no=#{centerNo}
+    </select>
+
+    <select id="getCenterSet" resultType="cn.ewsd.material.model.TCostCenter">
+        SELECT cc.center_no, cc.center_name
+        FROM t_cost_center cc
+    	WHERE 1=1
+    	<if test='_parameter !=""'>
+            AND EXISTS (SELECT '1' FROM t_center_team WHERE dept_no IN
+            <foreach collection="_parameter.split(',')" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+            )
+        </if>
+    	ORDER BY cc.center_no
+    </select>
+    
+    <select id="getCenterTeam" resultType="cn.ewsd.material.model.TCostCenter">
+        SELECT center_no, dept_no
+        FROM t_center_team
+        WHERE center_no=#{centerNo}
+    </select>
+
+    <select id="getCenterList" resultType="cn.ewsd.material.model.TCostCenter">
+        SELECT * FROM t_cost_center
+    </select>
+</mapper>

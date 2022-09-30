@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <!-- 避免IE使用兼容模式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="keywords" content='JAVA开发平台,快速开发平台,EasyUI开发平台,BPM开发平台,流程设计器,流程设计'/>
+    <meta name="description"
+          content='矿软企业级快速开发平台，可以应用在任何J2EE项目的开发中，尤其适合企业管理信息系统（EMIS）、内部办公系统（OA）、企业资源计划系统（ERP）、客户关系管理系统（CRM）等。'/>
+    <!-- 浏览器标签图片 -->
+    <!--href="/topjui/images/favicon.ico"-->
+    <link rel="shortcut icon" th:href="${sysConfig.companyBrowserIcon}"/>
+    <title th:text="${sysConfig.systemName}"></title>
+
+    <!-- 浏览器标签图片 -->
+    <!--<link rel="shortcut icon" href="/topjui/image/favicon.ico"/>-->
+    <!-- TopJUI框架样式 -->
+    <link type="text/css" href="/topjui/themes/default/topjui.core.min.css" rel="stylesheet">
+    <!--<link type="text/css"
+          href="/topjui/themes/default/topjui.blue.css"
+          rel="stylesheet" id="dynamicTheme"/>-->
+    <link type="text/css"
+          href="/topjui/themes/default/topjui.smartness-blue.css"
+          rel="stylesheet" id="dynamicTheme"/>
+    <link type="text/css" href="/public/css/topjui.index.css" rel="stylesheet">
+    <link type="text/css" href="/topjui/themes/default/sidemenu_style.css" rel="stylesheet">
+    <!-- FontAwesome字体图标 -->
+    <link type="text/css" href="/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
+    <!-- layui框架样式 -->
+    <link type="text/css" href="/plugins/layui/css/layui.css" rel="stylesheet"/>
+    <!-- jQuery相关引用 -->
+    <script type="text/javascript" src="/plugins/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/plugins/jquery/jquery.cookie.js"></script>
+    <!-- TopJUI框架配置 -->
+    <script type="text/javascript" src="/public/js/topjui.config.js"></script>
+    <script type="text/javascript">
+        if (window.location.pathname == "/system/index/index") myConfig.config.mainPage = true;
+    </script>
+    <!-- TopJUI框架核心 -->
+    <script type="text/javascript" src="/topjui/js/topjui.core.min.js"></script>
+    <!-- TopJUI中文支持 -->
+    <script type="text/javascript" src="/topjui/js/locale/topjui.lang.zh_CN.js"></script>
+    <!-- 公共函数 -->
+    <script type="text/javascript" src="/public/js/common.js"></script>
+    <!-- layui框架js -->
+    <script type="text/javascript" src="/plugins/layui/layui.js"></script>
+
+    <script type="text/javascript">
+        $(window).load(function () {
+            $("#loading").fadeOut();
+        });
+        var _ROOT_PATH = "${pageContext.request.contextPath}";
+    </script>
+    <script type="text/javascript" src="/public/js/topjui.index.js" charset="utf-8"></script>
+    <script>
+        $(function () {
+            $('#ulMenu>li').hover(
+                function () {
+                    var m = $(this).data('menu');
+                    if (!m) {
+                        m = $(this).find('ul').clone();
+                        m.appendTo(document.body);
+                        $(this).data('menu', m);
+                        var of = $(this).offset();
+                        m.css({left: of.left, top: of.top + this.offsetHeight});
+                        m.hover(function () {
+                            clearTimeout(m.timer);
+                        }, function () {
+                            m.hide()
+                        });
+                    }
+                    m.show();
+                }, function () {
+                    var m = $(this).data('menu');
+                    if (m) {
+                        m.timer = setTimeout(function () {
+                            m.hide();
+                        }, 100);//延时隐藏，时间自定义，100ms
+                    }
+                }
+            );
+        });
+    </script>
+    <style>
+        .moreBox {
+            text-align: center;
+            padding: 7px 0 5px;
+            width: 79px;
+            height: 54px;
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .moreBox:hover + #moreMenu {
+            display: block;
+        }
+
+        #moreMenu {
+            position: fixed;
+            display: none;
+        }
+
+        #moreMenu:hover {
+            display: block;
+        }
+
+        #moreMenu ul {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+        }
+
+    </style>
+</head>
+
+<body>
+<!--遮罩层-->
+<div id="loading" class="loading-wrap">
+    <div class="loading-content">
+        <div class="loading-round"></div>
+        <div class="loading-dot"></div>
+    </div>
+</div>
+<div id="mm" class="submenubutton" style="width: 140px;display: none;">
+    <div id="mm-tabclose" name="6" iconCls="fa fa-refresh">刷新</div>
+    <div class="menu-sep"></div>
+    <div id="Div1" name="1" iconCls="fa fa-close">关闭</div>
+    <div id="mm-tabcloseother" name="3">关闭其他</div>
+    <div id="mm-tabcloseall" name="2">关闭全部</div>
+    <div class="menu-sep"></div>
+    <div id="mm-tabcloseright" name="4">关闭右侧标签</div>
+    <div id="mm-tabcloseleft" name="5">关闭左侧标签</div>
+    <div class="menu-sep"></div>
+    <div id="mm-newwindow" name="7">新窗口中打开</div>
+</div>
+
+<div data-toggle="topjui-layout" data-options="id:'index_layout',fit:true">
+
+    <div id="north" class="banner" data-options="region:'north',border:false,split:false"
+         style="height: 50px; padding:0;margin:0; overflow: hidden;">
+        <div class="nav-bar">
+            <div class="nav-left webname">
+                <!--<span th:class="${sysConfig.companyPlatformIcon}" ></span>-->
+                <span><img th:src="@{(${sysConfig.companyPlatformIcon})}" style="height: 35px;"></img></span>
+                <span th:text="${sysConfig.systemNameShort}"></span>
+                <span class="collapseMenu " style="text-align: center;cursor: pointer;font-size: 18px;">
+                    <span class="fa fa-chevron-circle-left"></span>
+                </span>
+            </div>
+            <!--<a href="javascript:void(0)" data-toggle="topjui-menubutton"
+                          data-options="iconCls:'fa fa-user',hasDownArrow:false"
+                          style="color:#fff;" th:text="${userInfo.userNameId}+'（'+${userInfo.userName}+'）'"></a>-->
+            <div class="nav-right" id="nav-right">
+                <span style=" padding-right: 8px; height: 50px; line-height: 50px;">
+                        当前用户：<th th:text="${userInfo.userName+'('+userInfo.orgName+')'}"></th>
+                        <!--<a href="javascript:void(0)" id="mb3" data-toggle="topjui-menubutton"
+                           data-options="menu:'#mm3',iconCls:'fa fa-cog',hasDownArrow:true" style="color:#fff;">设置</a>
+                        <div id="mm3" style="width:74px;">
+                            <div data-options="iconCls:'fa fa-info-circle'" onclick="javascript:personal(0)">个人信息</div>
+                            <div class="menu-sep"></div>
+                            <div data-options="iconCls:'fa fa-key'" onclick="javascript:modifyPwd(0)">修改密码</div>
+                        </div>|-->
+                        <!--<a href="javascript:void(0)" id="mb2" data-toggle="topjui-menubutton"
+                           data-options="menu:'#mm2',iconCls:'fa fa-tree',hasDownArrow:true" style="color:#fff;">主题</a>
+                        <div id="mm2" style="width:180px;">
+                            <div data-options="iconCls:'fa fa-tree blue'" onclick="changeTheme('smartness-blue')">默认主题</div>
+                            <div data-options="iconCls:'fa fa-tree'" onclick="changeTheme('black')">黑色主题</div>
+                            <div data-options="iconCls:'fa fa-tree'" onclick="changeTheme('blacklight')">黑色主题-亮</div>
+                            <div data-options="iconCls:'fa fa-tree red'" onclick="changeTheme('red')">红色主题</div>
+                            <div data-options="iconCls:'fa fa-tree red'" onclick="changeTheme('redlight')">红色主题-亮</div>
+                            <div data-options="iconCls:'fa fa-tree green'" onclick="changeTheme('green')">绿色主题</div>
+                            <div data-options="iconCls:'fa fa-tree green'" onclick="changeTheme('greenlight')">绿色主题-亮</div>
+                            <div data-options="iconCls:'fa fa-tree purple'" onclick="changeTheme('purple')">紫色主题</div>
+                            <div data-options="iconCls:'fa fa-tree purple'" onclick="changeTheme('purplelight')">紫色主题-亮</div>
+                            <div data-options="iconCls:'fa fa-tree blue'" onclick="changeTheme('blue')">蓝色主题</div>
+                            <div data-options="iconCls:'fa fa-tree blue'" onclick="changeTheme('bluelight')">蓝色主题-亮</div>
+                            <div data-options="iconCls:'fa fa-tree orange'" onclick="changeTheme('yellow')">橙色主题</div>
+                            <div data-options="iconCls:'fa fa-tree orange'" onclick="changeTheme('yellowlight')">橙色主题-亮</div>
+                        </div>-->
+                        <!--<a href="javascript:void(0)" onclick="logout()" data-toggle="topjui-menubutton"
+                           data-options="iconCls:'fa fa-sign-out',hasDownArrow:false" style="color:#fff;" th:text="#{user.login.signOut}">注销</a>-->
+                    </span>
+            </div>
+            <div class="nav-center">
+                <a class="nav-btn nav-left-btn topmenu " href="#" style="float: left;"><i class="fa fa-angle-double-left"
+                                                                                          aria-hidden="true"></i></a>
+                <a class="nav-btn nav-right-btn topmenu" href="#" style="float: right;"><i class="fa fa-angle-double-right"
+                                                                                           aria-hidden="true"></i></a>
+                <div style="overflow: hidden;position: relative;text-align: left">
+                    <ul class="nav-group" style="font-size:0">
+                        <li th:each="system2 : ${systemList}" th:id="${system2.id}" th:title="${system2.text}" th:data-url="${system2.url}"
+                            class="topmenu" >
+                            <div class="l-btn-text bannerMenu" href="javascript:void(0)">
+                                <p><lable th:class="${system2.iconCls}" ></lable></p>
+                                <p th:text="${system2.text}" style="padding: 0 5px ;overflow: hidden;text-overflow:ellipsis;white-space: nowrap;"></p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="west"
+         data-options="region:'west',split:true,width:230,border:false,headerCls:'border_right',bodyCls:'border_right'"
+         title="" iconCls="fa fa-dashboard">
+        <div data-options="region:'north',title:'North Title',split:true" class="serchBox">
+            <input type="text" name="menuName"
+                   data-toggle="topjui-combobox" id="menuName"
+                   data-options="prompt:'输入菜单名称',editable:true,
+                       onChange:menuOnChange,
+                       onClick:menuOnClick,
+                       valueField:'url',
+                       textField:'text',
+                       url:'/system/authAccess/getMenuListByText',
+                       panelHeight:164">
+        </div>
+        <div id="RightAccordion"  data-toggle="topjui-accordion" th:attr="data-options='fit: '+${accordionFit}+',border: false'"  style="padding-right: 10px;padding-top: 34px;">
+
+        </div>
+    </div>
+
+    <div id="center" data-options="region:'center',border:false" style="overflow:hidden;">
+        <div id="index_tabs" style="width:100%;height:100%">
+            <div title="系统首页" iconCls="fa fa-home" data-options="border:true,
+            content:'<iframe src=\'/system/portal/index\' scrolling=\'auto\' frameborder=\'0\' style=\'width:100%;height:100%;\'></iframe>'"></div>
+        </div>
+    </div>
+
+    <!--<div data-options="region:'south',border:true"
+         style="text-align:center;height:30px;line-height:30px;border-bottom:0;overflow:hidden;">
+        <span style="float:left;padding-left:5px;width:30%;text-align: left;">当前用户：<th th:text="${userInfo.userName+'('+userInfo.orgName+')'}"></th></span>
+        <span style="padding-right:5px;width:40%"> © <span th:text="${sysConfig.systemVersionPublishDate}"></span> <span th:text="${sysConfig.companyName}"></span>&lt;!&ndash;<a href="https://mine-soft.cn" target="_blank" th:text="${sysConfig.companyName}"></a>&ndash;&gt;</span>
+        <span style="float:right;padding-right:5px;width:30%;text-align: right;" th:text="${sysConfig.systemVersion}"></span>
+        &lt;!&ndash;<span style="float:right;padding-right:5px;width:30%;text-align: right;" id="showNowDate"></span>&ndash;&gt;
+    </div>-->
+</div>
+
+<!--[if lte IE 8]>
+<div id="ie6-warning">
+    <p>您正在使用低版本浏览器，在本页面可能会导致部分功能无法使用，建议您升级到
+        <a href="http://www.microsoft.com/china/windows/internet-explorer/" target="_blank">IE9或以上版本的浏览器</a>
+        或使用<a href="http://se.360.cn/" target="_blank">360安全浏览器</a>的极速模式浏览
+    </p>
+</div>
+<![endif]-->
+
+
+<!--建立websocket链接-->
+<!--<script src="/webjars/sockjs-client/1.1.2/sockjs.min.js"></script>
+<script src="/webjars/stomp-websocket/2.3.3-1/stomp.min.js"></script>-->
+<!--thymleaf js获取变量-->
+<script th:inline="javascript">
+    var userNameId = [[${userInfo.userNameId}]];
+
+    //根据菜单模糊名称查询菜单数据
+    function menuOnChange() {
+        //获取选择的菜单属性
+        var menuNameText = $('#menuName').iCombobox('getText');
+        //根据菜单名称模糊查询菜单数据
+        var url ='/system/authAccess/getMenuListByText';
+        var postData = {
+            text: menuNameText
+        }
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: postData,
+            dataType: 'json',
+            success: function (res) {
+              if (res.length > 0){
+                  $('#menuName').iCombobox('loadData',res);
+              }else {
+                  return;
+              }
+            }
+        })
+    }
+
+    //跳转页面
+    function menuOnClick(record) {
+        //获取选中菜单数据进行页面跳转
+        //打开Tab窗口
+            var iframe = '<iframe src="' + record.url + '" scrolling="auto" frameborder="0" style="width:100%;height:100%;"></iframe>';
+            var t = $('#index_tabs');
+            var opts = {
+                id: record.id,
+                title: record.text,
+                closable: typeof(record.closable) != "undefined" ? record.closable : true,
+                iconCls: record.iconCls ? record.iconCls : 'fa fa-file-text-o',
+                content: iframe,
+                border: record.border || true,
+                fit: true
+            };
+            if (t.iTabs('exists', opts.title)) {
+                t.iTabs('select', opts.title);
+            } else {
+                var lastMenuClickTime = $.cookie("menuClickTime");
+                var nowTime = new Date().getTime();
+                if ((nowTime - lastMenuClickTime) >= 500) {
+                    $.cookie("menuClickTime", new Date().getTime());
+                    t.iTabs('add', opts);
+                } else {
+                    $.iMessager.show({
+                        title: '温馨提示',
+                        msg: '操作过快，请稍后重试！'
+                    });
+                }
+            }
+
+
+    }
+</script>
+<!--<script type="text/javascript">
+    var nowTime ;
+    function play(){
+        var time = new Date();
+        nowTime = time.getFullYear()+"年"+(time.getMonth()+1)+"月"+time.getDate()+"日"+time.getHours()+"时"+time.getMinutes()+"分"+time.getSeconds()+"秒";
+        document.getElementById("showNowDate").innerHTML = "当前时间："+nowTime;
+    }
+    setInterval(play,1000);//每一秒执行一次
+</script>-->
+
+</body>
+</html>

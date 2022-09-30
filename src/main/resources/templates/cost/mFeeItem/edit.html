@@ -1,0 +1,106 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="itemNo" name="itemNo">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">所属部门</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="teamNo" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',loadFilter:function(data){
+					data.unshift({id:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">指标名称</label>
+			<div class="topjui-input-block">
+				<input type="text" name="itemName" data-toggle="topjui-textbox" data-options="prompt:'',required:true">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">计量单位</label>
+			<div class="topjui-input-block">
+				<input type="text" name="itemUnit" data-toggle="topjui-textbox" data-options="prompt:''">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">考核单价</label>
+			<div class="topjui-input-block">
+				<input type="text" name="assPrice" data-toggle="topjui-numberbox" data-options="prompt:''">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">考核系数</label>
+			<div class="topjui-input-block">
+				<input type="text" name="assRatio" data-toggle="topjui-numberbox" data-options="prompt:''">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">奖励系数</label>
+			<div class="topjui-input-block">
+				<input type="text" name="awardRatio" data-toggle="topjui-numberbox" data-options="prompt:''">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">惩罚系数</label>
+			<div class="topjui-input-block">
+				<input type="text" name="punishRatio" data-toggle="topjui-numberbox" data-options="prompt:''">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">是否启用</label>
+			<div class="topjui-input-block">
+				<select id="ifUse" data-toggle="topjui-combobox" name="ifUse" >
+					<option value="1" selected>是</option>
+					<option value="0">否</option>
+				</select>
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">产量类型</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="outType" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.outType',required:true,loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">是否输入</label>
+			<div class="topjui-input-block">
+				<select id="ifEnter" data-toggle="topjui-combobox" name="ifEnter" >
+					<option value="1" selected>是</option>
+					<option value="0">否</option>
+				</select>
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">考核周期</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="assCycle" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.assCycle',required:true,loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">考核总项目</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="upItem" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.assessUpItem',required:true,loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">排序序号</label>
+			<div class="topjui-input-block">
+				<input type="text" name="orderNo" data-toggle="topjui-numberbox" data-options="prompt:''">
+			</div>
+		</div>
+	</div>
+</div>

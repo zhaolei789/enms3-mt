@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+
+<div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'center',title:'${gltitlezb1}',fit:false,split:true,border:false,bodyCls:'border_right_bottom'"
+         style="height:60%">
+
+            <table data-toggle="topjui-datagrid"
+               data-options="id:'${pathName1}Dg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/${systemName1}/${pathName1}/getPageSet',
+               childTab: [{id:'southTabs'}]">
+                <thead>
+                <tr>
+                #foreach($column in $columns1)
+                #if($column.columnName == "uuid")
+				<th data-options="field:'${column.columnNameCamelCase}',title:'${column.comments}',sortable:true,checkbox:true"></th>
+				#else
+				<th data-options="field:'${column.columnNameCamelCase}',title:'${column.comments}',sortable:true"></th>
+				#end
+                    #end
+            </tr>
+             </thead>
+            </table>
+    </div>
+        <div data-options="region:'south',fit:false,split:true,border:false"
+             style="height:40%">
+            <div data-toggle="topjui-tabs"
+                 data-options="id:'southTabs',
+             fit:true,
+             border:false,
+             parentGrid:{
+                 type:'datagrid',
+                 id:'${pathName1}Dg',
+                 param:'#foreach($column in ${glgl})${column}:${pk1.attrname},#end'}">
+             #foreach($column in $list)
+
+             <div title="${column.title}" data-options="id:'tab${velocityCount}',iconCls:'fa fa-th'">
+                    <table data-toggle="topjui-datagrid"
+                           data-options="id:'${column.pathName}Dg',
+                   singleSelect:true,
+                     url:'/${systemName1}/${column.pathName}/getPageSet'">
+                        <thead>
+                        <tr>
+                         #foreach($column in ${column.clouns})
+                            #if($column.columnName == "uuid")
+				        <th data-options="field:'${column.columnNameCamelCase}',title:'${column.comments}',sortable:true,checkbox:true"></th>
+				            #else
+			            	<th data-options="field:'${column.columnNameCamelCase}',title:'${column.comments}',sortable:true"></th>
+			            	#end
+                        #end
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            #end
+
+            </div>
+        </div>
+    </div>
+
+
+
+<div id="${pathName1}Dg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'${pathName1}Dg'
+       }" style="display:none">
+		<ewsd:rbac str="${pathName1}AddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#${pathName1}Dg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'${pathName1}AddDg',
+               href:'/${systemName1}/${pathName1}/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/${systemName1}/${pathName1}/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="${pathName1}EditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#${pathName1}Dg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'${pathName1}EditDg',
+               href:'/${systemName1}/${pathName1}/edit',
+               url:'/${systemName1}/${pathName1}/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/${systemName1}/${pathName1}/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'${pathName1}Dg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/${systemName1}/${pathName1}/deleteBatch">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#${pathName1}Dg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/${systemName1}/${pathName1}/deleteBatch'">删除</a>
+		</ewsd:rbac>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#${pathName1}Dg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#${pathName1}Dg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+</div>
+<!-- 针对子表 -->
+#foreach($column in $list)
+<div id="${column.pathName}Dg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'${column.pathName}Dg'
+       }" style="display:none">
+		<ewsd:rbac str="${column.pathName}AddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#${column.pathName}Dg-toolbar',
+           btnCls:'topjui-btn-green',
+           parentGrid:{
+                        type:'datagrid',
+                        id:'${pathName1}Dg',param:'${column.relation}:uuid'
+                        },
+           dialog:{
+               id:'${column.pathName}AddDg',
+               href:'/${systemName1}/${column.pathName}/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/${systemName1}/${column.pathName}/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="${column.pathName}EditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#${column.pathName}Dg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'${column.pathName}EditDg',
+               href:'/${systemName1}/${column.pathName}/edit',
+               url:'/${systemName1}/${column.pathName}/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/${systemName1}/${column.pathName}/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'${column.pathName}Dg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/${systemName1}/${column.pathName}/deleteBatch">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#${column.pathName}Dg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/${systemName1}/${column.pathName}/deleteBatch'">删除</a>
+		</ewsd:rbac>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#${column.pathName}Dg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#${column.pathName}Dg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+</div>
+#end
+
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.WzscPlanMapper">
+	<select id="getPageSet" resultType="cn.ewsd.material.model.WzscPlan">
+        SELECT ep.*, cc.center_name, IFNULL(erp.amount, 0) amount, (ep.mat_price*ep.mat_amount) mat_bala, di1.text plan_type_name, di2.text item_type_name, di3.text mat_addr_name
+        FROM m_ep_plan ep
+        LEFT JOIN t_cost_center cc ON cc.center_no=ep.center_no
+        LEFT JOIN sys_dic_item di1 ON di1.value=ep.plan_type
+        LEFT JOIN sys_dic_item di2 ON di2.value=ep.item_type
+        LEFT JOIN sys_dic_item di3 ON di3.value=ep.mat_addr
+        LEFT JOIN (SELECT reserve_no, SUM(invoice_amount) amount FROM m_erp_mat GROUP BY reserve_no) erp ON ep.ep_id=erp.reserve_no
+        WHERE ep.create_date LIKE CONCAT(#{monthQry}, '%')
+          AND ep.center_no IN (SELECT center_no FROM t_center_team
+                               WHERE dept_no IN
+        <foreach collection="userDeptIds.split(',')" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+                               )
+        <if test='codeQry!=""'>
+            AND ep.mat_code LIKE CONCAT(#{codeQry}, '%')
+        </if>
+        <if test='typeQry!=""'>
+            AND ep.item_type=#{typeQry}
+        </if>
+        <if test='centerQry!=""'>
+            AND ep.center_no=#{centerQry}
+        </if>
+        <if test='purcQry!=""'>
+            AND (ep.purchase_no LIKE CONCAT(#{purcQry}, '%') OR ep.ep_id LIKE CONCAT(#{purcQry}, '%'))
+        </if>
+        <if test='matTypeQry!=""'>
+            AND CONCAT(ep.erp_type, ep.type_name) LIKE CONCAT('%', #{matTypeQry}, '%')
+        </if>
+        <if test='nameQry!=""'>
+            AND ep.mat_name LIKE CONCAT('%', #{nameQry}, '%')
+        </if>
+        <if test='statusQry=="m.supplyFlag.0"'>
+            AND IFNULL(erp.amount, 0)=0
+        </if>
+        <if test='statusQry=="m.supplyFlag.2"'>
+            AND (ep.mat_amount - IFNULL(erp.amount, 0)) &gt; 0 AND IFNULL(erp.amount, 0)!=0
+        </if>
+        <if test='statusQry=="m.supplyFlag.1"'>
+            AND (ep.mat_amount-IFNULL(erp.amount, 0)) &lt;= 0
+        </if>
+    </select>
+
+    <delete id="deleteByEpId">
+        DELETE FROM m_ep_plan WHERE ep_id=#{epId}
+    </delete>
+
+    <delete id="deleteByUuid">
+        DELETE FROM m_ep_plan WHERE uuid=#{uuid}
+    </delete>
+
+    <insert id="excuteSave" parameterType="cn.ewsd.material.model.WzscPlan">
+        INSERT INTO m_ep_plan (`ep_id`, `mat_code`, `mat_name`, `mat_unit`, `erp_type`, `type_name`, `mat_amount`, `mat_price`, `factory_no`, `center_no`, `mat_addr`, `item_type`,
+                               `wbs`, `plan_type`, `request`, `purchase_no`, `purchase_list`, `remark`, `create_date`, `request_date`, `status`, `ecc_msg`, `supplier`, `supplier_name`, `follow_no`,
+                               `uuid`, `create_time`, `creator_id`, `creator`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+        VALUES (#{epId}, #{matCode}, #{matName}, #{matUnit}, #{erpType}, #{typeName}, #{matAmount}, #{matPrice}, #{factoryNo}, #{centerNo}, #{matAddr}, #{itemType},
+                #{wbs}, #{planType}, #{request}, #{purchaseNo}, #{purchaseList}, #{remark}, #{createDate}, #{requestDate}, #{status}, #{eccMsg}, #{supplier}, #{supplierName}, #{followNo},
+                #{uuid}, #{createTime}, #{creatorId}, #{creator}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+    </insert>
+    
+    <update id="updateEpPlan" parameterType="cn.ewsd.material.model.WzscPlan">
+        UPDATE m_ep_plan
+        <set>
+            <if test="request!=null">`request`=#{request}</if>
+        </set>
+        WHERE ep_id=#{epId}
+    </update>
+
+    <select id="getByUuid" resultType="cn.ewsd.material.model.WzscPlan">
+        SELECT * FROM m_ep_plan WHERE uuid=#{uuid}
+    </select>
+
+    <select id="getEpPlan" resultType="cn.ewsd.material.model.WzscPlan">
+        SELECT ep.*, m.mat_no, RIGHT(CONCAT('00000', RTRIM(ep.purchase_list)) ,5) as purc_list
+        FROM m_ep_plan ep
+        LEFT JOIN m_material m ON CONCAT('X', ep.mat_code)=m.mat_code
+        WHERE ep.ep_id=#{epId}
+    </select>
+    
+    <select id="getArriveQryPageSet" resultType="cn.ewsd.material.model.WzscPlan">
+        SELECT ep.*, av.amount arrive_amount, cc.center_name, av.arrive_date, (ep.mat_amount * ep.mat_price) mat_bala,
+               (IFNULL(av.amount, 0) - IFNULL(ao.amount, 0)) stock_amount, ao.amount out_amount, (IFNULL(ao.amount, 0) * ep.mat_price) out_bala,
+               (IFNULL(av.amount, 0) * ep.mat_price) arrive_bala,
+               (IFNULL(av.amount, 0) - IFNULL(ao.amount,0)) * ep.mat_price stock_bala
+        FROM m_ep_plan ep
+        LEFT JOIN (SELECT i.reserve_no, MIN(i.bill_date) arrive_date, SUM(i.bill_amount) amount
+                   FROM m_in i
+                   WHERE data_src='m.dataSrc.1' AND in_step='7201F'
+                   <if test="reserveQry!=''">
+                       AND i.reserve_no LIKE CONCAT('%', #{reserveQry}, '%')
+                   </if>
+                   GROUP BY i.reserve_no) av ON ep.ep_id=av.reserve_no
+        LEFT JOIN (SELECT o.reserve_no, SUM(o.out_amount) amount
+                   FROM m_out o
+                   WHERE o.data_src='m.dataSrc.3' AND o.draw_step='7202F'
+                   GROUP BY o.reserve_no) ao ON ep.ep_id=ao.reserve_no
+        LEFT JOIN t_cost_center cc ON ep.center_no=cc.center_no
+        WHERE ep.create_date LIKE CONCAT(#{monthQry}, '%')
+          AND ep.center_no IN (SELECT dept_code
+                               FROM sys_organization
+                               WHERE id IN
+                               <foreach collection="userDeptIds.split(',')" item="id" index="index" open="(" close=")" separator=",">
+                                    #{id}
+                               </foreach>)
+          <!--AND EXISTS (SELECT '1' FROM m_plan WHERE reserve_no=ep.ep_id AND reserve_no!='')-->
+          <if test="centerQry!=''">
+              AND ep.center_no=#{centerQry}
+          </if>
+          <if test="reserveQry!=''">
+              AND ep.ep_id LIKE CONCAT('%', #{reserveQry}, '%')
+          </if>
+          <if test="matCodeQry!=''">
+              AND ep.mat_code LIKE CONCAT(#{matCodeQry}, '%')
+          </if>
+          <if test="over3Qry!=''">
+              AND (DATE_FORMAT(DATE_SUB(STR_TO_DATE(av.arrive_date, '%Y%m%d'), INTERVAL 90 DAY), '%Y%m%d') &lt; #{nowDate} AND IFNULL(av.amount, 0)-IFNULL(ao.amount, 0) &gt; 0)
+          </if>
+            <if test="over1Qry!=''">
+                AND (DATE_FORMAT(DATE_SUB(STR_TO_DATE(av.arrive_date, '%Y%m%d'), INTERVAL 28 DAY), '%Y%m%d') &lt; #{nowDate} AND IFNULL(av.amount, 0)-IFNULL(ao.amount, 0) &gt; 0)
+            </if>
+          <if test="matNameQry!=''">
+              AND ep.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+          </if>
+    </select>
+</mapper>

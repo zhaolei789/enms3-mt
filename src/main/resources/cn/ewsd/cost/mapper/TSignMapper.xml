@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.TSignMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.cost.model.TSign" id="tSignMap">
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modifier_time" column="modifier_time"/>
+        <result property="bill_id" column="bill_id"/>
+        <result property="user_id" column="user_id"/>
+        <result property="user_name" column="user_name"/>
+        <result property="check_id" column="check_id"/>
+        <result property="check_date" column="check_date"/>
+        <result property="check_time" column="check_time"/>
+        <result property="result" column="result"/>
+        <result property="remark" column="remark"/>
+        <result property="step_key" column="step_key"/>
+        <result property="step_code" column="step_code"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modifier_time
+		  ,  	  	     			 bill_id
+		  ,  	  	     			 user_id
+		  ,  	  	     			 user_name
+		  ,  	  	     			 check_id
+		  ,  	  	     			 check_date
+		  ,  	  	     			 check_time
+		  ,  	  	     			 result
+		  ,  	  	     			 remark
+		  ,  	  	     			 step_key
+		  ,  	  	     			 step_code
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.cost.model.TSign">
+        select
+        s.*
+		,f.status
+     	,(select process_name from sys_audit_process where sys_audit_process.uuid = f.status) as audit_step_name
+		,  	  	     			 f.del_status
+		,  	  	     			 f.del_reason
+		,  	  	     			 f.occ_date
+		,  	  	     			 f.modi_date
+		,  	  	     			 f.assign_date
+		,  	  	     			 f.notice_no
+		,  	  	     			 f.team_no
+		,(select text from sys_organization where f.team_no = sys_organization.id) as team_no_name
+		,  	  	     			 f.assess_type
+		,  	  	     			 f.award_bala
+		,  	  	     			 f.assess_team
+		,(select text from sys_organization where f.assess_team = sys_organization.id) as assess_team_name
+		,  	  	     			 f.modi_team
+		,(select text from sys_organization where f.modi_team = sys_organization.id) as modi_team_name
+		,  	  	     			 f.sign_emp
+		,  	  	     			 f.assess_cate
+		,  	  	     			 f.reason
+        from t_sign s
+        left join f_award f
+        on s.bill_id = f.uuid
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.cost.model.TSign">
+		select  <include refid="Base_Column_List" />  from t_sign where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.cost.model.TSign">
+		select  <include refid="Base_Column_List" />  from t_sign
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from t_sign 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.cost.model.TSign">
+		insert into t_sign
+		(
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modifier_time`, 
+			`bill_id`, 
+			`user_id`, 
+			`user_name`, 
+			`check_id`, 
+			`check_date`, 
+			`check_time`, 
+			`result`, 
+			`remark`, 
+			`step_key`, 
+			`step_code`
+		)
+		values
+		(
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modifier_time}, 
+			#{bill_id}, 
+			#{user_id}, 
+			#{user_name}, 
+			#{check_id}, 
+			#{check_date}, 
+			#{check_time}, 
+			#{result}, 
+			#{remark}, 
+			#{step_key}, 
+			#{step_code}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.cost.model.TSign">
+		update t_sign 
+		<set>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modifier_time != null">`modifier_time` = #{modifier_time}, </if>
+			<if test="bill_id != null">`bill_id` = #{bill_id}, </if>
+			<if test="user_id != null">`user_id` = #{user_id}, </if>
+			<if test="user_name != null">`user_name` = #{user_name}, </if>
+			<if test="check_id != null">`check_id` = #{check_id}, </if>
+			<if test="check_date != null">`check_date` = #{check_date}, </if>
+			<if test="check_time != null">`check_time` = #{check_time}, </if>
+			<if test="result != null">`result` = #{result}, </if>
+			<if test="remark != null">`remark` = #{remark}, </if>
+			<if test="step_key != null">`step_key` = #{step_key}, </if>
+			<if test="step_code != null">`step_code` = #{step_code}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from t_sign where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from t_sign where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

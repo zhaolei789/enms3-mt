@@ -1,0 +1,70 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<input type="hidden" name="userId">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">流程</label>
+			<div class="topjui-input-block">
+				<input type="text" name="processUuid"
+					   data-toggle="topjui-combobox"
+					   data-options="required:true,
+                       prompt:'必填',
+                       valueField:'uuid',
+                       textField:'processName',
+                       panelHeight:'150',
+                       url:'/system/sysAuditProcess/getListByFuuid?fuuid=1',
+                       onSelect: function(rec){
+            				var url = '/system/sysAuditProcess/getListByFuuid?fuuid='+rec.uuid;
+            				$('#stepUuid').iCombobox('reload', url);
+        				}
+                      ">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">步骤</label>
+			<div class="topjui-input-block">
+				<input type="text" name="stepUuid" id="stepUuid"
+					   data-toggle="topjui-combobox"
+					   data-options="required:true,
+                       prompt:'必填',
+                       multiple:true,
+                       valueField:'uuid',
+                       textField:'processName',
+                       panelHeight:'200',
+                        icons:[{
+                            iconCls:'fa fa-remove',
+                            handler: function(e){
+                                $(e.data.target).combobox('clear');
+                            }
+                        }],
+                      ">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">审核部门</label>
+			<div class="topjui-input-block">
+				<input type="text" name="auditOrgs"
+					   data-toggle="topjui-combobox"
+					   data-options="
+                       multiple:true,
+                       valueField:'id',
+                       textField:'text',
+                       panelHeight:'200',
+                        icons:[{
+                            iconCls:'fa fa-remove',
+                            handler: function(e){
+                                $(e.data.target).combobox('clear');
+                            }
+                        }],
+                       url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department'
+                      ">
+			</div>
+		</div>
+
+	</div>
+</div>

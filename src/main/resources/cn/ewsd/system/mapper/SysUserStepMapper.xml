@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.SysUserStepMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.system.model.SysUserStep" id="sysUserStepMap">
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+        <result property="user_id" column="user_id"/>
+        <result property="process_uuid" column="process_uuid"/>
+        <result property="step_uuid" column="step_uuid"/>
+        <result property="audit_org" column="audit_org"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 user_id
+		  ,  	  	     			 process_uuid
+		  ,  	  	     			 step_uuid
+		  ,  	  	     			 audit_org
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.SysUserStep">
+        select
+		f.uuid
+		,  	  	     			 f.create_time
+		,  	  	     			 f.creator
+		,  	  	     			 f.creator_id
+		,  	  	     			 f.creator_org_id
+		,  	  	     			 f.modifier_id
+		,  	  	     			 f.modifier
+		,  	  	     			 f.modify_time
+		,  	  	     			 f.user_id
+		,  	  	     			 f.process_uuid
+		,  	  	     			 f.step_uuid
+		,  	  	     			 f.audit_org
+        ,p1.process_name as process_name
+        ,p2.process_name as step_name
+        ,o.text as org_name
+        from sys_user_step f
+        left join sys_audit_process p1 on f.process_uuid = p1.uuid
+		left join sys_audit_process p2 on f.step_uuid = p2.uuid
+		left join sys_organization o on f.audit_org = o.id
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.system.model.SysUserStep">
+		select  <include refid="Base_Column_List" />  from sys_user_step where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.system.model.SysUserStep">
+		select  <include refid="Base_Column_List" />  from sys_user_step
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_user_step 
+	</select>
+
+	<select id="checkUserHavePms" resultType="int">
+		select count(*) from sys_user_step
+		where
+		user_id = #{userId}
+		and
+		step_uuid = #{stepUuid}
+		<if test="auditOrg != null">and audit_org = #{auditOrg}</if>
+	</select>
+
+	<select id="queryListByUserAndStep" resultType="cn.ewsd.system.model.SysUserStep">
+		select  <include refid="Base_Column_List" />  from sys_user_step
+		where
+		user_id = #{userId}
+		and
+		step_uuid = #{stepUuid}
+	</select>
+
+	<select id="queryListByUserAndProcessUuid" resultType="cn.ewsd.system.model.SysUserStep">
+		select  <include refid="Base_Column_List" />  from sys_user_step
+		where
+		user_id = #{userId}
+		and
+		process_uuid = #{processUuid}
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.system.model.SysUserStep">
+		insert into sys_user_step
+		(
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`, 
+			`user_id`, 
+			`process_uuid`, 
+			`step_uuid`, 
+			`audit_org`
+		)
+		values
+		(
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time}, 
+			#{user_id}, 
+			#{process_uuid}, 
+			#{step_uuid}, 
+			#{audit_org}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.system.model.SysUserStep">
+		update sys_user_step 
+		<set>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}, </if>
+			<if test="user_id != null">`user_id` = #{user_id}, </if>
+			<if test="process_uuid != null">`process_uuid` = #{process_uuid}, </if>
+			<if test="step_uuid != null">`step_uuid` = #{step_uuid}, </if>
+			<if test="audit_org != null">`audit_org` = #{audit_org}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from sys_user_step where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from sys_user_step where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+	<select id="queryListByStepGroupUser" resultType="cn.ewsd.system.model.SysUserStep">
+		select  <include refid="Base_Column_List" />  from sys_user_step
+		where
+		step_uuid = #{value}
+		group by user_id
+	</select>
+
+	<select id="queryListByStepAndOrgGroupUser" resultType="cn.ewsd.system.model.SysUserStep">
+		select  <include refid="Base_Column_List" />  from sys_user_step
+		where
+			step_uuid = #{stepUuid}
+		and(
+		 	audit_org = #{auditOrg}
+		    or
+			audit_org = 99999
+			)
+		group by user_id
+	</select>
+
+</mapper>

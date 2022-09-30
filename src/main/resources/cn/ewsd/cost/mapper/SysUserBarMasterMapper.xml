@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.SysUserBarMasterMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.cost.model.SysUserBarMaster" id="sysUserBarMasterMap">
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+        <result property="is_del" column="is_del"/>
+        <result property="user_id" column="user_id"/>
+        <result property="user_name_id" column="user_name_id"/>
+        <result property="master_id" column="master_id"/>
+        <result property="note" column="note"/>
+		<result property="master_name" column="master_name"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 is_del
+		  ,  	  	     			 user_id
+		  ,  	  	     			 user_name_id
+		  ,  	  	     			 master_id
+		  ,  	  	     			 note
+			,master_name
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.cost.model.SysUserBarMaster">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_user_bar_master
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.cost.model.SysUserBarMaster">
+		select  <include refid="Base_Column_List" />  from sys_user_bar_master where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.cost.model.SysUserBarMaster">
+		select  <include refid="Base_Column_List" />  from sys_user_bar_master
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_user_bar_master 
+	</select>
+
+	<select id="queryTotalByFS" resultType="int">
+		select count(*) from sys_user_bar_master
+		<where>
+			<if test="filterSort != null">
+				${filterSort}
+			</if>
+		</where>
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.cost.model.SysUserBarMaster">
+		insert into sys_user_bar_master
+		(
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`, 
+			`is_del`, 
+			`user_id`, 
+			`user_name_id`, 
+			`master_id`, 
+			`note`,
+		 	`master_name`
+		)
+		values
+		(
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time}, 
+			#{is_del}, 
+			#{user_id}, 
+			#{user_name_id}, 
+			#{master_id}, 
+			#{note},
+		 #{master_name}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.cost.model.SysUserBarMaster">
+		update sys_user_bar_master 
+		<set>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}, </if>
+			<if test="is_del != null">`is_del` = #{is_del}, </if>
+			<if test="user_id != null">`user_id` = #{user_id}, </if>
+			<if test="user_name_id != null">`user_name_id` = #{user_name_id}, </if>
+			<if test="master_id != null">`master_id` = #{master_id}, </if>
+			<if test="note != null">`note` = #{note},</if>
+			<if test="master_name != null">`master_name` = #{master_name}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from sys_user_bar_master where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from sys_user_bar_master where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

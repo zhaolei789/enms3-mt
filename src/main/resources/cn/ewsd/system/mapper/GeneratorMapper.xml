@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.GeneratorMapper">
+
+    <select id="getPageSet" resultType="java.util.HashMap">
+        select table_name tableName, engine, table_comment tableComment, create_time createTime from
+        information_schema.tables
+        <where>
+            <if test="filterSort != null">
+                ${filterSort}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryList" resultType="hashmap">
+        select table_name tableName, engine, table_comment tableComment, create_time createTime from
+        information_schema.tables
+        where table_schema = (select database())
+        <if test="tableName != null and tableName.trim() != ''">
+            and table_name like concat('%', #{tableName}, '%')
+        </if>
+        order by create_time desc
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+        select count(*) from information_schema.tables where table_schema = (select database())
+        <if test="tableName != null and tableName.trim() != ''">
+            and table_name like concat('%', #{tableName}, '%')
+        </if>
+    </select>
+
+    <select id="queryTable" resultType="map">
+		select table_name tableName, engine, table_comment tableComment, create_time createTime from information_schema.tables
+			where table_schema = (select database()) and table_name = #{tableName}
+	</select>
+
+    <select id="queryColumns" resultType="map">
+		select column_name columnName, data_type dataType, column_comment columnComment, column_key columnKey, extra from information_schema.columns
+ 			where table_name = #{tableName} and table_schema = (select database()) order by ordinal_position
+	</select>
+
+    <select id="getPageSetBySqlserver" resultType="java.util.HashMap">
+        select table_name tableName, create_time createTime ,table_comment tableComment
+        from sys_table_view
+        <where>
+            <if test="filterSort != null">
+                ${filterSort}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryTableBySqlserver" resultType="java.util.Map">
+		select table_name tableName,NULL as engine, table_comment tableComment, create_time createTime from sys_table_view
+			where  table_name = #{tableName}
+	</select>
+    <select id="queryColumnsBySqlserver" resultType="java.util.Map">
+        SELECT convert(varchar (255),a.name) AS columnName,NULL AS columnKey,NULL AS extra,convert(varchar (255),b.name) as dataType, convert(varchar (255),isnull(g.[value],'')) as columnComment
+        FROM syscolumns a left join   systypes b on a.xusertype=b.xusertype
+        inner join  sysobjects d on a.id=d.id  and d.xtype='U' and  d.name <![CDATA[<>]]> 'dtproperties'
+        left join
+        sys.extended_properties   g
+        on
+        a.id=G.major_id and a.colid=g.minor_id
+        where
+        d.name= #{tableName}    --如果只查询指定表,加上此where条件，tablename是要查询的表名；去除where条件查询所有的表信息
+        order by
+        a.id
+	</select>
+    <select id="getAll" resultType="java.util.HashMap">
+        select table_name tableName, engine, table_comment tableComment, create_time createTime from
+        information_schema.tables
+        <where>
+            <if test="filterSort != null">
+                ${filterSort}
+            </if>
+        </where>
+    </select>
+
+</mapper>

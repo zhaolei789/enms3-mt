@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.DicSetMapper">
+  <!-- 可根据自己的需求，是否要使用 -->
+  <resultMap type="cn.ewsd.system.model.DicSet" id="DicSetMap">
+    <result property="uuid" column="uuid"/>
+    <result property="creatorId" column="creator_id"/>
+    <result property="creator" column="creator"/>
+    <result property="createTime" column="create_time"/>
+    <result property="modifierId" column="modifier_id"/>
+    <result property="modifier" column="modifier"/>
+    <result property="modifyTime" column="modify_time"/>
+    <result property="text" column="text"/>
+    <result property="code" column="code"/>
+    <result property="remark" column="remark"/>
+    <result property="sort" column="sort"/>
+  </resultMap>
+  <sql id="Base_Column_List" >*</sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.DicSet">
+      SELECT * FROM sys_dic_set
+      <where>
+        <if test="filterSort != null">
+          ${filterSort}
+        </if>
+      </where>
+    </select>
+
+    <select id="getListByCode" resultType="cn.ewsd.system.model.DicSet">
+        SELECT * FROM sys_dic_set WHERE code = #{param1}
+    </select>
+    <select id="getListByCodes" resultType="cn.ewsd.system.model.DicSet">
+        SELECT * FROM sys_dic_set WHERE code = #{param1}
+    </select>
+    <select id="getDicSetByCode" resultType="cn.ewsd.system.model.DicSet">
+      SELECT * FROM  sys_dic_set WHERE code = #{param1}
+    </select>
+    <select id="getListByValue" resultType="cn.ewsd.system.model.DicItem">
+      select * from sys_dic_item s where s.value=#{value}
+    </select>
+  <select id="getListByValueAndUuid" resultType="java.lang.Integer">
+SELECT count(1) FROM sys_dic_item s WHERE s.value = #{value} AND s.uuid != #{uuid}
+  </select>
+  <update id="updateIsDel">
+         UPDATE sys_dic_set SET is_del = #{param1} WHERE uuid = #{param2}
+    </update>
+  <select id="getAllDicSet" resultType="cn.ewsd.system.model.DicSet">
+    select
+    *
+    from sys_dic_set
+    where
+    is_del != 1
+  </select>
+</mapper>

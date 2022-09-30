@@ -1,0 +1,127 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+    				<div class="topjui-col-sm6">
+			<label class="topjui-form-label">合同编号</label>
+			<div class="topjui-input-block">
+								<input type="text" name="contractNo"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'合同编号',required:true">
+							</div>
+		</div>
+    				<div class="topjui-col-sm6">
+			<label class="topjui-form-label">合同名称</label>
+			<div class="topjui-input-block">
+								<input type="text" name="contractName"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'合同名称',required:true">
+							</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">竞标类别</label>
+			<div class="topjui-input-block">
+				<input type="text" name="bidType"
+					data-toggle="topjui-combobox"
+					   data-options="prompt:'竞标类别',
+					   	required:true,
+						prompt:'必填',
+                   		panelHeight:150,
+                   		url:'/system/dicSet/getDicItemByCode?code=f.bidType',
+                   		valueField:'value',
+    					textField:'text'"
+				>
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">采办方式</label>
+			<div class="topjui-input-block">
+				<input type="text" name="buyType"
+					data-toggle="topjui-combobox"
+					   data-options="prompt:'采办方式',
+					   	required:true,
+						prompt:'必填',
+                   		panelHeight:190,
+                   		url:'/system/dicSet/getDicItemByCode?code=f.buyType',
+                   		valueField:'value',
+    					textField:'text'"
+				>
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">币种</label>
+			<div class="topjui-input-block">
+				<input type="text" name="currency"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'币种',
+					   	required:true,
+						prompt:'必填',
+                   		panelHeight:150,
+                   		url:'/system/dicSet/getDicItemByCode?code=currencyS',
+                   		valueField:'value',
+    					textField:'text'"
+				>
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">合同金额</label>
+			<div class="topjui-input-block">
+				<input type="text" name="contractBala"
+					data-toggle="topjui-numberbox"
+					data-options="prompt:'合同金额'">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">开始日期</label>
+			<div class="topjui-input-block">
+				<input type="text" name="beginDate"
+					data-toggle="topjui-datebox"
+					data-options="prompt:'合同开始日期',required:true">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">结束日期</label>
+			<div class="topjui-input-block">
+				<input type="text" name="endDate"
+					data-toggle="topjui-datebox"
+					data-options="prompt:'合同结束日期',required:true">
+			</div>
+		</div>
+    	<!--			<div class="topjui-col-sm6">
+			<label class="topjui-form-label">对应合同</label>
+			<div class="topjui-input-block">
+								<input type="text" name="linkId"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'对应合同'">
+							</div>
+		</div>
+    				<div class="topjui-col-sm6">
+			<label class="topjui-form-label">变更内容</label>
+			<div class="topjui-input-block">
+								<input type="text" name="modiInfo"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'变更内容'">
+							</div>
+		</div>
+    				<div class="topjui-col-sm6">
+			<label class="topjui-form-label">录入部门</label>
+			<div class="topjui-input-block">
+								<input type="text" name="teamNo"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'录入部门'">
+							</div>
+		</div>
+    				<div class="topjui-col-sm6">
+			<label class="topjui-form-label">录入日期</label>
+			<div class="topjui-input-block">
+								<input type="text" name="modiDate"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'录入日期'">
+							</div>
+		</div>-->
+	</div>
+</div>

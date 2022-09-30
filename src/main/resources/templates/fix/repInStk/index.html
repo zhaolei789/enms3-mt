@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<!--井下周转登记-->
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="repInStkForm" style="height:100%">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+			<table id="repInStkDg"></table>
+		</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="repInStkDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'repInStkDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:80px">计划月份：</label>
+	<select id="yearQry" data-toggle="topjui-combobox" name="yearQry" data-options="width:80" >
+		<option th:each="i:${#numbers.sequence(2015, endYear)}" th:value="${i}" th:text="${i}" th:selected="${i==currentYear}"></option>
+	</select>
+	<select id="monQry" data-toggle="topjui-combobox" name="monQry" data-options="width:80" >
+		<option value="" selected>&nbsp;</option>
+		<option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}"></option>
+	</select>
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">入库仓库：</label>
+	<input data-toggle="topjui-combobox" id="storeNo" name="storeNo" data-options="valueField:'storeNo',textField:'storeName',url:'/repository/mStore/getStoreList?storeType=r.storeType2.14&storeLevel=r.storeLevel.1',width:'150px'">
+
+	<a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">提交</span>
+            <span class="l-btn-icon fa fa-save">&nbsp;</span>
+        </span>
+	</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#repInStkDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/fix/repInStk/getPageSet',
+				queryParams:{
+					yearQry:$('#yearQry').iCombobox('getValue'),
+					monQry:$('#monQry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'planNo', sortable:false, title:'', checkbox:true
+					},{
+						field:'uuid', sortable:false, title:'计划号', formatter:function(value, row, index){
+							return row.planNo
+						}
+					},{
+						field:'matCode', sortable:false, title:'物料编码'
+					},{
+						field:'matName', sortable:false, title:'物料描述'
+					},{
+						field:'matUnit', sortable:false, title:'单位'
+					},{
+						field:'matPrice', sortable:false, title:'原值单价', align:'right'
+					},{
+						field:'fixPrice', sortable:false, title:'修复单价', align:'right'
+					},{
+						field:'planAmount', sortable:false, title:'计划数量', align:'right'
+					},{
+						field:'aAmount', sortable:false, title:'申请数量', formatter:function(value ,row, index){
+							return '<span class="textbox"><input class="textbox-text" type="text" id="applyAmount_' + row.planNo + '" name="applyAmount_' + row.planNo + '" value="" disabled /></span>'
+						}
+					},{
+						field:'applyAmount', sortable:false, title:'可申请数', formatter:function(value, row, index){
+							return value+'<input type="hidden" name="canApply_' + row.planNo + '" value="'+ value +'" /><input type="hidden" name="mat_' + row.planNo + '" value="'+ row.matNo +'" />'
+						}
+					},{
+						field:'planTeamName', sortable:false, title:'管理单位'
+					},{
+						field:'fixTypeName', sortable:false, title:'计划类型'
+					},{
+						field:'planMonth', sortable:false, title:'计划月份', formatter:function(value, row, idex){
+							return value.substring(0, 4) + '-' + value.substring(4, 6)
+						}
+					},{
+						field:'applyDate', sortable:false, title:'申请日期', formatter:function(value, row, index){
+							return '<input id="date_'+ row.planNo +'" name="date_'+ row.planNo +'" type="text">'
+						}
+					},{
+						field:'fixAddr', sortable:false, title:'修复地点', formatter:function(value, row, index){
+							return '<span class="textbox"><input class="textbox-text" type="text" id="fixAddr_' + row.planNo + '" name="fixAddr_' + row.planNo + '" value="" disabled /></span>'
+						}
+					},{
+						field:'fixEmp', sortable:false, title:'维修人', formatter:function(value, row, index){
+							return '<span class="textbox"><input class="textbox-text" type="text" id="fixEmp_' + row.planNo + '" name="fixEmp_' + row.planNo + '" value="" disabled /></span>'
+						}
+					}
+				] ],
+				onLoadSuccess:function(data){
+					for(var i=0; i<data.rows.length; i++){
+						var planNo = data.rows[i].planNo
+						$('#date_'+planNo).iDatebox({
+							disabled:true
+						});
+					}
+				},
+				onCheck:function(index, row){
+					var planNo = row.planNo;
+					$('#applyAmount_' + planNo + ', #fixAddr_' + planNo + ', #fixEmp_' + planNo).removeAttr('disabled');
+					$('#date_'+planNo).iDatebox('enable')
+				},
+				onUncheck:function(index, row){
+					var planNo = row.planNo;
+					$('#applyAmount_' + planNo + ', #fixAddr_' + planNo + ', #fixEmp_' + planNo).attr('disabled', 'disabled');
+					$('#date_'+planNo).iDatebox('disable')
+				},
+				onCheckAll:function(rows){
+					$('[name^="applyAmount_"], [name^="fixAddr_"], [name^="fixEmp_"]').removeAttr("disabled");
+					for(var i=0; i<rows.length; i++){
+						var planNo = rows[i].planNo;
+						$('#date_'+planNo).iDatebox('enable')
+					}
+				},
+				onUncheckAll:function(rows){
+					$('[name^="applyAmount_"], [name^="fixAddr_"], [name^="fixEmp_"]').attr("disabled", 'disabled');
+					for(var i=0; i<rows.length; i++){
+						var planNo = rows[i].planNo;
+						$('#date_'+planNo).iDatebox('disable')
+					}
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#submitBtn').click(function(){
+				$('#repInStkForm').iForm('submit', {
+					url:'/fix/repInStk/submit',
+					success:function(data){
+						data = $.parseJSON(data);
+						if(data.statusCode == 200){
+							$.iMessager.show({
+								title:data.title,
+								msg:data.message
+							})
+							reloadData();
+						} else {
+							$.iMessager.alert({
+								icon:'messager-error',
+								title:data.title,
+								msg:data.message
+							});
+						}
+					}
+				});
+			});
+		})
+
+		function reloadData(){
+			$('#repInStkDg').iDatagrid('reload',{
+				yearQry:$('#yearQry').iCombobox('getValue'),
+				monQry:$('#monQry').iCombobox('getValue')
+			});
+		}
+	</script>
+
+</th:block>
+</body>
+</html>

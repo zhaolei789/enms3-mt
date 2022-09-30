@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.logistics.mapper.SysSequenceMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.logistics.model.SysSequence" id="sysSequenceMap">
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="is_del" column="is_del"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modify_time" column="modify_time"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="sq_year" column="sq_year"/>
+        <result property="sq_month" column="sq_month"/>
+        <result property="sq_day" column="sq_day"/>
+        <result property="sq_system" column="sq_system"/>
+        <result property="sq_module" column="sq_module"/>
+        <result property="sq_sequence" column="sq_sequence"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 is_del
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 sq_year
+		  ,  	  	     			 sq_month
+		  ,  	  	     			 sq_day
+		  ,  	  	     			 sq_system
+		  ,  	  	     			 sq_module
+		  ,  	  	     			 sq_sequence
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.logistics.model.SysSequence">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_sequence
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.logistics.model.SysSequence">
+		select  <include refid="Base_Column_List" />  from sys_sequence where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.logistics.model.SysSequence">
+		select  <include refid="Base_Column_List" />  from sys_sequence
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_sequence 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.logistics.model.SysSequence">
+		insert into sys_sequence
+		(
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`is_del`, 
+			`modifier`, 
+			`modifier_id`, 
+			`modify_time`, 
+			`creator_org_id`, 
+			`sq_year`, 
+			`sq_month`, 
+			`sq_day`, 
+			`sq_system`, 
+			`sq_module`, 
+			`sq_sequence`
+		)
+		values
+		(
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{is_del}, 
+			#{modifier}, 
+			#{modifier_id}, 
+			#{modify_time}, 
+			#{creator_org_id}, 
+			#{sq_year}, 
+			#{sq_month}, 
+			#{sq_day}, 
+			#{sq_system}, 
+			#{sq_module}, 
+			#{sq_sequence}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.logistics.model.SysSequence">
+		update sys_sequence 
+		<set>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="is_del != null">`is_del` = #{is_del}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="sq_year != null">`sq_year` = #{sq_year}, </if>
+			<if test="sq_month != null">`sq_month` = #{sq_month}, </if>
+			<if test="sq_day != null">`sq_day` = #{sq_day}, </if>
+			<if test="sq_system != null">`sq_system` = #{sq_system}, </if>
+			<if test="sq_module != null">`sq_module` = #{sq_module}, </if>
+			<if test="sq_sequence != null">`sq_sequence` = #{sq_sequence}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+
+	<update id="sequenceAddOne">
+		update sys_sequence
+		set sq_sequence = sq_sequence +1
+		where uuid = #{value}
+	</update>
+
+	<select id="findSequence" resultType="cn.ewsd.logistics.model.SysSequence">
+		select  <include refid="Base_Column_List" />  from sys_sequence
+		where
+		    sq_system = #{sqSystem}
+			and
+			sq_module = #{sqModule}
+			and
+			sq_year = #{sqYear}
+			and
+			sq_month = #{sqMonth}
+			limit 1
+	</select>
+	
+	<delete id="executeDelete">
+		delete from sys_sequence where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from sys_sequence where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

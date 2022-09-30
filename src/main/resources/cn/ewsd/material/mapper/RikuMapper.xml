@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.RikuMapper">
+	<select id="getMatList" resultType="cn.ewsd.material.model.Riku">
+        SELECT p.mat_no, m.mat_code, m.mat_name, m.mat_unit, m.mat_unit mat_unit_name, m.mat_price, m.erp_type, m.type_name,
+               p.plan_no, p.team_no, o.text team_name, p.mat_amount, di1.text abc_type_name, p.abc_type, (p.mat_amount * m.mat_price) bala, p.cost_center
+        FROM m_plan p
+        LEFT JOIN m_material m ON p.mat_no=m.mat_no
+        LEFT JOIN sys_organization o ON o.id=p.team_no
+        LEFT JOIN sys_dic_item di1 ON di1.value=p.abc_type
+        WHERE (p.plan_step='7105M' OR (p.plan_step='7105F' AND p.abc_type='m.abcType.A'))
+          AND NOT EXISTS (SELECT '1' FROM m_purchase_plan WHERE plan_no=p.plan_no)
+          AND p.plan_month=#{monthQry}
+        <if test="wbsQry!=''">
+            AND p.wbs_element LIKE CONCAT('%', #{wbsQry}, '%')
+        </if>
+        <if test="ifAqfyQry=='0'">
+            AND p.wbs_element=''
+        </if>
+        <if test="ifAqfyQry==1">
+            AND p.wbs_element!=''
+        </if>
+        <if test='""!=startDateQry'>
+          AND p.plan_date&gt;=#{startDateQry}
+        </if>
+        <if test='""!=endDateQry'>
+            AND p.plan_date&lt;=#{endDateQry}
+        </if>
+        <if test='""!=matQry'>
+            AND (m.mat_name LIKE CONCAT('%', #{matQry}, '%') OR m.mat_code LIKE CONCAT('_', #{matQry}, '%'))
+        </if>
+        <if test='""!=planTypeQry'>
+            AND p.plan_type=#{planTypeQry}
+        </if>
+        <choose>
+            <when test='"m.abcType.A"==abcTypeQry'>
+                AND p.abc_type='m.abcType.A'
+            </when>
+            <otherwise>
+                AND p.abc_type!='m.abcType.A'
+            </otherwise>
+        </choose>
+        <if test='costCenterQry!=""'>
+            AND p.cost_center IN
+            <foreach item="costCenter" collection="costCenterQry.split(',')" open="(" separator="," close=")">
+                #{costCenter}
+            </foreach>
+        </if>
+        ORDER BY p.mat_no
+    </select>
+</mapper>

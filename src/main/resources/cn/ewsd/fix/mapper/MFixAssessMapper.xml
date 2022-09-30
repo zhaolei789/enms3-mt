@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.fix.mapper.MFixAssessMapper">
+	<update id="updateFixAssess" parameterType="cn.ewsd.fix.model.MFixAssess">
+		UPDATE m_fix_assess
+		<set>
+			<if test="planValue!=null">`plan_value`=#{planValue},</if>
+			<if test="workValue!=null">`work_value`=#{workValue},</if>
+			<if test="remark!=null">`remark`=#{remark},</if>
+			<if test="assStatus!=null">`ass_status`=#{assStatus}</if>
+		</set>
+		WHERE 1=1
+		<if test="assType!=null"> AND ass_type=#{assType}</if>
+		<if test="assMonth!=null"> AND ass_month=#{assMonth}</if>
+		<if test="mngTeam!=null"> AND mng_team=#{mngTeam}</if>
+		<if test="teamNo!=null"> AND team_no=#{teamNo}</if>
+		<if test="prjNo!=null"> AND prj_no=#{prjNo}</if>
+	</update>
+
+	<insert id="insertFixAssess" parameterType="cn.ewsd.fix.model.MFixAssess">
+		INSERT INTO m_fix_assess (`assess_id`, `ass_type`, `ass_month`, `mng_team`, `team_no`, `prj_no`, `prj_name`, `plan_value`,
+								  `work_value`, `remark`, `ass_status`, `apply_user`, `apply_date`, `agree_user`, `agree_date`,
+								  `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{assessId}, #{assType}, #{assMonth}, #{mngTeam}, #{teamNo}, #{prjNo}, #{prjName}, #{planValue},
+				#{workValue}, #{remark}, #{assStatus}, #{applyUser}, #{applyDate}, #{agreeUser}, #{agreeDate},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<select id="getFixAssess" resultType="cn.ewsd.fix.model.MFixAssess">
+		SELECT *
+		FROM m_fix_assess
+		WHERE ass_type=#{assType} AND ass_month=#{assMonth} AND mng_team=#{mngTeam} AND team_no=#{teamNo} AND prj_no=#{prjNo}
+	</select>
+
+	<select id="getFixAssess1" resultType="cn.ewsd.fix.model.MFixAssess">
+		SELECT *
+		FROM m_fix_assess
+		WHERE ass_type=#{assType} AND ass_month=#{assMonth} AND mng_team=#{mngTeam} AND ass_status=#{assStatus} AND prj_no=#{prjNo}
+	</select>
+	
+	<select id="getFixAssessTeam" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT a.team_no id, (SELECT text FROM sys_organization WHERE id=a.team_no) text
+		FROM m_fix_assess a
+		WHERE a.ass_month=#{assMonth} AND a.ass_type='m.fixType.1'
+		<if test="userTeam!='25'.toString()">
+			AND a.mng_team=#{userTeam}
+		</if>
+		GROUP BY a.team_no
+	</select>
+
+	<select id="getMngTeam" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT a.mng_team id, (SELECT text FROM sys_organization WHERE id=a.mng_team) text
+		FROM m_fix_assess a
+		GROUP BY a.mng_team
+	</select>
+
+</mapper>

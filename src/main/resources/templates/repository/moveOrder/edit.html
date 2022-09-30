@@ -1,0 +1,21 @@
+<style>
+	.topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+		margin-top: 10px;
+	}
+</style>
+<div class="topjui-fluid">
+	<div class="topjui-row">
+		<div class="topjui-col-sm4">
+			<label class="topjui-form-label">移出仓库</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" id="outStore" name="outStore" data-options="valueField:'storeNo',textField:'storeName',url:'/repository/mStore/getStoreList?chkUser=true&storeLevel=r.storeLevel.1',width:'150px'">
+			</div>
+		</div>
+		<div class="topjui-col-sm4">
+			<label class="topjui-form-label">移入仓库</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" id="inStore" name="inStore" data-options="valueField:'storeNo',textField:'storeName',url:'/repository/mStore/getStoreList?chkUser=true&storeLevel=r.storeLevel.1',width:'150px'">
+			</div>
+		</div>
+	</div>
+</div>

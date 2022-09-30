@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.FContractMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.cost.model.FContract" id="fContractMap">
+        <result property="contract_id" column="contract_id"/>
+        <result property="contract_no" column="contract_no"/>
+        <result property="contract_name" column="contract_name"/>
+        <result property="bid_type" column="bid_type"/>
+        <result property="buy_type" column="buy_type"/>
+        <result property="contract_bala" column="contract_bala"/>
+        <result property="currency" column="currency"/>
+        <result property="begin_date" column="begin_date"/>
+        <result property="end_date" column="end_date"/>
+        <result property="link_id" column="link_id"/>
+        <result property="modi_info" column="modi_info"/>
+        <result property="team_no" column="team_no"/>
+        <result property="modi_date" column="modi_date"/>
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+		<result property="contract_name_jp" column="contract_name_jp"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 contract_id
+		  ,  	  	     			 contract_no
+		  ,  	  	     			 contract_name
+		  ,  	  	     			 bid_type
+		  ,  	  	     			 buy_type
+		  ,  	  	     			 contract_bala
+		  ,  	  	     			 currency
+		  ,  	  	     			 begin_date
+		  ,  	  	     			 end_date
+		  ,  	  	     			 link_id
+		  ,  	  	     			 modi_info
+		  ,  	  	     			 team_no
+		  ,  	  	     			 modi_date
+		  ,  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		,contract_name_jp
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.cost.model.FContract">
+        select
+		f.contract_id
+		,  	  	     			 f.contract_no
+		,  	  	     			 f.contract_name
+		,  	  	     			 f.bid_type
+		,  	  	     			 f.buy_type
+		,  	  	     			 f.contract_bala
+		,  	  	     			 f.currency
+		,  	  	     			 f.begin_date
+		,  	  	     			 f.end_date
+		,  	  	     			 f.link_id
+		,  	  	     			 f.modi_info
+		,  	  	     			 f.team_no
+		,  	  	     			 f.modi_date
+		,  	  	     			 f.uuid
+		,  	  	     			 f.create_time
+		,  	  	     			 f.creator
+		,  	  	     			 f.creator_id
+		,  	  	     			 f.creator_org_id
+		,  	  	     			 f.modifier_id
+		,  	  	     			 f.modifier
+		,  	  	     			 f.modify_time
+		,f.contract_name_jp
+        ,o.text as team_no_name
+        from f_contract f
+        left join sys_organization o on f.team_no = o.id
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.cost.model.FContract">
+		select  <include refid="Base_Column_List" />  from f_contract where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.cost.model.FContract">
+		select  <include refid="Base_Column_List" />  from f_contract
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from f_contract 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.cost.model.FContract">
+		insert into f_contract
+		(
+			`contract_id`, 
+			`contract_no`, 
+			`contract_name`, 
+			`bid_type`, 
+			`buy_type`, 
+			`contract_bala`, 
+			`currency`, 
+			`begin_date`, 
+			`end_date`, 
+			`link_id`, 
+			`modi_info`, 
+			`team_no`, 
+			`modi_date`, 
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`,
+		 `contract_name_jp`
+		)
+		values
+		(
+			#{contract_id}, 
+			#{contract_no}, 
+			#{contract_name}, 
+			#{bid_type}, 
+			#{buy_type}, 
+			#{contract_bala}, 
+			#{currency}, 
+			#{begin_date}, 
+			#{end_date}, 
+			#{link_id}, 
+			#{modi_info}, 
+			#{team_no}, 
+			#{modi_date}, 
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time},
+		 #{contract_name_jp}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.cost.model.FContract">
+		update f_contract 
+		<set>
+			<if test="contract_id != null">`contract_id` = #{contract_id}, </if>
+			<if test="contract_no != null">`contract_no` = #{contract_no}, </if>
+			<if test="contract_name != null">`contract_name` = #{contract_name}, </if>
+			<if test="bid_type != null">`bid_type` = #{bid_type}, </if>
+			<if test="buy_type != null">`buy_type` = #{buy_type}, </if>
+			<if test="contract_bala != null">`contract_bala` = #{contract_bala}, </if>
+			<if test="currency != null">`currency` = #{currency}, </if>
+			<if test="begin_date != null">`begin_date` = #{begin_date}, </if>
+			<if test="end_date != null">`end_date` = #{end_date}, </if>
+			<if test="link_id != null">`link_id` = #{link_id}, </if>
+			<if test="modi_info != null">`modi_info` = #{modi_info}, </if>
+			<if test="team_no != null">`team_no` = #{team_no}, </if>
+			<if test="modi_date != null">`modi_date` = #{modi_date}, </if>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time},</if>
+			<if test="contract_name_jp != null">`contract_name_jp` = #{contract_name_jp}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from f_contract where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from f_contract where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

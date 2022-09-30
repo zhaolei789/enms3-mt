@@ -1,0 +1,112 @@
+<input type="hidden" id="uuid" name="uuid">
+<input type="hidden" name="codeSetId">
+<input type="hidden" name="id">
+<input type="hidden" name="levelId">
+
+<div class="topjui-fluid">
+    <div class="topjui-row" ></div>
+    <div class="topjui-row" >
+        <div class="topjui-col-sm12"><label class="topjui-form-label">父级资源</label>
+            <div class="topjui-input-block">
+                <input type="text" name="pid" data-toggle="topjui-combotreegrid"
+                       data-options="required:true,
+                       columns:[[
+                           {field:'text',title:'名称',width:100}
+                       ]],
+                       url:'/system/menu/getListByLevelId?levelId=0',
+                       expandUrl:'/system/menu/getListByPid?pid={id}',
+                       getFatherIdsUrl:'/system/menu/getFatherIds?id={id}'">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">资源类型</label>
+            <div class="topjui-input-block">
+                <input type="text" name="resourceType" data-toggle="topjui-combobox" data-options="
+		required:true,
+		valueField:'value',
+		data: [
+		    {
+				text: '菜单',
+				value: 'menu'
+			},
+			{
+				text: '窗体',
+				value: 'window'
+			},
+			{
+				text: '按钮',
+				value: 'button'
+			},
+			{
+				text: '链接',
+				value: 'url'
+			},
+			{
+				text: '过滤器',
+				value: 'filter'
+			}
+		]">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">资源名称</label>
+            <div class="topjui-input-block">
+                <input type="text" name="text" data-toggle="topjui-textbox" data-options="required:true">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm12"><label class="topjui-form-label">资源地址或标识</label>
+            <div class="topjui-input-block">
+                <input type="text" name="url" data-toggle="topjui-textbox" data-options="">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">是否启用</label>
+            <div class="topjui-input-block">
+                <input type="text" name="status"
+                       data-toggle="topjui-combobox"
+                       data-options="required:true,
+                       panelHeight:63,
+                       url:'/system/dicSet/getDicItemByCode?code=yesOrNo'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">是否有子节点</label>
+            <div class="topjui-input-block">
+                <input type="text" name="state"
+                       data-toggle="topjui-combobox"
+                       data-options="required:true,
+                       panelHeight:63,
+                       url:'/system/dicSet/getDicItemByCode?code=nodeState'">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">资源图标</label>
+            <div class="topjui-input-block">
+                <input type="text" name="iconCls" data-toggle="topjui-textbox" data-options="">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">资源排序</label>
+            <div class="topjui-input-block">
+                <input type="text" name="sort"
+                       data-toggle="topjui-numberspinner"
+                       data-options="required:true">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm12"><label class="topjui-form-label">备注</label>
+            <div class="topjui-input-block">
+                <input type="text" name="remark" data-toggle="topjui-textarea" data-options="">
+            </div>
+        </div>
+    </div>
+</div>

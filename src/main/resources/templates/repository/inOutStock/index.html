@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="inOutStockForm" style="height:50%">
+		<div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false, height:'100%'">
+			<table id="inOutStockDg"></table>
+		</div>
+	</form>
+	<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+		<table id="detailDg"></table>
+	</div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="inOutStockDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'inOutStockDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">日期：</label>
+	<input id="beginDateQry" name="beginDateQry" th:value="${beginDateQry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+	<label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+	<input id="endDateQry" name="endDateQry" th:value="${endDateQry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+	<label class="topjui-form-label" style="width:100px;float:none;display:inline-block">物料号：</label>
+	<input id="matCodeQry" data-toggle="topjui-textbox" name="matCodeQry" data-options="width:'150px'" value="">
+
+	<label class="topjui-form-label" style="width:100px;float:none;display:inline-block">描述：</label>
+	<input id="matNameQry" data-toggle="topjui-textbox" name="matNameQry" data-options="width:'150px'" value="">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">仓库：</label>
+	<input data-toggle="topjui-combobox" name="storeQry" id="storeQry" th:value="${storeQry}" data-options="valueField:'storeNo',textField:'storeName',url:'/repository/mStore/getPowerStore?chkUserStore=Y', width:'150px'">
+
+	<input type="hidden" name="matNo" id="matNo" />
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+	</a>
+
+	<a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+	</a>
+
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#inOutStockDg').iDatagrid({
+				queryParams:{
+					beginDateQry:$('#beginDateQry').iDatebox('getValue'),
+					endDateQry:$('#endDateQry').iDatebox('getValue'),
+					matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+					matNameQry:$('#matNameQry').iTextbox('getValue'),
+					storeQry:$('#storeQry').iCombobox('getValue')
+				},
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/repository/inOutStock/getPageSet',
+				columns:[ [
+					{
+						field:'erpType',title:'物料分类',sortable:false, rowspan:2
+					},{
+						field:'typeName',title:'分类描述',sortable:false, rowspan:2
+					},{
+						field:'matCode',title:'物料编码',sortable:false, rowspan:2, formatter:function(value, row, index){
+							if(value!='' && value!=null && value!=undefined){
+								return value.substring(0, 1)=='X' ? value.substring(1) : value;
+							}else{
+								return ''
+							}
+						}
+					},{
+						field:'matName',title:'物料描述',sortable:false, rowspan:2
+					},{
+						field:'matUnit',title:'单位',sortable:false, rowspan:2
+					},{
+						field:'',title:'期初库存',sortable:false, colspan:2
+					},{
+						field:'',title:'本期收入',sortable:false, colspan:2
+					},{
+						field:'',title:'本期支出',sortable:false, colspan:2
+					},{
+						field:'',title:'期末结存',sortable:false, colspan:2
+					}
+				],[
+					{
+						field:'qqAmountText',title:'数量',sortable:false, align:'right', width:"100px"
+					},{
+						field:'qqBalaText',title:'金额',sortable:false, align:'right', width:"100px"
+					},{
+						field:'bqrAmountText',title:'数量',sortable:false, align:'right', width:"100px"
+					},{
+						field:'bqrBalaText',title:'金额',sortable:false, align:'right', width:"100px"
+					},{
+						field:'bqcAmountText',title:'数量',sortable:false, align:'right', width:"100px"
+					},{
+						field:'bqcBalaText',title:'金额',sortable:false, align:'right', width:"100px"
+					},{
+						field:'jyAmountText',title:'数量',sortable:false, align:'right', width:"100px"
+					},{
+						field:'jyBalaText',title:'金额',sortable:false, align:'right', width:"100px"
+					}
+				] ],
+				onLoadSuccess: function(data){
+					$('#inOutStockForm').iForm('submit', {
+						url:'/repository/inOutStock/getSumInfo',
+						success:function(d){
+							if(d != null){
+								d = $.parseJSON(d);
+								var rows = $('#inOutStockDg').iDatagrid('getRows');
+								var r = rows[0];
+								r.erpType = '合计';
+								r.qqAmountText = "";
+								r.qqBalaText = d.qqBalaText;
+								r.bqrAmountText = "";
+								r.bqrBalaText = d.bqrBalaText;
+								r.bqcAmountText = "";
+								r.bqcBalaText = d.bqcBalaText;
+								r.jyAmountText = "";
+								r.jyBalaText = d.jyBalaText;
+								$('#inOutStockDg').iDatagrid('appendRow', r);
+								$('#inOutStockDg').iDatagrid('mergeCells', {
+									index: rows.length-1,
+									field: 'erpType',
+									rowspan: 1,
+									colspan: 5
+								});
+							} else {
+								$.iMessager.alert('操作提示', '获取合计数据失败！', 'messager-error');
+							}
+						}
+					});
+				},
+				onClickRow:function(index, row){
+					$('#matNo').val(row.matNo)
+					reloadDetail();
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#downloadBtn').click(function(){
+				$('#inOutStockForm').iForm('submit', {
+					url:'/repository/inOutStock/download',
+					success:function(data){
+
+					}
+				});
+			});
+
+			$('#detailDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				pagination:false,
+				url:'/repository/stockQry/detail',
+				queryParams:{
+					matNo:$('#matNo').val(),
+					date1Qry:$('#beginDateQry').iCombobox('getValue'),
+					date2Qry:$('#endDateQry').iCombobox('getValue'),
+					storeNoQry:$('#storeQry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'storeName', sortable:false, title:'仓库'
+					},{
+						field:'billDate', sortable:false, title:'入库时间'
+					},{
+						field:'inEmpName', sortable:false, title:'入库保管'
+					},{
+						field:'billAmount', sortable:false, title:'入库数', align:'right', formatter:function(value, row, index){
+							return value==0 ? "" : value;
+						}
+					},{
+						field:'setPrice', sortable:false, title:'单价', align:'right', formatter:function(value, row, index){
+							return value==0 ? "" : value;
+						}
+					},{
+						field:'bala', sortable:false, title:'金额', align:'right', formatter:function(value, row, index){
+							return value==0 ? "" : value;
+						}
+					},{
+						field:'uuid', sortable:false, title:'', width:'20px'
+					},{
+						field:'teamName', sortable:false, title:'领料单位'
+					},{
+						field:'storeName1', sortable:false, title:'出库仓库'
+					},{
+						field:'outDate', sortable:false, title:'出库日期'
+					},{
+						field:'empName', sortable:false, title:'审批人员'
+					},{
+						field:'drawEmpName', sortable:false, title:'保管员'
+					},{
+						field:'outAmount', sortable:false, title:'出库数', align:'right', formatter:function(value, row, index){
+							return value==0 ? "" : value;
+						}
+					},{
+						field:'matPrice', sortable:false, title:'单价', align:'right', formatter:function(value, row, index){
+							return value==0 ? "" : value;
+						}
+					},{
+						field:'outBala', sortable:false, title:'金额', align:'right', formatter:function(value, row, index){
+							return value==0 ? "" : value;
+						}
+					}
+				] ]
+			});
+		});
+
+		function reloadData(){
+			$('#inOutStockDg').iDatagrid('reload',{
+				beginDateQry:$('#beginDateQry').iDatebox('getValue'),
+				endDateQry:$('#endDateQry').iDatebox('getValue'),
+				matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+				matNameQry:$('#matNameQry').iTextbox('getValue'),
+				storeQry:$('#storeQry').iCombobox('getValue')
+			});
+		}
+
+		function reloadDetail(){
+			$('#detailDg').iDatagrid('reload', {
+				matNo:$('#matNo').val(),
+				date1Qry:$('#beginDateQry').iCombobox('getValue'),
+				date2Qry:$('#endDateQry').iCombobox('getValue'),
+				storeNoQry:$('#storeQry').iCombobox('getValue')
+			})
+		}
+	</script>
+</th:block>
+</body>
+</html>

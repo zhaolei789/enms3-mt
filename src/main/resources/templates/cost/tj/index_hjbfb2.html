@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+	  layout:decorator="public/layout">
+
+<head>
+	<th:block layout:fragment="css">
+		<style>
+			.layui-table td, .layui-table th {
+				font-size: 12px;
+				padding: 5px 5px;
+				min-height: 20px;
+				line-height: 20px;
+				font-size: 12px;
+			}
+		</style>
+	</th:block>
+</head>
+<!--核减绩效统计-->
+<body>
+<th:block layout:fragment="content">
+
+
+	<!--表格-->
+	<div data-options="fit:true">
+		<!--筛选条件-->
+		<div id="fHjbfbDg-toolbar" class="topjui-toolbar datagrid-toolbar" data-options="grid:{
+           type:'datagrid',
+           id:'fHjbfbDg'
+       }" style="display: block;">
+			<a href="javascript:void(0)"
+			   data-toggle="topjui-menubutton"
+			   data-options="
+       extend:'#fHjbfbDg-toolbar',
+       btnCls:'topjui-btn-purple',
+       onClick:exportDataKhhz
+		">考核汇总</a>
+			<a href="javascript:void(0)"
+			   data-toggle="topjui-menubutton"
+			   data-options="
+       extend:'#fHjbfbDg-toolbar',
+       btnCls:'topjui-btn-purple',
+       onClick:exportDataTdhj
+		">区队核减</a>
+			<a href="javascript:void(0)"
+			   data-toggle="topjui-menubutton"
+			   data-options="
+       extend:'#fHjbfbDg-toolbar',
+       btnCls:'topjui-btn-purple',
+       onClick:exportDataFkmx
+		">罚款明细</a>
+			<a href="javascript:void(0)"
+			   data-toggle="topjui-menubutton"
+			   data-options="
+       extend:'#fHjbfbDg-toolbar',
+       btnCls:'topjui-btn-purple',
+       onClick:exportDataFkbfb
+		">罚款百分比</a>
+			<form class="search-box" id="queryForm" name="dataForm" method="post">
+				年份:
+				<input type="text" name="query_year" id="query_year"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'默认当年',
+                   		width:100,
+                   		panelHeight:150,
+                   		url:'/system/dicSet/getDicItemByCode?code=sys.year',
+                   		valueField:'value',
+    					textField:'text'"
+				>
+				月份:
+				<input type="text" name="query_month" id="query_month"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'默认当月',
+                   		width:100,
+                   		panelHeight:150,
+                   		url:'/system/dicSet/getDicItemByCode?code=sys.month',
+                   		valueField:'value',
+    					textField:'text'"
+				>
+				<a href="javascript:void(0)" id="query_button">查询</a>
+			</form>
+		</div>
+
+		<!--<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">-->
+			<table class="layui-table" id="fHjbfbDg">
+				<thead>
+				<tr>
+					<!--<th rowspan="2">序号</th>-->
+					<th style="font-weight: bold;width: 200px;" rowspan="2" align="center">部门</th>
+					<th style="font-weight: bold;width: 300px;" colspan="3">合计</th>
+					<th style="font-weight: bold;width: 300px;" colspan="3">安全考核</th>
+					<th style="font-weight: bold;width: 300px;" colspan="3">材料考核</th>
+					<th style="font-weight: bold;width: 300px;" colspan="3">机电考核</th>
+					<th style="font-weight: bold;width: 300px;" colspan="3">煤质考核</th>
+					<th style="font-weight: bold;width: 300px;" colspan="3">企业考核</th>
+					<th style="font-weight: bold;width: 300px;" colspan="3">三违考核</th>
+					<th style="font-weight: bold;width: 300px;" colspan="3">生产考核</th>
+					<th style="font-weight: bold;width: 300px;" colspan="3">质量考核</th>
+					<th style="font-weight: bold;width: 300px;" colspan="3">通防考核</th>
+					<th style="font-weight: bold;width: 300px;" colspan="3">环保考核</th>
+					<th style="font-weight: bold;width: 300px;" colspan="3">运输考核</th>
+				</tr>
+				<tr>
+					<th style="font-weight: bold;" >通知单</th>
+					<th style="font-weight: bold;" >金额</th>
+					<th style="font-weight: bold;" >百分比</th>
+
+					<th style="font-weight: bold;" >通知单</th>
+					<th style="font-weight: bold;" >金额</th>
+					<th style="font-weight: bold;" >百分比</th>
+
+					<th style="font-weight: bold;" >通知单</th>
+					<th style="font-weight: bold;" >金额</th>
+					<th style="font-weight: bold;" >百分比</th>
+
+					<th style="font-weight: bold;" >通知单</th>
+					<th style="font-weight: bold;" >金额</th>
+					<th style="font-weight: bold;" >百分比</th>
+
+					<th style="font-weight: bold;" >通知单</th>
+					<th style="font-weight: bold;" >金额</th>
+					<th style="font-weight: bold;" >百分比</th>
+
+					<th style="font-weight: bold;" >通知单</th>
+					<th style="font-weight: bold;" >金额</th>
+					<th style="font-weight: bold;" >百分比</th>
+
+					<th style="font-weight: bold;" >通知单</th>
+					<th style="font-weight: bold;" >金额</th>
+					<th style="font-weight: bold;" >百分比</th>
+
+					<th style="font-weight: bold;" >通知单</th>
+					<th style="font-weight: bold;" >金额</th>
+					<th style="font-weight: bold;" >百分比</th>
+
+					<th style="font-weight: bold;" >通知单</th>
+					<th style="font-weight: bold;" >金额</th>
+					<th style="font-weight: bold;" >百分比</th>
+
+					<th style="font-weight: bold;" >通知单</th>
+					<th style="font-weight: bold;" >金额</th>
+					<th style="font-weight: bold;" >百分比</th>
+
+					<th style="font-weight: bold;" >通知单</th>
+					<th style="font-weight: bold;" >金额</th>
+					<th style="font-weight: bold;" >百分比</th>
+
+					<th style="font-weight: bold;" >通知单</th>
+					<th style="font-weight: bold;" >金额</th>
+					<th style="font-weight: bold;" >百分比</th>
+				</tr>
+				</thead>
+				<tbody>
+				<tr th:each="resData : ${res_data_list}">
+					<!--<td th:text="${resData.index + 1}"></td>-->
+					<td th:text="${resData.text}"></td>
+
+					<td th:text="${resData.cnt_all}"></td>
+					<td th:text="${resData.bala_all}"></td>
+					<td th:text="${resData.bl_all}"></td>
+
+					<td th:text="${resData.cnt_1}"></td>
+					<td th:text="${resData.bala_1}"></td>
+					<td th:text="${resData.bl_1}"></td>
+
+					<td th:text="${resData.cnt_2}"></td>
+					<td th:text="${resData.bala_2}"></td>
+					<td th:text="${resData.bl_2}"></td>
+
+					<td th:text="${resData.cnt_3}"></td>
+					<td th:text="${resData.bala_3}"></td>
+					<td th:text="${resData.bl_3}"></td>
+
+					<td th:text="${resData.cnt_4}"></td>
+					<td th:text="${resData.bala_4}"></td>
+					<td th:text="${resData.bl_4}"></td>
+
+					<td th:text="${resData.cnt_5}"></td>
+					<td th:text="${resData.bala_5}"></td>
+					<td th:text="${resData.bl_5}"></td>
+
+					<td th:text="${resData.cnt_6}"></td>
+					<td th:text="${resData.bala_6}"></td>
+					<td th:text="${resData.bl_6}"></td>
+
+					<td th:text="${resData.cnt_7}"></td>
+					<td th:text="${resData.bala_7}"></td>
+					<td th:text="${resData.bl_7}"></td>
+
+					<td th:text="${resData.cnt_8}"></td>
+					<td th:text="${resData.bala_8}"></td>
+					<td th:text="${resData.bl_8}"></td>
+
+					<td th:text="${resData.cnt_9}"></td>
+					<td th:text="${resData.bala_9}"></td>
+					<td th:text="${resData.bl_9}"></td>
+
+					<td th:text="${resData.cnt_10}"></td>
+					<td th:text="${resData.bala_10}"></td>
+					<td th:text="${resData.bl_10}"></td>
+
+					<td th:text="${resData.cnt_11}"></td>
+					<td th:text="${resData.bala_11}"></td>
+					<td th:text="${resData.bl_11}"></td>
+				</tr>
+				</tbody>
+			</table>
+		<!--</div>-->
+	</div>
+
+
+</th:block>
+
+<th:block layout:fragment="js">
+	<script th:inline="javascript">
+		//页面前置参数
+		var request_query_year = [[${query_year}]];
+		var request_query_month = [[${query_month}]];
+
+		$('#query_button').iMenubutton({
+			iconCls:'fa fa-search',
+			btnCls:'topjui-btn-red',
+			method:'request'
+		});
+
+
+		$(function () {
+			$('#query_year').iCombobox('setValue',request_query_year);
+			$('#query_month').iCombobox('setValue',request_query_month);
+			$('#query_button').bind('click', function(){
+				request_query_year = $('#query_year').iCombobox('getValue');
+				request_query_month = $('#query_month').iCombobox('getValue');
+				window.location.href = '/cost/fTj/indexHjbfb2?query_year='+request_query_year+'&query_month='+request_query_month;
+			});
+		});
+
+		function exportDataKhhz() {
+			window.location.href = decodeURI('/cost/fTj/exportDataKhhz?query_year='+request_query_year+'&query_month='+request_query_month);
+		};
+		function exportDataTdhj() {
+			window.location.href = decodeURI('/cost/fTj/exportDataTdhj?query_year='+request_query_year+'&query_month='+request_query_month);
+		};
+		function exportDataFkmx() {
+			window.location.href = decodeURI('/cost/fTj/exportDataFkmx?query_year='+request_query_year+'&query_month='+request_query_month);
+		};
+		function exportDataFkbfb() {
+			window.location.href = decodeURI('/cost/fTj/exportDataFkbfb?query_year='+request_query_year+'&query_month='+request_query_month);
+		};
+	</script>
+
+</th:block>
+</body>
+</html>

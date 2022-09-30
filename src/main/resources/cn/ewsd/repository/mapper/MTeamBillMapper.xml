@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.repository.mapper.MTeamBillMapper">
+    <insert id="saveTeamBill" parameterType="cn.ewsd.repository.model.MTeamBill">
+        INSERT INTO m_team_bill (`bill_no`, `store_no`, `team_no`, `dept_no`, `mat_no`, `occ_amount`, `mat_price`, `occ_date`, `prj_no`, `draw_emp`,
+                                 `use_addr`, `norm_no`, `if_assess`, `if_stock`, `remark`, `in_store`, `step_code`, `modi_emp`, `modi_date`, `modi_time`,
+                                 `data_src`, `account_type`, `mat_status`, `item_no`,
+                                 `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`
+        ) VALUES (
+            #{billNo}, #{storeNo}, #{teamNo}, #{deptNo}, #{matNo}, #{occAmount}, #{matPrice}, #{occDate}, #{prjNo}, #{drawEmp},
+            #{useAddr}, #{normNo}, #{ifAssess}, #{ifStock}, #{remark}, #{inStore}, #{stepCode}, #{modiEmp}, #{modiDate}, #{modiTime},
+            #{dataSrc}, #{accountType}, #{matStatus}, #{itemNo},
+            #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime}
+        )
+    </insert>
+
+    <select id="getConsumeList" resultType="cn.ewsd.repository.model.MTeamBill">
+        SELECT a.occ_date, a.mat_no, a.occ_amount, a.mat_price,
+	    	   (a.occ_amount*a.mat_price) bala, b.new_old, a.dept_no, o.text dept_name
+	    FROM m_team_bill a
+	    LEFT JOIN m_material b ON a.mat_no=b.mat_no
+	    LEFT JOIN sys_organization o ON o.id=a.dept_no
+	    WHERE a.dept_no IN
+	      <foreach collection="deptNos.split(',')" item="deptNo" open="(" separator="," close=")">
+              #{deptNo}
+          </foreach>
+	      AND a.mat_no IN (#{newMatNo}, #{oldMatNo})
+	    ORDER BY a.occ_date DESC
+    </select>
+
+    <select id="getTeamBill" resultType="cn.ewsd.repository.model.MTeamBill">
+        SELECT * FROM m_team_bill WHERE bill_no=#{_parameter}
+    </select>
+
+    <delete id="deleteTeamBill">
+        DELETE FROM m_team_bill WHERE bill_no=#{_parameter}
+    </delete>
+
+    <select id="getTeamStockOutDetail" resultType="cn.ewsd.repository.model.MTeamBill">
+        SELECT a.*, (SELECT prj_name FROM m_prj WHERE prj_no=a.prj_no) prj_name,
+               (SELECT store_name FROM m_store WHERE store_no=a.store_no) store_name,
+               (SELECT text FROM sys_organization WHERE id=a.dept_no) dept_name
+        FROM m_team_bill a
+        WHERE a.mat_no=#{matNo} AND a.occ_date &gt;= #{bDateQry} AND a.occ_date &lt;= #{eDateQry}
+          AND a.team_no=#{teamNoQry} AND a.data_src='m.dataSrc.7'
+        ORDER BY a.occ_date DESC
+    </select>
+
+    <select id="getClassMatQryList" resultType="cn.ewsd.repository.model.MTeamBill">
+        SELECT a.bill_no, a.occ_date, a.dept_no, a.mat_no, b.erp_type, b.type_name, b.mat_code, b.mat_name, b.mat_unit,
+               a.mat_price, a.occ_amount, (a.mat_price*a.occ_amount) as bala, a.use_addr, a.account_type,
+               a.team_no, (SELECT store_name FROM m_store WHERE store_no=a.store_no) AS store_name, mp.prj_name,
+               (SELECT text FROM sys_organization WHERE a.team_no=id) team_name,
+               (SELECT text FROM sys_organization WHERE a.dept_no=id) dept_name,
+               (SELECT text FROM sys_dic_item WHERE a.account_type=value) account_type_name
+        FROM m_team_bill a
+        LEFT JOIN m_material b ON a.mat_no=b.mat_no
+        LEFT JOIN m_prj mp ON a.prj_no=mp.prj_no
+        WHERE a.occ_date &gt;= #{date1Qry} AND a.occ_date &lt;= #{date2Qry}
+          AND a.team_no = #{teamNoQry} AND a.data_src='m.dataSrc.7'
+        <if test="deptNoQry!=''">
+          AND a.dept_no=#{deptNoQry}
+        </if>
+        <if test="typeQry!=''">
+          AND a.account_type=#{typeQry}
+        </if>
+        <if test="prjNameQry!=''">
+          AND mp.prj_name LIKE CONCAT('%', #{prjNameQry}, '%')
+        </if>
+        <if test="matNameQry!=''">
+          AND CONCAT(b.mat_name, b.mat_code) LIKE CONCAT('%', #{matNameQry}, '%')
+        </if>
+        ORDER BY a.occ_date DESC
+    </select>
+</mapper>

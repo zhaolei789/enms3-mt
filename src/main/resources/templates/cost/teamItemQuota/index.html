@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="teamItemQuotaForm" style="height:100%">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+			<table id="teamItemQuotaDg"></table>
+		</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="teamItemQuotaDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'teamItemQuotaDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">单位：</label>
+	<input data-toggle="topjui-combobox" id="teamNoQry" name="teamNoQry" value="" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',width:'150px',loadFilter:function(data){
+		data.unshift({id:'', text:'--全部--'});
+		return data
+	}">
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">工程：</label>
+	<input data-toggle="topjui-combobox" id="prjQry" name="prjQry" value="" data-options="valueField:'prjNo',textField:'prjName',url:'/material/mPrj/getPrjList1?teamNo=',width:'150px',loadFilter:function(data){
+		data.unshift({prjNo:'', prjName:'--全部--'});
+		return data
+	}">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<br />
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">考核指标：</label>
+	<input data-toggle="topjui-combobox" id="itemNo" name="itemNo" value="" data-options="valueField:'itemNo',textField:'itemName',url:'/cost/mFeeItem/getTeamItemQuotaItem?teamNo=',width:'150px',loadFilter:function(data){
+		data.unshift({itemNo:'', itemName:'--请选择--'});
+		return data
+	}">
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">定额数量：</label>
+	<input id="amount" data-toggle="topjui-textbox" name="amount" data-options="width:'150px'" value="">
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">定稿价格：</label>
+	<input id="price" data-toggle="topjui-textbox" name="price" data-options="width:'150px'" value="">
+
+	<a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">保存新增</span>
+			<span class="l-btn-icon fa fa-plus">&nbsp;</span>
+		</span>
+	</a>
+
+	<a href="javascript:void(0)" id="updBtn" class="l-btn topjui-btn-purple l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">保存修改</span>
+			<span class="l-btn-icon fa fa-edit">&nbsp;</span>
+		</span>
+	</a>
+
+	<a href="javascript:void(0)" id="deleteBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">删除</span>
+			<span class="l-btn-icon fa fa-trash">&nbsp;</span>
+		</span>
+	</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#teamNoQry').iCombobox({
+				onChange:function(newValue, oldValue){
+					$('#prjQry').iCombobox('reload', '/material/mPrj/getPrjList1?teamNo='+newValue)
+					$('#itemNo').iCombobox('reload', '/cost/mFeeItem/getTeamItemQuotaItem?teamNo='+newValue)
+				}
+			})
+
+			$('#teamItemQuotaDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/cost/teamItemQuota/getPageSet',
+				queryParams:{
+					teamNoQry:$('#teamNoQry').iCombobox('getValue'),
+					prjQry:$('#prjQry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'normId', sortable:false, title:'', checkbox:true
+					},{
+						field:'teamName', sortable:false, title:'单位部门'
+					},{
+						field:'prjName', sortable:false, title:'工程项目'
+					},{
+						field:'itemName', sortable:false, title:'考核指标'
+					},{
+						field:'normAmount', sortable:false, title:'定额数量', formatter:function(value ,row, index){
+							var normId = row.normId
+							return '<span class="textbox"><input class="textbox-text" type="number" id="amount_'+ normId +'" name="amount_'+ normId +'" value="'+ value +'" disabled /></span>';
+						}
+					},{
+						field:'normPrice', sortable:false, title:'定额单价', formatter:function(value, row, index){
+							var normId = row.normId
+							return '<span class="textbox"><input class="textbox-text" type="number" id="price_'+ normId +'" name="price_'+ normId +'" value="'+ value +'" disabled /></span>';
+						}
+					},{
+						field:'assTeamName', sortable:false, title:'管理科室'
+					}
+				] ],
+				onCheck:function(index, row){
+					var normId = row.normId;
+					$('#amount_' + normId +', #price_'+ normId).removeAttr('disabled');
+				},
+				onUncheck:function(index, row){
+					var normId = row.normId;
+					$('#amount_' + normId +', #price_'+ normId).attr('disabled', 'disabled');
+				},
+				onCheckAll:function(rows){
+					$('[name^="amount_"], [name^="price_"]').removeAttr("disabled");
+				},
+				onUncheckAll:function(rows){
+					$('[name^="amount_"], [name^="price_"]').attr("disabled", 'disabled');
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#saveBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '确定保存新增的数据吗！', function (r) {
+					if (r) {
+						$('#teamItemQuotaForm').iForm('submit', {
+							url: '/cost/teamItemQuota/save',
+							success: function (data) {
+								data = $.parseJSON(data);
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadData()
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				});
+			});
+
+			$('#updBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '确定保存修改的数据吗！', function (r) {
+					if (r) {
+						$('#teamItemQuotaForm').iForm('submit', {
+							url: '/cost/teamItemQuota/update',
+							success: function (data) {
+								data = $.parseJSON(data);
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadData()
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				});
+			});
+
+			$('#deleteBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '确定删除数据吗！', function (r) {
+					if (r) {
+						$('#teamItemQuotaForm').iForm('submit', {
+							url: '/cost/teamItemQuota/delete',
+							success: function (data) {
+								data = $.parseJSON(data);
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadData()
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				});
+			});
+		});
+
+		function reloadData(){
+			$('#teamItemQuotaDg').iDatagrid('reload',{
+				teamNoQry:$('#teamNoQry').iCombobox('getValue'),
+				prjQry:$('#prjQry').iCombobox('getValue')
+			});
+		}
+	</script>
+</th:block>
+</body>
+</html>

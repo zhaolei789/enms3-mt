@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.mdata.mapper.SysOrganizationMasterMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.mdata.model.SysOrganizationMaster" id="sysOrganizationMasterMap">
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+        <result property="is_del" column="is_del"/>
+        <result property="org_uuid" column="org_uuid"/>
+        <result property="org_id" column="org_id"/>
+        <result property="org_level" column="org_level"/>
+        <result property="master_uuid" column="master_uuid"/>
+        <result property="master_name" column="master_name"/>
+        <result property="master_position_name" column="master_position_name"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 is_del
+		  ,  	  	     			 org_uuid
+		  ,  	  	     			 org_id
+		  ,  	  	     			 org_level
+		  ,  	  	     			 master_uuid
+		  ,  	  	     			 master_name
+		  ,  	  	     			 master_position_name
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.mdata.model.SysOrganizationMaster">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_organization_master
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.mdata.model.SysOrganizationMaster">
+		select  <include refid="Base_Column_List" />  from sys_organization_master where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.mdata.model.SysOrganizationMaster">
+		select  <include refid="Base_Column_List" />  from sys_organization_master
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_organization_master 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.mdata.model.SysOrganizationMaster">
+		insert into sys_organization_master
+		(
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`, 
+			`is_del`, 
+			`org_uuid`, 
+			`org_id`, 
+			`org_level`, 
+			`master_uuid`, 
+			`master_name`, 
+			`master_position_name`
+		)
+		values
+		(
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time}, 
+			#{is_del}, 
+			#{org_uuid}, 
+			#{org_id}, 
+			#{org_level}, 
+			#{master_uuid}, 
+			#{master_name}, 
+			#{master_position_name}
+		)
+	</insert>
+
+	<insert id="batchInsert">
+		insert into sys_organization_master
+		(
+		`uuid`,
+		`create_time`,
+		`creator`,
+		`creator_id`,
+		`creator_org_id`,
+		`modifier_id`,
+		`modifier`,
+		`modify_time`,
+		`is_del`,
+		`org_uuid`,
+		`org_id`,
+		`org_level`,
+		`master_uuid`,
+		`master_name`,
+		`master_position_name`
+		)
+		values
+		<foreach collection="list" item="list" index="index" separator=",">
+			(
+			#{list.uuid},
+			#{list.createTime},
+			#{list.creator},
+			#{list.creatorId},
+			#{list.creatorOrgId},
+			#{list.modifierId},
+			#{list.modifier},
+			#{list.modifyTime},
+			#{list.isDel},
+			#{list.orgUuid},
+			#{list.orgId},
+			#{list.orgLevel},
+			#{list.masterUuid},
+			#{list.masterName},
+			#{list.masterPositionName}
+			)
+		</foreach>
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.mdata.model.SysOrganizationMaster">
+		update sys_organization_master 
+		<set>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}, </if>
+			<if test="is_del != null">`is_del` = #{is_del}, </if>
+			<if test="org_uuid != null">`org_uuid` = #{org_uuid}, </if>
+			<if test="org_id != null">`org_id` = #{org_id}, </if>
+			<if test="org_level != null">`org_level` = #{org_level}, </if>
+			<if test="master_uuid != null">`master_uuid` = #{master_uuid}, </if>
+			<if test="master_name != null">`master_name` = #{master_name}, </if>
+			<if test="master_position_name != null">`master_position_name` = #{master_position_name}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from sys_organization_master where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from sys_organization_master where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+	<select id="queryListByIds" resultType="cn.ewsd.mdata.model.SysOrganizationMaster">
+		select  <include refid="Base_Column_List" />  from sys_organization_master
+		where uuid in
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</select>
+
+	<delete id="executeDeleteByOrgBatch">
+		delete from sys_organization_master where org_id in
+		<foreach item="id" collection="orgId" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		and
+			master_uuid = #{masterUuid}
+	</delete>
+
+	<select id="queryListByMasterIds" resultType="cn.ewsd.mdata.model.SysOrganizationMaster">
+		select  <include refid="Base_Column_List" />  from sys_organization_master
+		where master_uuid in
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+		group by org_id
+	</select>
+</mapper>

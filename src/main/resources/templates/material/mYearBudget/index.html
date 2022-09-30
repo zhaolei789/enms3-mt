@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <form id="ybForm" method="post">
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <table id="mYearBudgetDg">
+                <thead>
+                <tr>
+                    <th data-options="field:'teamName',title:'单位名称',sortable:false"></th>
+                    <th data-options="field:'budBala',title:'合计',sortable:false,align:'right',width:'80px'"></th>
+                    <th data-options="field:'iniBala',title:'预算（年初）',sortable:false,formatter:function(value, row, index){
+                        return '<span class=&quot;textbox&quot;><input type=&quot;hidden&quot; name=&quot;teamNo&quot; value=&quot;'+row.teamNo+'&quot; /><input style=&quot;text-align:right&quot; class=&quot;textbox-text&quot; type=&quot;number&quot; name=&quot;'+row.teamNo+'_ini&quot; value=&quot;'+(value==0 ? '' : value)+'&quot; /></span>'
+                    }"></th>
+                    <th data-options="field:'addBala',title:'预算（调整）',sortable:false,formatter:function(value, row, index){
+                        return '<span class=&quot;textbox&quot;><input style=&quot;text-align:right&quot;  class=&quot;textbox-text&quot; type=&quot;number&quot; name=&quot;'+row.teamNo+'_add&quot; value=&quot;'+(value==0 ? '' : value)+'&quot; /></span>'
+                    }"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        </form>
+    </div>
+
+    <!-- 表格工具栏 -->
+    <div id="mYearBudgetDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'mYearBudgetDg'
+       }" style="display:none">
+
+        <label class="topjui-form-label" style="width:60px">年份：</label>
+        <select id="useYearQry" data-toggle="topjui-combobox" name="useYearQry" data-options="width:80" >
+            <option th:each="i:${#numbers.sequence(2015, endYear)}" th:value="${i}" th:text="${i}" th:selected="${i==currentYear}"></option>
+        </select>
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">材料科目：</label>
+        <select id="itemNoQry" data-toggle="topjui-combobox" name="itemNoQry" data-options="width:160" >
+            <option th:each="mItem:${itemList}" th:value="${mItem.itemNo}" th:text="${mItem.itemName}" ></option>
+        </select>
+
+        <label class="topjui-form-label" style="width:60px;float:none;display:inline-block">系统：</label>
+        <select id="sysNoQry" data-toggle="topjui-combobox" name="sysNoQry" data-options="width:120" >
+            <option value="">--全部--</option>
+            <option th:each="dept:${deptList}" th:value="${dept.id}" th:text="${dept.text}" ></option>
+        </select>
+
+        <a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">保存数据</span>
+                <span class="l-btn-icon fa fa-save">&nbsp;</span>
+            </span>
+        </a>
+
+        <a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">查询</span>
+                <span class="l-btn-icon fa fa-search">&nbsp;</span>
+            </span>
+        </a>
+
+        <span style="font-weight: bold; color:blue">单位：万元</span>
+
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#mYearBudgetDg').iDatagrid({
+                queryParams:{
+                    useYearQry:$('#useYearQry').val(),
+                    itemNoQry:$('#itemNoQry').val(),
+                    sysNoQry:$('#sysNoQry').val()
+                },
+                singleSelect:true,
+                selectOnCheck:false,
+                checkOnSelect:false,
+                pagination:false,
+                url:'/material/mYearBudget/getTableData',
+                onLoadSuccess:function(data){
+                    var sumBudBala = 0;
+                    var sumIniBala = 0;
+                    var sumAddBala = 0;
+                    $.each(data.rows, function(i, row){
+                        sumBudBala += row.budBala;
+                        sumIniBala += row.iniBala;
+                        sumAddBala += row.addBala;
+                    })
+                    $('.datagrid-view1 .datagrid-btable tbody tr#datagrid-row-r1-1-'+ data.total).remove();
+                    $('.datagrid-view1 .datagrid-btable tbody').append('' +
+                        '<tr class="datagrid-row" id="datagrid-row-r1-1-'+ data.total +'" datagrid-row-index="'+ data.total +'">' +
+                            '<td class="datagrid-td-rownumber" sty><div class="datagrid-cell-rownumber">'+ (data.total+1) +'</div></td>' +
+                        '</tr>');
+                    $('.datagrid-view2 .datagrid-btable tbody tr#datagrid-row-r1-2-'+ data.total).remove();
+                    $('.datagrid-view2 .datagrid-btable tbody').append('' +
+                        '<tr class="datagrid-row" id="datagrid-row-r1-2-'+ data.total +'" datagrid-row-index="'+ data.total +'">' +
+                            '<td field="teamName">' +
+                                '<div style="height:auto;font-weight: bold" class="datagrid-cell datagrid-cell-c1-teamName">合计</div>' +
+                            '</td>' +
+                            '<td field="budBala">' +
+                                '<div style="height:auto;font-weight: bold;text-align:right" class="datagrid-cell datagrid-cell-c1-budBala">'+ sumBudBala +'</div>' +
+                            '</td>' +
+                            '<td field="iniBala">' +
+                                '<div style="height:auto;font-weight: bold;text-align:right" class="datagrid-cell datagrid-cell-c1-iniBala">'+ sumIniBala +'</div>' +
+                            '</td>' +
+                            '<td field="addBala">' +
+                                '<div style="height:auto;font-weight: bold;text-align:right" class="datagrid-cell datagrid-cell-c1-aadBala">'+ sumAddBala +'</div>' +
+                            '</td>' +
+                        '</tr>');
+                }
+            });
+
+            $('#saveBtn').click(function(){
+                $('#ybForm').iForm('submit', {
+                    url:'/material/mYearBudget/save',
+                    success:function(data){
+                        data = $.parseJSON(data);
+                        if(data.statusCode == 200){
+                            $.iMessager.show({
+                                title:data.title,
+                                msg:data.message
+                            })
+                            $('#mYearBudgetDg').iDatagrid('reload',{
+                                useYearQry:$('#useYearQry').val(),
+                                itemNoQry:$('#itemNoQry').val(),
+                                sysNoQry:$('#sysNoQry').val()
+                            })
+                        } else {
+                            $.iMessager.alert({
+                                icon:'messager-error',
+                                title:data.title,
+                                msg:data.message
+                            });
+                        }
+                    }
+                });
+            });
+
+            $('#searchBtn').click(function(){
+                $('#mYearBudgetDg').iDatagrid('reload',{
+                    useYearQry:$('#useYearQry').val(),
+                    itemNoQry:$('#itemNoQry').val(),
+                    sysNoQry:$('#sysNoQry').val()
+                })
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>

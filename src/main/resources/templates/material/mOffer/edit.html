@@ -1,0 +1,71 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">供应商编号</label>
+			<div class="topjui-input-block">
+				<input type="text" readonly id="offerNo" name="offerNo" data-toggle="topjui-textbox" data-options="prompt:'',required:true">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">供应商名称</label>
+			<div class="topjui-input-block">
+				<input type="text" name="offerName" data-toggle="topjui-textbox" data-options="prompt:'',required:true">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">供应商简称</label>
+			<div class="topjui-input-block">
+				<input type="text" name="shortName" data-toggle="topjui-textbox" data-options="prompt:''">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">主要联系人</label>
+			<div class="topjui-input-block">
+				<input type="text" name="linkMan" data-toggle="topjui-textbox" data-options="prompt:''">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">联系方式</label>
+			<div class="topjui-input-block">
+				<input type="text" name="contactWay" data-toggle="topjui-textbox" data-options="prompt:''">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">供应商地址</label>
+			<div class="topjui-input-block">
+				<input type="text" name="offerAddr" data-toggle="topjui-textbox" data-options="prompt:''">
+			</div>
+		</div>
+    	<div class="topjui-col-sm12">
+			<label class="topjui-form-label">备注</label>
+			<div class="topjui-input-block">
+				<input type="text" name="certInfo" data-toggle="topjui-textbox" data-options="prompt:''">
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+	if($('#uuid').val() == ''){
+		$.ajax({
+			url:'/material/mOffer/getNewOfferNo',
+			type:"post",
+			async:false,
+			cache:false,
+			dataType:'json',
+			success:function(data, textStatus, jqXHR){
+				$('#offerNo').val(data.offerNo);
+			},
+			error:function(jqXHR, textStatus, errorThrown){
+
+			}
+		});
+	}
+});
+</script>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--外部模块数据库-->
+<mapper namespace="cn.ewsd.fix.mapper.OtherModuleMapper">
+
+
+	<select id="queryObject" resultType="cn.ewsd.fix.model.MBackPlan">
+		select  *  from m_back_plan where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.fix.model.MBackPlan">
+		select  *  from m_back_plan
+		where 1 = 1
+	</select>
+	
+
+
+</mapper>

@@ -1,0 +1,52 @@
+server:
+  ip: 127.0.0.1
+  port: 9090
+  database-host: 192.168.5.191
+  redis-host: 127.0.0.1
+  rabbitmq-host: 127.0.0.1
+spring:
+  datasource:
+    url: jdbc:mysql://${server.database-host}:3306/krmis_mt?characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+    default:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://${server.database-host}:3306/krmis_mt?characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+      username: root
+      password: root
+  redis:
+    database: 0
+    host: ${server.redis-host}
+    port: 6379
+    password: root
+  rabbitmq:
+    host: ${server.rabbitmq-host}
+    port: 5672
+    username: admin
+    password: 123456
+logging:
+  config: classpath:logback-krmis.xml
+jwt:
+  audience:
+    clientId: 098f6bcd4621d373cade4e832627b4f9
+    base64Secret: MDk4ZjZiY2Q0NjIxZDM3M2NhZGU0ZTgzMjYyN2I0ZjY=
+    name: systemJwt
+    expiresSecond: 172800
+#xxl-job配置
+xxl.job:
+  admin:
+    addresses: http://localhost:9092/xxl-job-admin
+  executor:
+    appname: xxl-job-executor-enms3-mt
+    ip:
+    port: 9999
+    logpath: D:/zysd/logs/xxl-job/jobhandler
+    logretentiondays: 30
+#文件服务地址
+files:
+  server-url-prefix: http://localhost:9095/
+
+#forest配置
+forest:
+  variables:
+    mtServerUrl: http://10.255.9.60

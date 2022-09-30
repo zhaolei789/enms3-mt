@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'40%'">
+        <table id="orderDg"></table>
+    </div>
+    <form id="listForm">
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <table id="listDg"></table>
+        </div>
+    </form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="orderDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'orderDg'
+       }" style="display:none">
+
+</div>
+
+    <div id="listDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'listDg'
+       }" style="display:none">
+
+        <input type="hidden" id="transNo" name="transNo" value="" />
+
+        <a href="javascript:void(0)" id="backBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">退回</span>
+            <span class="l-btn-icon fa fa-reply">&nbsp;</span>
+        </span>
+        </a>
+
+        <a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">收货</span>
+            <span class="l-btn-icon fa fa-check">&nbsp;</span>
+        </span>
+        </a>
+
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        $(document).ready(function(){
+            $('#orderDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                url: '/repository/moveCheck/getMoveCheckList',
+                columns:[ [
+                    {
+                        field:'outName', sortable:false, title:'移出仓库'
+                    },{
+                        field:'inName', sortable:false, title:'移入仓库'
+                    },{
+                        field:'occDate', sortable:false, title:'编制时间', formatter: function(value, row, index){
+                            return (value!='' && value!=null && value!=undefined ? value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8) : "")
+                                + (row.occTime!='' && row.occTime!=null && row.occTime!=undefined ? row.occTime.substring(0, 2) + ':' + row.occTime.substring(2, 4) + ':' + row.occTime.substring(4, 6) : '')
+                        }
+                    },{
+                        field:'stepName', sortable:false, title:'状态'
+                    }
+                ] ],
+                onSelect:function(index, row){
+                    var moveStep = row.moveStep
+                    var transNo = row.transNo
+                    $('#transNo').val(transNo)
+                    reloadList(transNo)
+                }
+            });
+
+            $('#saveBtn').click(function(){
+                $.iMessager.confirm('确认对话框', '您确定接收选择的物料吗？', function (r) {
+                    if (r) {
+                        $('#listForm').iForm('submit', {
+                            url:'/repository/moveCheck/check',
+                            success:function(data){
+                                data = $.parseJSON(data);
+                                if(data.statusCode == 200){
+                                    $.iMessager.show({
+                                        title:data.title,
+                                        msg:data.message
+                                    })
+                                    var transNo = $('#transNo').val()
+                                    reloadOrder()
+                                    reloadList(transNo);
+                                } else {
+                                    $.iMessager.alert({
+                                        icon:'messager-error',
+                                        title:data.title,
+                                        msg:data.message
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+
+            $('#listDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                url: '/repository/moveCheck/getMoveList',
+                columns:[ [
+                    {
+                        field:'listNo', sortable:false, title:'', checkbox:true
+                    },{
+                        field:'erpType', sortable:false, title:'物料分类'
+                    },{
+                        field:'typeName', sortable:false, title:'分类描述'
+                    },{
+                        field:'matCode', sortable:false, title:'物料编码'
+                    },{
+                        field:'matName', sortable:false, title:'物料描述'
+                    },{
+                        field:'matUnit', sortable:false, title:'单位'
+                    },{
+                        field:'matAmount', sortable:false, title:'指令数量'
+                    },{
+                        field:'pickAmount', sortable:false, title:'拣货数量'
+                    }
+                ] ]
+            });
+        });
+
+        $('#backBtn').click(function(){
+            $.iMessager.confirm('确认对话框', '您确定退回选择的物料吗？', function (r) {
+                if (r) {
+                    $('#listForm').iForm('submit', {
+                        url: '/repository/moveCheck/check',
+                        success: function (data) {
+                            data = $.parseJSON(data);
+                            if (data.statusCode == 200) {
+                                $.iMessager.show({
+                                    title: data.title,
+                                    msg: data.message
+                                })
+                                reloadOrder();
+                                reloadList($('#transNo').val());
+                            } else {
+                                $.iMessager.alert({
+                                    icon: 'messager-error',
+                                    title: data.title,
+                                    msg: data.message
+                                });
+                            }
+                        }
+                    });
+                }
+            })
+        });
+
+        function reloadList(transNo){
+            $('#listDg').iDatagrid('reload',{
+                transNo:transNo
+            });
+        }
+
+        function reloadOrder(){
+            $('#orderDg').iDatagrid('reload');
+        }
+    </script>
+</th:block>
+</body>
+</html>

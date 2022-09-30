@@ -1,0 +1,285 @@
+<input type="hidden" id="uuid" name="uuid">
+<input type="hidden" name="password">
+<style>
+    .textbox-icon {
+        width: 26px !important;
+        text-align: center;
+        text-decoration: none;
+        color: gray;
+        line-height: 29px;
+    }
+    a:hover{
+        text-decoration: none;
+    }
+</style>
+<div class="topjui-fluid">
+    <!--<fieldset>
+        <legend>基本信息</legend>
+    </fieldset>-->
+    <br>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6"><label class="topjui-form-label">用户名</label>
+            <div class="topjui-input-block">
+                <input type="text" name="userNameId" data-toggle="topjui-textbox"
+                       data-options="required:true,prompt:'必填',validType:'alphaDash'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6"><label class="topjui-form-label">姓名</label>
+            <div class="topjui-input-block">
+                <input type="text" name="userName" data-toggle="topjui-textbox"
+                       data-options="required:true,prompt:'必填'">
+            </div>
+        </div>
+    </div>
+    <!--<div class="topjui-row">
+        <div class="topjui-col-sm6"><label class="topjui-form-label">性别</label>
+            <div class="topjui-input-block">
+                <input name="sex" data-toggle="topjui-radiobutton"
+                       data-options="value:'1',label:'男',labelPosition:'after',checked:'true'">
+                <input name="sex" data-toggle="topjui-radiobutton"
+                       data-options="value:'2',label:'女',labelPosition:'after'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6"><label class="topjui-form-label">年龄</label>
+            <div class="topjui-input-block">
+                <input type="text" name="age" data-toggle="topjui-numberbox" data-options="groupSeparator:''">
+            </div>
+        </div>
+    </div>-->
+    <div class="topjui-row">
+        <div class="topjui-col-sm6"><label class="topjui-form-label">所属机构</label>
+            <div class="topjui-input-block">
+                <input type="hidden" name="orgName">
+                <input type="text" name="orgId"
+                       data-toggle="topjui-combotree"
+                       data-options="required:true,
+                   prompt:'必填',
+                   url:'/mdata/organization/getListByLevelId?levelId=1',
+                   expandUrl:'/mdata/organization/getListByPid?pid={id}',
+                   getFatherIdsUrl:'/mdata/organization/getFatherIds?id={id}',
+                   param:'orgName:text'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6"><label class="topjui-form-label">固定电话</label>
+            <div class="topjui-input-block">
+                <input type="text" name="telephone" data-toggle="topjui-textbox">
+            </div>
+        </div>
+    </div>
+
+    <div class="topjui-row">
+        <div class="topjui-col-sm6"><label class="topjui-form-label">电子邮箱</label>
+            <div class="topjui-input-block">
+                <input type="text" name="email" data-toggle="topjui-textbox"
+                       data-options="validType:'email',prompt:'必填'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6"><label class="topjui-form-label">手机</label>
+            <div class="topjui-input-block">
+                <input type="text" name="cellphone" data-toggle="topjui-textbox">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">角色授权</label>
+            <div class="topjui-input-block">
+                <input type="text" name="userGroup"
+                       data-toggle="topjui-combotree"
+                       data-options="required:true,
+                       prompt:'必填',
+                       id:'userGroup',
+                       multiple:true,
+                       url:'/system/authGroup/getListByLevelId?levelId=0',
+                       expandUrl:'/system/authGroup/getListByPid?pid={id}',
+                       expandAll:true,
+                       onBeforeSelect: function (node) {
+                         var opts = $(this).iTree('options');
+                         if (opts.onlyLeafCheck) {
+                            // 判断是否是叶子节点
+                             var isLeaf = $(this).iTree('isLeaf', node.target);
+                            if (!isLeaf) {
+                                // 返回false表示取消本次选择操作
+                                return false;
+                            }
+                         }
+                       },
+                       icons:[{
+                            iconCls:'fa fa-remove',
+                            handler: function(e){
+                                $(e.data.target).iCombotree('clear');
+                            }
+                        }],
+                        iconWidth:22,
+                       onlyLeafCheck:true">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">数据授权</label>
+            <div class="topjui-input-block">
+                <input type="text" name="dataAuth"
+                       data-toggle="topjui-combobox"
+                       data-options="required:true,
+                       prompt:'必填',
+                       multiple:true,
+                       valueField:'id',
+                       textField:'name',
+                       panelHeight:'auto',
+                        icons:[{
+                            iconCls:'fa fa-remove',
+                            handler: function(e){
+                                $(e.data.target).combobox('clear');
+                            }
+                        }],
+                       url:'/system/sysAuthdataGroup/getAllList'
+                      ">
+            </div>
+            <!--原来的数据权限-->
+            <!--<div class="topjui-input-block">-->
+            <!--<input type="text" name="dataAuth"-->
+            <!--data-toggle="topjui-combotree"-->
+            <!--data-options="required:true,-->
+            <!--prompt:'必填',-->
+            <!--multiple:true,-->
+            <!--url:'/system/sysAuthData/getListByLevelId?levelId=1',-->
+            <!--expandUrl:'/system/sysAuthData/getListByPid?pid={id}',expandAll:true-->
+            <!--">-->
+            <!--</div>-->
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm12"><label class="topjui-form-label">状态</label>
+            <div class="topjui-input-block">
+                <input type="text" name="status"
+                       data-toggle="topjui-combobox"
+                       data-options="required:true,
+                   prompt:'必填',
+                   panelHeight:63,
+                   url:'/system/dicSet/getDicItemByCode?code=en-disable',
+                   param:'status:text'">
+            </div>
+        </div>
+    </div>
+   <!-- <fieldset>
+        <legend>其它信息</legend>
+    </fieldset>-->
+    <!--<div class="topjui-row">
+        <div class="topjui-col-sm12"><label class="topjui-form-label">所属区域</label>
+            <div class="topjui-input-block">
+                <input type="text" name="zone"
+                       data-toggle="topjui-combotree"
+                       data-options="required:true,
+                   prompt:'必填',
+                   url:'/system/codeItem/getListByCodeSetIdAndLevelId?codeSetId=AGA&levelId=3',
+				   expandUrl:'/system/codeItem/getListByPid?pid={id}',
+                   getFatherIdsUrl:'/system/codeItem/getFatherIds?id={id}',
+                   backfill:{url:'/system/codeItem/getZoneFillbackData?id={id}'}">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6"><label class="topjui-form-label">国家</label>
+            <div class="topjui-input-block">
+                <input type="text" name="country" data-toggle="topjui-textbox" data-options="readonly:true">
+            </div>
+        </div>
+        <div class="topjui-col-sm6"><label class="topjui-form-label">省份</label>
+            <div class="topjui-input-block">
+                <input type="text" name="province" data-toggle="topjui-textbox" data-options="readonly:true">
+            </div>
+        </div>
+    </div>-->
+    <!--<div class="topjui-row">
+        <div class="topjui-col-sm6"><label class="topjui-form-label">城市</label>
+            <div class="topjui-input-block">
+                <input type="text" name="city" data-toggle="topjui-textbox" data-options="readonly:true">
+            </div>
+        </div>
+        <div class="topjui-col-sm6"><label class="topjui-form-label">区县</label>
+            <div class="topjui-input-block">
+                <input type="text" name="district" data-toggle="topjui-textbox" data-options="readonly:true">
+            </div>
+        </div>
+    </div>-->
+    <!--<div class="topjui-row">
+        <div class="topjui-col-sm6"><label class="topjui-form-label">籍贯</label>
+            <div class="topjui-input-block">
+                <input type="text" name="nativePlace" data-toggle="topjui-combobox"
+                       data-options="url:'/system/codeItem/getListByCodeSetIdAndLevelId?codeSetId=AAAC&levelId=5',panelHeight:'250',textField:'text',valueField:'text'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6"><label class="topjui-form-label">民族</label>
+            <div class="topjui-input-block">
+                <input type="text" name="nation" data-toggle="topjui-combobox"
+                       data-options="url:'/system/codeItem/getListByCodeSetIdAndLevelId?codeSetId=AAAB&levelId=2',panelHeight:'250',textField:'text',valueField:'text'">
+            </div>
+        </div>
+    </div>-->
+    <!--<div class="topjui-row">
+        <div class="topjui-col-sm6"><label class="topjui-form-label">身份证号</label>
+            <div class="topjui-input-block">
+                <input type="text" name="idCard" data-toggle="topjui-textbox">
+            </div>
+        </div>
+        <div class="topjui-col-sm6"><label class="topjui-form-label">毕业院校</label>
+            <div class="topjui-input-block">
+                <input type="text" name="school" data-toggle="topjui-textbox">
+            </div>
+        </div>
+    </div>-->
+    <!--<div class="topjui-row">
+        <div class="topjui-col-sm6"><label class="topjui-form-label">学历</label>
+            <div class="topjui-input-block">
+                <input type="text" id="education" name="education" data-toggle="topjui-combobox"
+                       data-options="url:'/system/codeItem/getListByCodeSetIdAndLevelId?codeSetId=AABA&levelId=5',textField:'text',valueField:'text'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6"><label class="topjui-form-label">学位</label>
+            <div class="topjui-input-block">
+                <input type="text" id="degree" name="degree" data-toggle="topjui-combobox"
+                       data-options="url:'/system/codeItem/getListByCodeSetIdAndLevelId?codeSetId=AABB&levelId=5',textField:'text',valueField:'text'">
+            </div>
+        </div>
+    </div>-->
+    <div class="topjui-row">
+        <div class="topjui-col-sm12"><label class="topjui-form-label">备注</label>
+            <div class="topjui-input-block">
+                <input type="text" name="remark" data-toggle="topjui-textarea">
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    $.extend($.fn.textbox.methods, {
+        addClearBtn: function (jq, iconCls) {
+            return jq.each(function () {
+                var t = $(this);
+                var opts = t.combotree('options');
+                opts.icons = opts.icons || [];
+                opts.icons.unshift({
+                    iconCls: iconCls,
+                    handler: function (e) {
+                        $(e.data.target).combotree('clear').combotree('textbox').focus();
+                        $(this).css('visibility', 'hidden');
+                    }
+                });
+                t.textbox();
+                if (!t.combotree('getText')) {
+                    t.combotree('getIcon', 0).css('visibility', 'hidden');
+                }
+                t.combotree('textbox').bind('keyup', function () {
+                    var icon = t.combotree('getIcon', 0);
+                    if ($(this).val()) {
+                        icon.css('visibility', 'visible');
+                    } else {
+                        icon.css('visibility', 'hidden');
+                    }
+                });
+            });
+        }
+    });
+    $(function () {
+        $('#userGroup').combotree().textbox('addClearBtn', 'icon-clear');
+    });
+</script>

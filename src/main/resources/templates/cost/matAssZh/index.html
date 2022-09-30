@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="matAssZhForm">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+			<table id="matAssZhDg"></table>
+		</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="matAssZhDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'matAssZhDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:75px">月份：</label>
+	<select id="yearQry" data-toggle="topjui-combobox" name="yearQry" data-options="width:80" >
+		<option th:each="i:${#numbers.sequence(2015, endYear)}" th:value="${i}" th:text="${i}" th:selected="${i==currentYear}"></option>
+	</select>
+	<select id="monQry" data-toggle="topjui-combobox" name="monQry" data-options="width:70" >
+		<option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}" th:selected="${i==currentMonth}"></option>
+	</select>
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-brown l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+	</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#matAssZhDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				rownumbers:false,
+				url:'/cost/matAssZh/getList',
+				queryParams:{
+					yearQry:$('#yearQry').iCombobox('getValue'),
+					monQry:$('#monQry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'orderNo', sortable:false, title:'序号', align:'center', formatter:function(value, row, index){
+							if(row.teamName == '合计'){
+								return row.teamName
+							}else{
+								return value
+							}
+						}
+					},{
+						field:'teamName', sortable:false, title:'单位'
+					},{
+						field:'prjName', sortable:false, title:'工程项目'
+					},{
+						field:'occDigText', sortable:false, title:'生产完成', align:'right'
+					},{
+						field:'assPriceText', sortable:false, title:'单价', align:'right'
+					},{
+						field:'normBalaText', sortable:false, title:'单项定额材料费', align:'right'
+					},{
+						field:'addBalaText', sortable:false, title:'本月定额材料费', align:'right'
+					},{
+						field:'lastStockText', sortable:false, title:'上月结存额', align:'right'
+					},{
+						field:'inBalaText', sortable:false, title:'当月领用额', align:'right'
+					},{
+						field:'occBalaText', sortable:false, title:'本月考核金额', align:'right'
+					},{
+						field:'stockBalaText', sortable:false, title:'本月结存额', align:'right'
+					},{
+						field:'diffBalaText', sortable:false, title:'节+超-额', align:'right'
+					}
+				] ],
+				onLoadSuccess: function(data){
+					for(var i=0; i<data.rows.length; i++){
+						var row = data.rows[i];
+						var rowspan = row.rowSpan;
+						if(rowspan != 0){
+							mergeCell(i, "orderNo", rowspan, 1);
+							mergeCell(i, "teamName", rowspan, 1);
+						}
+						if(row.frequ == 1){
+							var cnt = row.cnt;
+							mergeCell(i, "addBalaText", cnt, 1);
+							mergeCell(i, "lastStockText", cnt, 1);
+							mergeCell(i, "inBalaText", cnt, 1);
+							mergeCell(i, "occBalaText", cnt, 1);
+							mergeCell(i, "stockBalaText", cnt, 1);
+							mergeCell(i, "diffBalaText", cnt, 1);
+						}
+						if(row.teamName=='合计'){
+							mergeCell(i, "orderNo", 1, 3);
+						}
+					}
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#downloadBtn').click(function(){
+				$('#matAssZhForm').iForm('submit', {
+					url:'/cost/matAssZh/download',
+					success:function(data){
+
+					}
+				});
+			});
+		});
+
+		function reloadData(){
+			$('#matAssZhDg').iDatagrid('reload',{
+				yearQry:$('#yearQry').iCombobox('getValue'),
+				monQry:$('#monQry').iCombobox('getValue')
+			});
+		}
+
+		function mergeCell(rowIndex, field, rowspan, colspan){
+			$('#matAssZhDg').iDatagrid('mergeCells',{
+				index: rowIndex,
+				field: field,
+				rowspan: rowspan,
+				colspan: colspan
+			});
+		}
+	</script>
+</th:block>
+</body>
+</html>

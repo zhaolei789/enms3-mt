@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="detailUpDataForm">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+			<table id="detailUpDataDg"></table>
+		</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="detailUpDataDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'detailUpDataDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:75px">月份：</label>
+	<select id="yearQry" data-toggle="topjui-combobox" name="yearQry" data-options="width:80" >
+		<option th:each="i:${#numbers.sequence(2015, endYear)}" th:value="${i}" th:text="${i}" th:selected="${i==currentYear}"></option>
+	</select>
+	<select id="monQry" data-toggle="topjui-combobox" name="monQry" data-options="width:70" >
+		<option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}" th:selected="${i==currentMonth}"></option>
+	</select>
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">领料单位：</label>
+	<input data-toggle="topjui-combobox" id="teamQry" name="teamQry" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',width:'150px',loadFilter:function(data){
+		data.unshift({id:'', text:'--全部--'});
+		return data
+	}">
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">预留号：</label>
+	<input id="reserveNoQry" data-toggle="topjui-textbox" name="reserveNoQry" data-options="width:'150px'" value="">
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">物料信息：</label>
+	<input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'" value="">
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">使用地点：</label>
+	<input id="addrQry" data-toggle="topjui-textbox" name="addrQry" data-options="width:'150px'" value="">
+
+	<br />
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">出账来源：</label>
+	<input data-toggle="topjui-combobox" id="drawSrcQry" name="drawSrcQry" value="" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.drawSrc',width:'150px',loadFilter:function(data){
+		data.unshift({value:'', text:'--全部--'});
+		return data
+	}">
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">指标名称：</label>
+	<input data-toggle="topjui-combobox" id="itemNameQry" name="itemNameQry" value="" data-options="valueField:'itemName',textField:'itemName',url:'/cost/detailUpData/getItem',width:'150px',loadFilter:function(data){
+		data.unshift({itemName:'', itemName:'--全部--'});
+		return data
+	}">
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">仓库：</label>
+	<input data-toggle="topjui-combobox" id="storeQry" name="storeQry" value="" data-options="valueField:'storeNo',textField:'storeName',url:'/repository/mStore/getStoreList?storeLevel=r.storeLevel.1',width:'150px',loadFilter:function(data){
+		data.unshift({storeNo:'', storeName:'--全部--'});
+		return data
+	}">
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">物资：</label>
+	<input data-toggle="topjui-combobox" id="purchaseQry" name="purchaseQry" value="" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.abcType',width:'150px',loadFilter:function(data){
+		data.unshift({value:'', text:'--全部--'});
+		return data
+	}">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-brown l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+	</a>
+
+	<a href="javascript:void(0)" id="addBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">新增明细</span>
+            <span class="l-btn-icon fa fa-plus">&nbsp;</span>
+        </span>
+	</a>
+
+	<a href="javascript:void(0)" id="calcBtn" class="l-btn topjui-btn-purple l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">提取数据</span>
+            <span class="l-btn-icon fa fa-calculator">&nbsp;</span>
+        </span>
+	</a>
+
+	<a href="javascript:void(0)" id="deleteBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">删除数据</span>
+            <span class="l-btn-icon fa fa-trash">&nbsp;</span>
+        </span>
+	</a>
+
+	<a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">保存指标</span>
+            <span class="l-btn-icon fa fa-save">&nbsp;</span>
+        </span>
+	</a>
+
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#yearQry').iCombobox({
+				onChange: function(newValue, oldValue){
+					$('#itemNameQry').iCombobox('reload', '/cost/detailUpData/getItem?monthQry=' + newValue + $('#monQry').iCombobox('getValue'));
+				}
+			});
+
+			$('#monQry').iCombobox({
+				onChange: function(newValue, oldValue){
+					$('#itemNameQry').iCombobox('reload', '/cost/detailUpData/getItem?monthQry=' + $('#yearQry').iCombobox('getValue') + newValue);
+				}
+			});
+
+			$('#itemNameQry').iCombobox('reload', '/cost/detailUpData/getItem?monthQry=' + $('#yearQry').iCombobox('getValue') + $('#monQry').iCombobox('getValue'));
+
+			$('#detailUpDataDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/cost/detailUpData/getPageSet',
+				queryParams:{
+					yearQry:$('#yearQry').iCombobox('getValue'),
+					monQry:$('#monQry').iCombobox('getValue'),
+					teamQry:$('#teamQry').iCombobox('getValue'),
+					reserveNoQry:$('#reserveNoQry').iTextbox('getValue'),
+					matQry:$('#matQry').iTextbox('getValue'),
+					drawSrcQry:$('#drawSrcQry').iCombobox('getValue'),
+					itemNameQry:$('#itemNameQry').iCombobox('getValue'),
+					storeQry:$('#storeQry').iCombobox('getValue'),
+					purchaseQry:$('#purchaseQry').iCombobox('getValue'),
+					addrQry:$('#addrQry').iTextbox('getValue')
+				},
+				columns:[ [
+					{
+						field:'drawNo', sortable:false, title:'调整', formatter: function(value, row, index){
+							var key = value + '_' + row.splitNo;
+							if(row.status=='1'){
+								return '<a style="font-weight: bold; color:#00b7ee; cursor:pointer " adjustBtn="'+ key +'">调整</a>'
+							}else{
+								return '---'
+							}
+						}
+					},{
+						field:'teamName', sortable:false, title:'出账单位'
+					},{
+						field:'erpType', sortable:false, title:'物料分类'
+					},{
+						field:'typeName', sortable:false, title:'分类描述'
+					},{
+						field:'matCode', sortable:false, title:'物料编码', formatter: function(value, row, index){
+							if(value!='' && value!=null && value!=undefined){
+								return value.substring(0, 1) == 'X' ? value.substring(1) : value;
+							}else{
+								return ''
+							}
+						}
+					},{
+						field:'matName', sortable:false, title:'物料描述'
+					},{
+						field:'matPrice', sortable:false, title:'价格', align:'right'
+					},{
+						field:'matUnit', sortable:false, title:'单位'
+					},{
+						field:'matAmount', sortable:false, title:'数量', align:'right'
+					},{
+						field:'matBala', sortable:false, title:'金额', align:'right'
+					},{
+						field:'itemNo', sortable:false, title:'关联费用', formatter:function(value, row, index){
+							var key = row.drawNo + '_' + row.splitNo
+							return '<input name="item_'+ key +'" id="item_'+ key +'" value="'+ value +'" /><input type="hidden" name="key" value="'+ key +'" />';
+						}
+					},{
+						field:'prjNo', sortable:false, title:'工程项目', formatter:function(value, row, index){
+							var key = row.drawNo + '_' + row.splitNo
+							return '<input name="prj_'+ key +'" id="prj_'+ key +'" value="'+ value +'" />';
+						}
+					},{
+						field:'storeName', sortable:false, title:'领料仓库'
+					},{
+						field:'occDate', sortable:false, title:'发生日期', formatter: function(value, row, index){
+							if(value!='' && value!=null && value!=undefined){
+								return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+							}else{
+								return ''
+							}
+						}
+					},{
+						field:'useAddr', sortable:false, title:'使用地点'
+					},{
+						field:'assDate', sortable:false, title:'考核日期', formatter: function(value, row, index){
+							if(value!='' && value!=null && value!=undefined){
+								return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+							}else{
+								return ''
+							}
+						}
+					},{
+						field:'uuid', sortable:false, title:'出账编号', formatter: function(value, row, index){
+							return row.drawNo
+						}
+					},{
+						field:'splitNo', sortable:false, title:'拆分号'
+					},{
+						field:'reserveNo', sortable:false, title:'计划预留'
+					},{
+						field:'drawSrcName', sortable:false, title:'出账来源'
+					},{
+						field:'wbs', sortable:false, title:'WBS'
+					}
+				] ],
+				onLoadSuccess: function(data){
+					for(var i=0; i<data.rows.length; i++){
+						var row = data.rows[i];
+						var key = row.drawNo+ '_' + row.splitNo;
+						$('#item_'+key).iCombobox({
+							valueField:'itemNo',
+							textField: 'itemName',
+							url: '/cost/detailUpData/getItemForSelect?teamNo=' + row.teamNo,
+							loadFilter:function(data){
+								data.unshift({itemNo:'0', itemName:'--请选择--'});
+								return data
+							}
+						});
+						$('#prj_'+key).iCombobox({
+							valueField:'prjNo',
+							textField: 'prjName',
+							url: '/cost/detailUpData/getPrjForSelect?teamNo=' + row.teamNo,
+							loadFilter:function(data){
+								data.unshift({prjNo:'0', prjName:'--请选择--'});
+								return data
+							}
+						});
+					}
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#downloadBtn').click(function(){
+				$('#detailUpDataForm').iForm('submit', {
+					url:'/cost/detailUpData/download',
+					success:function(data){
+
+					}
+				});
+			});
+
+			$('#addBtn').click(function(value, row, index){
+				var year = $('#yearQry').iCombobox('getValue');
+				var month = $('#monQry').iCombobox('getValue');
+				$('#addDetailUpData').iDialog('openDialog', {
+					id:'addDetailUpData',
+					title:'新增'+year+'年'+month+'月消耗数据',
+					href:'/cost/detailUpData/add?year='+year+'&month='+month,
+					buttons:[{
+						text:'关闭',
+						iconClass:'fa fa-close',
+						btnCls:'topjui-btn-red',
+						handler:function(){
+							$('#addDetailUpData').iDialog('close');
+						}
+					},{
+						text:'确认新增',
+						iconClass:'fa fa-save',
+						btnCls:'topjui-btn-blue',
+						handler:function(){
+							$('#addDetailUpData').iForm('submit', {
+								url:'/cost/detailUpData/insert',
+								success:function(data){
+									data = $.parseJSON(data);
+									if(data.statusCode == 200){
+										$.iMessager.show({
+											title:data.title,
+											msg:data.message
+										})
+										$('#addDetailUpData').iDialog('close');
+										reloadData()
+									} else {
+										$.iMessager.alert({
+											icon:'messager-error',
+											title:data.title,
+											msg:data.message
+										});
+									}
+								}
+							});
+						}
+					}]
+				});
+			});
+
+			$('#calcBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '确定重新提取数据？重新提取将删除之前的记录，请慎用！', function (r) {
+					if (r) {
+						$('#detailUpDataForm').iForm('submit', {
+							url: '/cost/detailUpData/insData',
+							success: function (data) {
+								data = $.parseJSON(data);
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadData()
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				});
+			});
+
+			$('#deleteBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '确定删除选择条件的数据？请慎用！', function (r) {
+					if (r) {
+						$('#detailUpDataForm').iForm('submit', {
+							url: '/cost/detailUpData/delete',
+							success: function (data) {
+								data = $.parseJSON(data);
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadData()
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				});
+			});
+
+			$('#saveBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '确定保存？', function (r) {
+					if (r) {
+						$('#detailUpDataForm').iForm('submit', {
+							url: '/cost/detailUpData/save',
+							success: function (data) {
+								data = $.parseJSON(data);
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadData()
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				});
+			});
+		});
+
+		function reloadData(){
+			$('#detailUpDataDg').iDatagrid('reload',{
+				yearQry:$('#yearQry').iCombobox('getValue'),
+				monQry:$('#monQry').iCombobox('getValue'),
+				teamQry:$('#teamQry').iCombobox('getValue'),
+				reserveNoQry:$('#reserveNoQry').iTextbox('getValue'),
+				matQry:$('#matQry').iTextbox('getValue'),
+				drawSrcQry:$('#drawSrcQry').iCombobox('getValue'),
+				itemNameQry:$('#itemNameQry').iCombobox('getValue'),
+				storeQry:$('#storeQry').iCombobox('getValue'),
+				purchaseQry:$('#purchaseQry').iCombobox('getValue'),
+				addrQry:$('#addrQry').iTextbox('getValue')
+			});
+		}
+	</script>
+</th:block>
+</body>
+</html>

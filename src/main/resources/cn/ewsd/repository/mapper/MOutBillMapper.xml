@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.repository.mapper.MOutBillMapper">
+	<insert id="insertOutBill" parameterType="cn.ewsd.repository.model.MOutBill">
+		INSERT INTO m_out_bill (`bill_no`, `out_type`, `link_no`, `draw_no`, `pack_no`, `in_no`, `mat_no`, `mat_amount`, `mat_price`, `mat_bala`, `occ_date`,
+						   `draw_emp`, `store_no`, `team_no`, `prj_no`, `f_month`, `item_no`, `pay_team`, `remark`, `print_cnt`,
+						   `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{billNo}, #{outType}, #{linkNo}, #{drawNo}, #{packNo}, #{inNo}, #{matNo}, #{matAmount}, #{matPrice}, #{matBala}, #{occDate},
+				#{drawEmp}, #{storeNo}, #{teamNo}, #{prjNo}, #{fMonth}, #{itemNo}, #{payTeam}, #{remark}, #{printCnt},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+</mapper>

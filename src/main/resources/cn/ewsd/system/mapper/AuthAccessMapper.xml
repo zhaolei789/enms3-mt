@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.AuthAccessMapper">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.system.model.AuthAccess" id="authAccessMap">
+        <result property="uuid" column="uuid"/>
+        <result property="iconCls" column="icon_cls"/>
+        <result property="accessAuth" column="access_auth"/>
+        <result property="roleId" column="role_id"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" >*</sql>
+    <insert id="insertMultiple" parameterType="map" statementType="CALLABLE">
+          {
+            call p_sys_auth_access_insert_multiple(
+                #{p1,mode=IN,jdbcType=NUMERIC},
+                #{p2,mode=IN,jdbcType=NUMERIC}
+            )
+         }
+    </insert>
+    <insert id="setMenuStateByRecursion" parameterType="map" statementType="CALLABLE">
+          {
+            call p_setMenuStateByRecursion(
+                #{p2,mode=IN,jdbcType=NUMERIC}
+            )
+         }
+    </insert>
+    <update id="updateAccessAuth">
+      UPDATE sys_auth_access SET access_auth = 1 WHERE role_id = #{param1} AND uuid = #{param2}
+    </update>
+    <delete id="deleteByUuid">
+        DELETE FROM sys_auth_access WHERE uuid = #{param1}
+    </delete>
+    <delete id="deleteByRoleId">
+         DELETE FROM sys_auth_access WHERE role_id in
+        <foreach collection="roleIdList" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.AuthAccess">
+      select
+      <include refid="Base_Column_List"></include>
+      from sys_auth_access
+      <where>
+        <if test="filterSort != null">
+          ${filterSort}
+        </if>
+      </where>
+    </select>
+
+    <select id="getListByRoleIdAndPid1" resultType="cn.ewsd.system.model.AuthAccess">
+        select a.uuid, m.id, m.pid, m.state, m.icon_cls, m.text, m.url,
+        a.role_id,a.access_auth,a.detailAuth,a.addAuth,a.editAuth,a.deleteAuth,a.searchAuth,a.importAuth,a.exportAuth
+        FROM sys_auth_access a, sys_Menu m
+        WHERE a.role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+         AND m.pid = #{pid} AND a.id = m.id ORDER BY m.sort ASC
+    </select>
+
+    <select id="getListByRoleIdAndUuid" resultType="java.lang.Integer">
+       select count(1) FROM sys_auth_access WHERE role_id = #{param1} AND uuid = #{param2}
+    </select>
+
+    <select id="getListByRoleIdAndUuids" resultType="java.lang.Integer">
+       select count(1)  FROM sys_auth_access WHERE role_id = #{param1} AND uuid = #{param2}
+    </select>
+
+    <select id="getByRoleIdAndId" resultType="java.lang.Integer">
+        select count(1) from sys_auth_access where role_id = #{param1} and id =  #{param2}
+    </select>
+
+    <select id="getListByResourceType" resultType="java.util.Map">
+        SELECT DISTINCT(pid) FROM sys_auth_access WHERE resource_type != 'menu'
+    </select>
+
+    <update id="updateByPids">
+        UPDATE sys_auth_access SET state = 'open' WHERE id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="updateAccessAuths">
+     UPDATE sys_auth_access SET access_auth = 0 WHERE role_id = #{param1} AND uuid = #{param2}
+    </update>
+
+    <select id="getCountByCurrentUserNameIdAUrl" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM sys_menu m, sys_auth_access a WHERE a.role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+         AND m.url = #{param2} AND a.access_auth = 1 AND a.id = m.id
+    </select>
+
+    <select id="selectCodeLeveMenu" resultType="cn.ewsd.system.model.AuthAccess">
+        select a.uuid, m.id, m.pid, a.state, m.icon_cls, m.text, m.url, a.role_id, a.access_auth
+        FROM sys_auth_access a, sys_menu m
+        WHERE a.role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+         AND a.access_auth = 1
+        AND m.resource_type = 'menu' AND m.codeSetId = #{codeSetId} AND m.levelId =#{levelId}
+        AND m.status = 1 AND m.pid = #{pid} AND a.id = m.id ORDER BY m.sort ASC
+    </select>
+
+    <select id="selectUserNameIdAndPid" resultType="cn.ewsd.system.model.AuthAccess">
+        select a.uuid, m.id, m.pid, a.state, m.icon_cls, m.text, m.url, a.role_id, a.access_auth
+        FROM sys_auth_access a, sys_menu m
+        WHERE a.role_id IN (${_parameter}) AND a.access_auth = 1 AND m.resource_type = 'menu' AND a.id = m.id AND m.pid = #{param2} ORDER BY m.sort ASC
+    </select>
+
+    <select id="getListByRoleIdByUserNameIdAndPid" resultType="cn.ewsd.system.model.AuthAccessView">
+        SELECT * FROM v_sys_auth_access
+        WHERE role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+        #{id}
+        </foreach>
+        AND access_auth = 1 AND status = 1 AND resource_type = 'menu' AND pid = #{pid}
+        AND  uuid in(
+            SELECT min(uuid) FROM v_sys_auth_access WHERE role_id IN
+            <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+            AND
+            access_auth = 1 AND status = 1 AND
+            resource_type = 'menu' AND
+             pid = #{pid}  GROUP BY id
+        )
+        ORDER BY sort ASC
+        <!--SELECT *, COUNT(DISTINCT id) FROM v_sys_auth_access-->
+         <!--WHERE role_id IN-->
+        <!--<foreach collection="list" index="index" item="id" open="(" close=")" separator=",">-->
+            <!--#{id}-->
+        <!--</foreach>-->
+         <!--AND access_auth = 1-->
+          <!--AND status = 1 AND resource_type = 'menu' AND pid = #{pid} GROUP BY id ORDER BY sort ASC-->
+    </select>
+
+    <select id="getDetailByRoleIdByUserNameIdAndUrl" resultType="cn.ewsd.system.model.AuthAccess">
+        select a.uuid, m.id, m.pid, m.state, m.icon_cls, m.text, m.url, a.role_id, a.access_auth
+               FROM sys_auth_access a, sys_menu m
+               WHERE m.id = a.id and a.role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+                 AND m.url = #{refererUri} ORDER BY m.sort ASC
+    </select>
+    <select id="getListByRoleId" resultType="cn.ewsd.system.model.AuthAccess">
+       select * FROM sys_auth_access WHERE role_id = #{param1} AND pid = #{param2}
+    </select>
+
+    <select id="getDetailByRoleIdAndUrl" resultType="cn.ewsd.system.model.AuthAccess">
+        select *  from sys_auth_access where role_id in
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+         and url = #{url}
+    </select>
+
+    <select id="getCountByRoleIdAndMenuId" resultType="java.lang.Integer">
+       select count(1) from sys_auth_access where role_id =  #{param1} and id = #{param2}
+    </select>
+
+    <select id="getListByRoleIdAndPid" resultType="cn.ewsd.system.model.AuthAccess">
+        select * FROM sys_auth_access WHERE role_id = #{param1} AND pid = #{param2}
+    </select>
+
+    <select id="getLimitedListByRoldIdsAndUrl" resultType="cn.ewsd.system.model.AuthAccess">
+        select *  FROM sys_auth_access WHERE role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND url = #{url} ORDER BY sort ASC limit 0,1
+    </select>
+    <select id="getListByJdbc"  resultMap="authAccessMap" >
+        SELECT a.uuid,m.id as id,m.pid as pid,m.state as state,m.icon_cls,m.text,m.url,a.role_id,
+              a.access_auth FROM sys_menu m LEFT JOIN sys_auth_access a ON m.id=a.id WHERE m.code_set_id = 'menu' AND m.level_id = '1'
+                ${filterSort}
+    </select>
+    <select id="getChildIds" parameterType="map" statementType="CALLABLE" resultType="java.lang.String">
+        {
+        call p_get_child_ids(
+        #{p1,mode=IN,jdbcType=NUMERIC},
+        #{p2,mode=IN,jdbcType=NUMERIC},
+        #{p3,mode=OUT,jdbcType=VARCHAR}
+        )
+        }
+
+    </select>
+    <select id="getListBypId" resultType="cn.ewsd.system.model.AuthAccess">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_auth_access
+        <where>
+            <if test="filterSort != null">
+                ${filterSort}
+            </if>
+        </where>
+    </select>
+    <select id="getListInUuid" resultType="cn.ewsd.system.model.AuthAccess">
+        SELECT * FROM sys_auth_access WHERE uuid IN
+        <foreach collection="list" index="index" item="uuid" open="(" close=")" separator=",">
+            #{uuid}
+        </foreach>
+    </select>
+    <select id="getListByRoleIdInt" resultType="java.lang.Integer">
+         SELECT count(1) FROM sys_auth_access where role_id = #{param1}
+    </select>
+    <select id="getListByRoleIdByUserNameIdAndText" resultType="cn.ewsd.system.model.AuthAccessView">
+        SELECT * FROM v_sys_auth_access
+        WHERE role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND access_auth = 1 AND status = 1 AND resource_type = 'menu' AND text LIKE '%${text}%'
+        AND  uuid in(
+        SELECT min(uuid) FROM v_sys_auth_access WHERE role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND
+        access_auth = 1 AND status = 1 AND
+        resource_type = 'menu' AND
+        text LIKE '%${text}%' and url !='' GROUP BY id
+        )
+        ORDER BY sort ASC
+    </select>
+
+    <update id="executeByStateRoleIdMid">
+        update sys_auth_access set state = #{param1} where role_id = #{param2}
+    </update>
+</mapper>

@@ -1,0 +1,34 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<input type="hidden" name="userId">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">分管领导</label>
+			<div class="topjui-input-block">
+				<input type="hidden" name="masterName">
+				<input type="text" name="masterId"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'分管领导',
+					   required:true,
+                        panelHeight:190,
+                        url:'/cost/barMaster/getLeaderList',
+                        valueField:'uuid',
+    				    textField:'user_name',
+						param:'masterName:user_name'">
+			</div>
+		</div>
+    				<div class="topjui-col-sm12">
+			<label class="topjui-form-label">备注</label>
+			<div class="topjui-input-block">
+								<input type="text" name="note"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'备注'">
+							</div>
+		</div>
+    		</div>
+</div>

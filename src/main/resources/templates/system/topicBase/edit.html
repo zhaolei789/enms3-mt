@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content" th:with="type=${#httpServletRequest.getParameter('type')}">
+<input type="hidden" id="uuid" name="uuid">
+<input type="hidden" name="type" th:value="${type}">
+<div class="topjui-fluid">
+    <fieldset>
+        <legend>基本信息</legend>
+    </fieldset>
+
+    <div class="topjui-row">
+        <div class="topjui-col-sm12"><label class="topjui-form-label">栏目</label>
+            <div class="topjui-input-block">
+                <input type="text" id="categoryId" name="categoryId"
+                       data-toggle="topjui-combotree"
+                       th:data-options="@{'
+				   panelHeight:250,
+				   expandAll:true,
+                url:\'/system/category/getCategorysByTypeAndLevelId?levelId=1&type='+${type}+'\',
+                expandUrl:\'/system/category/getListByPid?pid={id}&type='+${type}+'\',param:\'orgName:text\''}">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm12"><label class="topjui-form-label">标题</label>
+            <div class="topjui-input-block">
+                <input type="text" name="title"
+                       data-toggle="topjui-textbox"
+                       data-options="required:true">
+            </div>
+        </div>
+    </div>
+
+    <div class="topjui-row">
+        <div class="topjui-col-sm12"><label class="topjui-form-label">内容</label>
+            <div class="topjui-input-block">
+               <textarea name="content" style="height:300px;" data-toggle="topjui-ueditor"
+                         data-options="id:'oaTopicAddContainer'"></textarea>
+            </div>
+        </div>
+    </div>
+
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+</th:block>
+</body>
+</html>

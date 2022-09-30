@@ -1,0 +1,194 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">材料代码</label>
+			<div class="topjui-input-block">
+				<input type="text" name="matCode" data-toggle="topjui-textbox" data-options="prompt:'',required:true">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">材料名称</label>
+			<div class="topjui-input-block">
+				<input type="text" name="matName" data-toggle="topjui-textbox" data-options="prompt:'',required:true">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">数量单位</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="matUnit" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.matUnit',required:true,loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">材料价格</label>
+			<div class="topjui-input-block">
+				<input type="text" name="matPrice" data-toggle="topjui-numberbox" data-options="prompt:'', precision:2">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">人工费用</label>
+			<div class="topjui-input-block">
+				<input type="text" name="payFee" data-toggle="topjui-numberbox" data-options="prompt:'', precision:2">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">其他费用</label>
+			<div class="topjui-input-block">
+				<input type="text" name="otherFee" data-toggle="topjui-numberbox" data-options="prompt:'', precision:2">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">计划价格</label>
+			<div class="topjui-input-block">
+				<input type="text" name="planPrice" data-toggle="topjui-numberbox" data-options="prompt:'', precision:2">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">旧品价格</label>
+			<div class="topjui-input-block">
+				<input type="text" name="fixPrice" data-toggle="topjui-numberbox" data-options="prompt:'', precision:2">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">质保时长</label>
+			<div class="topjui-input-block">
+				<input type="text" name="qaPeriod" data-toggle="topjui-numberbox" data-options="prompt:''">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">ABC分类</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="abcType" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.abcType',loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">物资分类</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="goodsType" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.goodsType',required:true,loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">包装规格</label>
+			<div class="topjui-input-block">
+				<input type="text" name="packScale" data-toggle="topjui-numberbox" data-options="prompt:'', precision:2">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">暂估标识</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="realFlag" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.realFlag',required:true,loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">循环标识</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="reFlag" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.reFlag',required:true,loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">使用标识</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="offenFlag" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.offenFlag',required:true,loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">供应工厂</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="factoryNo" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.factoryNo',loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">库存地</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="matAddr" data-options="valueField:'matAddr',textField:'text',url:'/material/mMaterial/getFactoryAddr',loadFilter:function(data){
+					data.unshift({matAddr:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">旧料科室</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="fixContent" data-options="valueField:'value',textField:'text',url:'/material/mMaterial/getOldTeamForSelect',loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">内加工单位</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="makeTeam" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',loadFilter:function(data){
+					data.unshift({id:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+		<div class="topjui-col-sm4">
+			<label class="topjui-form-label">材料分类</label>
+			<div class="topjui-input-block">
+				<input type="hidden" name="typeName">
+				<input type="text" name="erpType"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'选择分类',
+					   	panelHeight:190,
+                   		editable:true,
+                   		url:'/material/mMatType/getListByKeywords',
+                   		valueField:'typeCode',
+    					textField:'typeName',
+    					param:'typeName:typeName'
+				">
+			</div>
+		</div>
+		<!--<div class="topjui-col-sm4">
+			<label class="topjui-form-label">材料分类</label>
+			<div class="topjui-input-block">
+				<input type="text" name="erpType" data-toggle="topjui-textbox" data-options="prompt:''">
+			</div>
+		</div>
+		<div class="topjui-col-sm4">
+			<label class="topjui-form-label">分类名称</label>
+			<div class="topjui-input-block">
+				<input type="text" name="typeName" data-toggle="topjui-textbox" data-options="prompt:''">
+			</div>
+		</div>-->
+    	<div class="topjui-col-sm4">
+			<label class="topjui-form-label">集团编码</label>
+			<div class="topjui-input-block">
+				<input type="text" name="erpCode" data-toggle="topjui-textbox" data-options="prompt:''">
+			</div>
+		</div>
+    	<div class="topjui-col-sm8">
+			<label class="topjui-form-label">使用说明</label>
+			<div class="topjui-input-block">
+				<input type="text" name="useInfo" data-toggle="topjui-textbox" data-options="prompt:''">
+			</div>
+		</div>
+	</div>
+</div>

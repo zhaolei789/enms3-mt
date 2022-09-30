@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'mMatTypeDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/material/mMatType/getPageSet'">
+            <thead>
+				<tr>
+					<th data-options="field:'uuid',title:'',sortable:false,checkbox:true"></th>
+					<th data-options="field:'typeCode',title:'分类编码',sortable:false"></th>
+					<th data-options="field:'typeName',title:'分类名称',sortable:false"></th>
+					<th data-options="field:'remark',title:'分类解释',sortable:false"></th>
+					<th data-options="field:'useFlag',title:'是否启用',sortable:false, formatter:function(value, row, index){
+                        if(row.useFlag=='1'){
+                            return '是';
+                        }else{
+                            return '否';
+                        }
+                    }">是否启用</th>
+				</tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="mMatTypeDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'mMatTypeDg'
+       }" style="display:none">
+		<ewsd:rbac str="mMatTypeAddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#mMatTypeDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'mMatTypeAddDg',
+               href:'/material/mMatType/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/material/mMatType/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="mMatTypeEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#mMatTypeDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'mMatTypeEditDg',
+               href:'/material/mMatType/edit',
+               url:'/material/mMatType/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/material/mMatType/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'mMatTypeDg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/material/mMatType/deleteBatch">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#mMatTypeDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的分类',param:'uuid:uuid'},
+	       url:'/material/mMatType/deleteBatch'">删除</a>
+		</ewsd:rbac>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#mMatTypeDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#mMatTypeDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

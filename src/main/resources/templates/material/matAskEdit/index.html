@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <form id="matAskEditForm">
+        <div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'60%'">
+            <table data-toggle="topjui-datagrid" data-options="id:'matAskEditDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/material/matAskEdit/getPageSet',
+               queryParams:{
+                    occDate1Qry:$('#occDate1Qry').iDatebox('getValue'),
+                    occDate2Qry:$('#occDate2Qry').iDatebox('getValue'),
+                    askNameQry:$('#askNameQry').iTextbox('getValue')
+                }">
+                <thead>
+                    <tr>
+                        <th data-options="field: 'askNo', sortable: false, title: '', checkbox: true"></th>
+                        <th data-options="field:'opt', sortable:false, title:'操作', formatter:function(value, row, index){
+                            if(row.askStep == '73000'){
+                                return '<a style=&quot;font-weight: bold; color:#00b7ee; cursor:pointer &quot; askNo=&quot;'+row.askNo+'&quot;>删除</a>';
+                            }else{
+                                return '---'
+                            }
+                        }"></th>
+                        <th data-options="field:'askStepName', sortable:false, title:'状态'"></th>
+                        <th data-options="field:'matCode', sortable:false, title:'加工件编码', formatter(value, row, index){
+                            if(value != null && value != undefined) {
+                                return value.substring(0, 1) == 'X' ? value.substring(1) : value;
+                            }else{
+                                return ''
+                            }
+                        }"></th>
+                        <th data-options="field:'askName', sortable:false, title:'加工件名称', formatter(value, row, index){
+                            return value + ' ' + row.askModel;
+                        }"></th>
+                        <th data-options="field:'askUnitName', sortable:false, title:'计量单位'"></th>
+                        <th data-options="field:'askAmount', sortable:false, title:'申请数量', align:'right'"></th>
+                        <th data-options="field:'prjName', sortable:false, title:'用料工程'"></th>
+                        <th data-options="field:'itemName', sortable:false, title:'材料科目'"></th>
+                        <th data-options="field:'makeTeamName', sortable:false, title:'加工单位'"></th>
+                        <th data-options="field:'useAddr', sortable:false, title:'使用地点'"></th>
+                        <th data-options="field:'remark', sortable:false, title:'备注'"></th>
+                        <th data-options="field:'askDate', sortable:false, title:'申请日期', formatter:function (value, row, index){
+                            if(value != null && value != undefined){
+                                return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+                            }else{
+                                return ''
+                            }
+                        }"></th>
+                        <th data-options="field:'needType', sortable:false, title:'预期类型', formatter:function (value, row, index){
+                            return '0'==value ? '普通' : '1'==value ? '永久使用' : '2'==value ? '一次性投入' : ''
+                        }"></th>
+                        <th data-options="field:'needDate', sortable:false, title:'回收预期', formatter:function (value, row, index){
+                            if(value != '' && value != null && value != undefined){
+                                return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+                            }else{
+                                return ''
+                            }
+                        }"></th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </form>
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <div data-toggle="topjui-layout" data-options="fit:true">
+            <div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false,height:'50%'">
+                <table id="makeFormDg"></table>
+            </div>
+            <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+                <div data-toggle="topjui-tabs"
+                     data-options="id:'southTabs',
+                     fit:true,
+                     border:false,
+                     parentGrid:{
+                         type:'datagrid',
+                         id:'matAskEditDg',
+                         param:'puuid:askNo'
+                     }">
+                    <div title="附件信息" data-options="id:'southTab0',iconCls:'fa fa-table'">
+                        <!-- datagrid表格 -->
+                        <table data-toggle="topjui-datagrid"
+                               data-options="id:'attachmentDg',
+                               initCreate: false,
+                               fitColumns:true,
+                               rownumbers:false,
+						       url:'/system/attachment/getListByPuuid'">
+                            <thead>
+                            <tr>
+                                <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                                <th data-options="field:'fileName',title:'文件名称',width:150,
+                                        formatter: function(value,row,index){
+                                        return '<a href=\'/system/attachment/download?uuid='+row.uuid+'\' target=\'_blank\'>'+value+'</a>';
+                                        }"></th>
+                                <th data-options="field:'fileSize',title:'文件大小',
+                                        formatter: function(value,row,index){
+                                            return bytesToSize(value);
+                                        }"></th>
+                                <th data-options="field:'creator',title:'上传人'"></th>
+                                <th data-options="field:'createTime',title:'上传时间',width:100"></th>
+                                <th data-options="field:'creatorId',title:'预览',formatter: picFormatter"></th>
+                                <!--<th data-options="field:'creatorId',title:'下载',
+                                        formatter: function(value,row,index){
+                                        return '<a href=\'/system/attachment/download?uuid='+row.uuid+'\' target=\'_blank\'>下载</a>';
+                                        }"></th>-->
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="matAskEditDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'matAskEditDg'
+       }" style="display:none">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">申请日期：</label>
+    <input id="occDate1Qry" name="occDate1Qry" th:value="${startDate}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+    <label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+    <input id="occDate2Qry" name="occDate2Qry" th:value="${endDate}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+    <label class="topjui-form-label" style="width:100px;float:none;display:inline-block">名称：</label>
+    <input id="askNameQry" data-toggle="topjui-textbox" name="askNameQry" data-options="width:'150px'" value="">
+
+    <a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+    </a>
+
+    <a href="javascript:void(0)" id="add1"
+       data-toggle="topjui-menubutton"
+       data-options="method:'openDialog',
+           extend:'#matAskEditDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'matAskEditAddDg',
+               href:'/material/matAskEdit/add',
+               height:550,
+               buttonsGroup:[
+                   {text:'保存',url:'/material/matAskEdit/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+
+    <a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">提交</span>
+            <span class="l-btn-icon fa fa-check">&nbsp;</span>
+        </span>
+    </a>
+
+
+
+</div>
+
+    <div id="makeFormDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'makeFormDg'
+       }" style="display:none">
+
+        <label class="topjui-form-label" style="width:100px;float:none;display:inline-block">编码/名称：</label>
+        <input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'" value="">
+        <input id="pAskNo" name="pAskNo" value="" type="hidden" />
+
+        <a href="javascript:void(0)" id="searchBtn1" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+        </a>
+
+    </div>
+
+    <div id="attachmentDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'attachmentDg'
+       }" style="display:none">
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'upload',
+           extend:'#attachmentDg-toolbar',
+           iconCls:'fa fa-cloud-upload',
+           btnCls:'topjui-btn-green',
+           accept:'file',
+           dialog:{
+               title:'附件批量上传'
+           },
+           parentGrid:{type:'datagrid', id:'matAskEditDg',unselectedMsg:'请先选中上表中要添加附件的数据！'},
+           uploadUrl:'/system/attachment/upload?puuid={askNo}'">添加附件</a>
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#attachmentDg-toolbar',
+	       url:'/system/attachment/delete',
+	       btnCls:'topjui-btn-red'">删除</a>
+
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        $(document).ready(function(){
+
+            $('#matAskEditDg').iDatagrid({
+                onClickRow:function(index, row){
+                    $('#pAskNo').val(row.askNo);
+                    reloadForm(row.askNo);
+                    reloadFile(row.askNo);
+                },
+                onLoadSuccess:function (data){
+                    if(data.rows!=null && data.rows.length>0){
+                        for(var i=0; i<data.rows.length; i++){
+                            var row = data.rows[i];
+                            if(row.askStep!='73000'){
+                                $('[value="'+ row.askNo +'"]').attr('disabled', 'disabled')
+                            }
+                        }
+                    }
+
+                    $('[askNo]').click(function(){
+                        var askNo = $(this).attr('askNo');
+                        $.iMessager.confirm('确认对话框', '您确定删除吗？', function (r) {
+                            if(r){
+                                $.getJSON('/material/matAskEdit/delete', {
+                                    askNo:askNo,
+                                },function(data){
+                                    if(data.statusCode=='200'){
+                                        $.iMessager.show({
+                                            title:data.title,
+                                            msg:data.message,
+                                            timeout:5000,
+                                            showType:'slide'
+                                        });
+                                        reloadData();
+                                        reloadForm(null);
+                                    }else{
+                                        $.iMessager.alert(data.title,data.message,'messager-info');
+                                    }
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+
+            $('#searchBtn').click(function(){
+                reloadData();
+            });
+
+            $('#makeFormDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                pagination:false,
+                url: '/material/matAskEdit/getMakeFormList',
+                queryParams:{
+                    matQry:$('#matQry').iTextbox("getValue"),
+                    askNo:$('#pAskNo').val()
+                },
+                columns:[ [
+                    {
+                        field:'matCode', sortable:false, title:'物料编码', formatter:function(value, row, index){
+                            return value.substring(0, 1)=='X' ? value.substring(1) : value
+                        }
+                    },{
+                        field:'matName', sortable:false, title:'物料名称'
+                    },{
+                        field:'matUnit', sortable:false, title:'计量单位'
+                    },{
+                        field:'matPrice', sortable:false, title:'单价', align:'right'
+                    },{
+                        field:'matAmount', sortable:false, title:'数量', align:'right'
+                    }
+                ] ]
+            });
+
+            $('#searchBtn1').click(function(){
+                reloadForm(null);
+            });
+
+            $('#submitBtn').click(function(){
+                $.iMessager.confirm('确认对话框', '您确定提交吗？', function (r) {
+                    if (r) {
+                        $('#matAskEditForm').iForm('submit', {
+                            url: '/material/matAskEdit/submit',
+                            success: function (data) {
+                                data = $.parseJSON(data);
+                                if (data.statusCode == 200) {
+                                    $.iMessager.show({
+                                        title: data.title,
+                                        msg: data.message
+                                    })
+                                    reloadData();
+                                } else {
+                                    $.iMessager.alert({
+                                        icon: 'messager-error',
+                                        title: data.title,
+                                        msg: data.message
+                                    });
+                                }
+                            }
+                        });
+                    }
+                })
+            });
+        });
+
+        function reloadData(){
+            $('#matAskEditDg').iDatagrid('reload',{
+                occDate1Qry:$('#occDate1Qry').iDatebox('getValue'),
+                occDate2Qry:$('#occDate2Qry').iDatebox('getValue'),
+                askNameQry:$('#askNameQry').iTextbox("getValue")
+            });
+        }
+
+        function reloadForm(askNo){
+            $('#makeFormDg').iDatagrid('reload',{
+                matQry:$('#matQry').iTextbox("getValue"),
+                askNo:askNo == null ? $('#pAskNo').val() : askNo
+            });
+        }
+
+        function reloadFile(askNo){
+            $('#attachmentDg').iDatagrid('reload',{
+                puuid:askNo == null ? $('#pAskNo').val() : askNo
+            });
+        }
+
+        function picFormatter(value, row, index) {
+            var html = ""
+            if (row.filePath) {
+                html = "<div class=\"box\" style='text-align: center;padding: 3px' data-toggle=\"topjui-viewer\">" +
+                    "<img style='width: 100px;' src='/system/attachment/showPic?path=" +
+                    row.filePath + "' title='点击预览' alt='" + value + "'>" +
+                    "</div>"
+            }
+            return html
+        }
+
+        function pictureUrlOnChange(value) {
+            $("#imgBox").show();
+            $("#imgBox img").attr('src', "/system/attachment/showPic?path=" + value);
+            $.parser.parse('.imgBox');
+        }
+    </script>
+</th:block>
+</body>
+</html>

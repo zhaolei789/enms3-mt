@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.FAwardAssignMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.cost.model.FAwardAssign" id="fAwardAssignMap">
+        <result property="assign_id" column="assign_id"/>
+        <result property="award_id" column="award_id"/>
+        <result property="emp_id" column="emp_id"/>
+        <result property="emp_name" column="emp_name"/>
+        <result property="award_bala" column="award_bala"/>
+        <result property="remark" column="remark"/>
+        <result property="assign_type" column="assign_type"/>
+        <result property="modi_date" column="modi_date"/>
+        <result property="modi_user" column="modi_user"/>
+        <result property="user_name" column="user_name"/>
+        <result property="is_del" column="is_del"/>
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+		<result property="lead_flag" column="lead_flag"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 assign_id
+		  ,  	  	     			 award_id
+		  ,  	  	     			 emp_id
+		  ,  	  	     			 emp_name
+		  ,  	  	     			 award_bala
+		  ,  	  	     			 remark
+		  ,  	  	     			 assign_type
+		  ,  	  	     			 modi_date
+		  ,  	  	     			 modi_user
+		  ,  	  	     			 user_name
+		  ,  	  	     			 is_del
+		  ,  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+,lead_flag
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.cost.model.FAwardAssign">
+        select
+        <include refid="Base_Column_List"></include>
+        from f_award_assign
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryListByLeadExcel" resultType="cn.ewsd.cost.model.FAwardAssignSelect_A">
+		select
+			a.*,
+		       f.occ_date,
+		       f.team_no,
+			   o1.text as team_no_name,
+		       f.assess_team,
+			   o2.text as assess_team_name,
+		       f.sign_emp,
+		       f.assess_cate,
+		       dic1.text as assess_cate_name,
+		       f.reason
+		from f_award_assign a
+		join f_award f on a.award_id = f.uuid
+		left join sys_dic_item dic1 on dic1.value = f.assess_cate
+		left join sys_organization o1 on f.team_no = o1.id
+		left join sys_organization o2 on f.assess_team = o2.id
+		<where>
+			<if test="filterSort != null">
+				${filterSort}
+			</if>
+		</where>
+	</select>
+
+
+	<select id="queryObject" resultType="cn.ewsd.cost.model.FAwardAssign">
+		select  <include refid="Base_Column_List" />  from f_award_assign where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.cost.model.FAwardAssign">
+		select  <include refid="Base_Column_List" />  from f_award_assign
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by assign_id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from f_award_assign 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.cost.model.FAwardAssign">
+		insert into f_award_assign
+		(
+			`assign_id`, 
+			`award_id`, 
+			`emp_id`, 
+			`emp_name`, 
+			`award_bala`, 
+			`remark`, 
+			`assign_type`, 
+			`modi_date`, 
+			`modi_user`, 
+			`user_name`, 
+			`is_del`, 
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`,
+		 	`lead_flag`
+		)
+		values
+		(
+			#{assign_id}, 
+			#{award_id}, 
+			#{emp_id}, 
+			#{emp_name}, 
+			#{award_bala}, 
+			#{remark}, 
+			#{assign_type}, 
+			#{modi_date}, 
+			#{modi_user}, 
+			#{user_name}, 
+			#{is_del}, 
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time},
+		 	#{lead_flag}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.cost.model.FAwardAssign">
+		update f_award_assign 
+		<set>
+			<if test="award_id != null">`award_id` = #{award_id}, </if>
+			<if test="emp_id != null">`emp_id` = #{emp_id}, </if>
+			<if test="emp_name != null">`emp_name` = #{emp_name}, </if>
+			<if test="award_bala != null">`award_bala` = #{award_bala}, </if>
+			<if test="remark != null">`remark` = #{remark}, </if>
+			<if test="assign_type != null">`assign_type` = #{assign_type}, </if>
+			<if test="modi_date != null">`modi_date` = #{modi_date}, </if>
+			<if test="modi_user != null">`modi_user` = #{modi_user}, </if>
+			<if test="user_name != null">`user_name` = #{user_name}, </if>
+			<if test="is_del != null">`is_del` = #{is_del}, </if>
+			<if test="uuid != null">`uuid` = #{uuid}, </if>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time},</if>
+			<if test="lead_flag != null">`lead_flag` = #{lead_flag}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from f_award_assign where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from f_award_assign where uuid in
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

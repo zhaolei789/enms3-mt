@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'fItemDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/cost/fItem/getPageSet'">
+            <thead>
+            <tr>
+				<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+				<th data-options="field:'itemName',title:'科目名称',sortable:true"></th>
+                <th data-options="field:'getType',title:'提取方式',sortable:true"></th>
+                <th data-options="field:'assPeriod',title:'考核周期',sortable:true"></th>
+                <th data-options="field:'denomType',title:'使用分母',sortable:true"></th>
+                <th data-options="field:'linkStore',title:'关联仓库',sortable:true"></th>
+                <th data-options="field:'ifOn',title:'是否启用',sortable:true,
+					formatter:function(value,row,index){
+                        if (value == '1') {
+                            return '是';
+                        }else {
+                            return '否';
+                        }
+                    }"></th>
+                <th data-options="field:'itemId',title:'科目ID',sortable:true"></th>
+                <th data-options="field:'itemType',title:'科目类型',sortable:true"></th>
+			</tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="fItemDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'fItemDg'
+       }" style="display:none">
+		<ewsd:rbac str="fItemAddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#fItemDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'fItemAddDg',
+               href:'/cost/fItem/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/cost/fItem/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="fItemEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#fItemDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'fItemEditDg',
+               href:'/cost/fItem/edit',
+               url:'/cost/fItem/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/cost/fItem/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'fItemDg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/cost/fItem/deleteBatch">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#fItemDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/cost/fItem/deleteBatch'">删除</a>
+		</ewsd:rbac>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#fItemDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#fItemDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

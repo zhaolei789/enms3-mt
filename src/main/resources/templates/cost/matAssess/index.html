@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="matAssessForm" style="height:100%">
+		<div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'75%'">
+			<table id="matAssessDg"></table>
+		</div>
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+			<div class="topjui-fluid" style="margin-top: 10px">
+				<div class="topjui-row">
+					<div class="topjui-col-sm6">
+						<label style="width:80px" class="topjui-form-label">考核奖罚金额</label>
+						<div class="topjui-input-block">
+							<input id="awardBala" data-toggle="topjui-textbox" name="awardBala" data-options="width:'200px'" value="">
+						</div>
+					</div>
+				</div>
+				<div class="topjui-row">
+					<div class="topjui-col-sm6">
+						<label style="width:80px" class="topjui-form-label">当月留存金额</label>
+						<div class="topjui-input-block">
+							<input id="keepBala" data-toggle="topjui-textbox" name="keepBala" data-options="width:'200px'" value="">
+						</div>
+					</div>
+				</div>
+				<div class="topjui-row">
+					<div class="topjui-col-sm6">
+						<label style="width:80px" class="topjui-form-label">当月延期金额</label>
+						<div class="topjui-input-block">
+							<input id="delayBala" data-toggle="topjui-textbox" name="delayBala" data-options="width:'200px'" value="">
+						</div>
+					</div>
+				</div>
+				<div class="topjui-row">
+					<div class="topjui-col-sm6">
+						<label style="width:80px" class="topjui-form-label">实际奖罚金额</label>
+						<div class="topjui-input-block">
+							<input id="monthBala" data-toggle="topjui-textbox" name="monthBala" data-options="width:'200px'" value="">
+						</div>
+					</div>
+				</div>
+				<div class="topjui-row">
+					<div class="topjui-col-sm6">
+						<label style="width:80px" class="topjui-form-label">备注</label>
+						<div class="topjui-input-block">
+							<input id="remark" data-toggle="topjui-textbox" name="remark" data-options="width:'200px'" value="">
+						</div>
+					</div>
+				</div>
+				<div class="topjui-row">
+					<div class="topjui-col-sm6">
+						<label style="width:80px" class="topjui-form-label">上月留存金额</label>
+						<div class="topjui-input-block">
+							<label style="width:200px; text-align: left" class="topjui-form-label"><span id="lastKeepBala"></span></label>
+						</div>
+					</div>
+				</div>
+				<div class="topjui-row">
+					<div class="topjui-col-sm6">
+						<label style="width:80px" class="topjui-form-label">上月延期金额</label>
+						<div class="topjui-input-block">
+							<label style="width:200px; text-align: left" class="topjui-form-label"><span id="lastDelayBala"></span></label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="matAssessDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'matAssessDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:75px">月份：</label>
+	<select id="yearQry" data-toggle="topjui-combobox" name="yearQry" data-options="width:80" >
+		<option th:each="i:${#numbers.sequence(2015, endYear)}" th:value="${i}" th:text="${i}" th:selected="${i==currentYear}"></option>
+	</select>
+	<select id="monQry" data-toggle="topjui-combobox" name="monQry" data-options="width:70" >
+		<option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}" th:selected="${i==currentMonth}"></option>
+	</select>
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">责任部门：</label>
+	<input data-toggle="topjui-combobox" id="teamQry" name="teamQry" th:value="${teamQry}" data-options="valueField:'id',textField:'text',url:'/cost/matAssess/getDept',width:'150px'">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<a href="javascript:void(0)" id="calcBtn" class="l-btn topjui-btn-purple l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">产生考核</span>
+            <span class="l-btn-icon fa fa-calculator">&nbsp;</span>
+        </span>
+	</a>
+
+	<a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">保存数据</span>
+            <span class="l-btn-icon fa fa-save">&nbsp;</span>
+        </span>
+	</a>
+
+	<a href="javascript:void(0)" id="deleteBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">删除数据</span>
+            <span class="l-btn-icon fa fa-trash">&nbsp;</span>
+        </span>
+	</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#yearQry').iCombobox({
+				onChange: function(newValue, oldValue){
+					$('#teamQry').iCombobox('reload', '/cost/matAssess/getDept?month=' + newValue + $('#monQry').iCombobox('getValue'));
+				}
+			});
+
+			$('#monQry').iCombobox({
+				onChange: function(newValue, oldValue){
+					$('#teamQry').iCombobox('reload', '/cost/matAssess/getDept?month=' + $('#yearQry').iCombobox('getValue') + newValue);
+				}
+			});
+
+			$('#teamQry').iCombobox('reload', '/cost/matAssess/getDept?month=' + $('#yearQry').iCombobox('getValue') + $('#monQry').iCombobox('getValue'));
+
+			$('#matAssessDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				rownumbers:false,
+				url:'/cost/matAssess/getList',
+				queryParams:{
+					yearQry:$('#yearQry').iCombobox('getValue'),
+					monQry:$('#monQry').iCombobox('getValue'),
+					teamQry:$('#teamQry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'uuid', sortable:false, title:'序号', align:'center', formatter:function(value, row, index){
+							return parseInt(index)+1;
+						}
+					},{
+						field:'prjName', sortable:false, title:'工程项目'
+					},{
+						field:'itemName', sortable:false, title:'考核指标'
+					},{
+						field:'assPriceText', sortable:false, title:'定额单价', align:'right'
+					},{
+						field:'normAmountText', sortable:false, title:'定额量', align:'right'
+					},{
+						field:'normBalaText', sortable:false, title:'分项定额费用', align:'right'
+					},{
+						field:'normBalaAssText', sortable:false, title:'总定额费用', align:'right'
+					},{
+						field:'occBalaText', sortable:false, title:'实际消耗金额', align:'right', formatter:function(value, row, index){
+							var ret = '';
+							var resultId = row.resultId;
+							if(row.ifEnter=='1' && row.frequ==1){
+								ret += '上月结存：<span class="textbox"><input class="textbox-text" type="number" name="last_'+ resultId +'" id="last_'+ resultId +'" value="'+ row.lastStockText +'" /></span><br />';
+								ret += '本月领用：<span class="textbox"><input class="textbox-text" type="number" name="in_'+ resultId +'" id="in_'+ resultId +'" value="'+ row.inBalaText +'" /></span><br />';
+								ret += '月末结存：<span class="textbox"><input class="textbox-text" type="number" name="stock_'+ resultId +'" id="stock_'+ resultId +'" value="'+ row.stockBalaText +'" /></span><br />';
+								ret += '其他使用：<span class="textbox"><input class="textbox-text" type="number" name="add_'+ resultId +'" id="add_'+ resultId +'" value="'+ row.addBalaText +'" /></span><br />';
+								ret += '实际消耗：' + value;
+							}
+							if(row.ifEnter!='1'){
+								ret = value;
+							}
+							return ret;
+						}
+					},{
+						field:'diffBalaText', sortable:false, title:'节+超-额', align:'right'
+					},{
+						field:'diffBala', sortable:false, title:'奖罚金额', align:'right', formatter:function(value, row, index){
+							return row.diffBalaText
+						}
+					},{
+						field:'remark', sortable:false, title:'备注', formatter:function(value, row, index){
+							var resultId = row.resultId;
+							if(row.frequ==1){
+								return '<span class="textbox"><input class="textbox-text" type="text" name="remark_'+ resultId +'" id="remark_'+ resultId +'" value="'+ value +'" /><input type="hidden" name="key" value="'+ resultId +'" /></span>';
+							}else{
+								return '';
+							}
+						}
+					}
+				] ],
+				onLoadSuccess: function(data){
+					for(var i=0; i<data.rows.length; i++){
+						var row = data.rows[i];
+						if(row.ifEnter=='1' && row.frequ==1){
+							$('#matAssessDg').iDatagrid('mergeCells', {
+								index:i,
+								field:'normBalaAssText',
+								rowspan:row.cnt,
+								colspan:1
+							})
+							$('#matAssessDg').iDatagrid('mergeCells', {
+								index:i,
+								field:'occBalaText',
+								rowspan:row.cnt,
+								colspan:1
+							})
+							$('#matAssessDg').iDatagrid('mergeCells', {
+								index:i,
+								field:'diffBalaText',
+								rowspan:row.cnt,
+								colspan:1
+							})
+							$('#matAssessDg').iDatagrid('mergeCells', {
+								index:i,
+								field:'diffBala',
+								rowspan:row.cnt,
+								colspan:1
+							})
+							$('#matAssessDg').iDatagrid('mergeCells', {
+								index:i,
+								field:'remark',
+								rowspan:row.cnt,
+								colspan:1
+							})
+						}
+					}
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+				relaodFormData();
+			});
+
+			relaodFormData();
+
+			$('#calcBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '确定产生考核吗？', function (r) {
+					if (r) {
+						$('#matAssessForm').iForm('submit', {
+							url: '/cost/matAssess/calcData',
+							success: function (data) {
+								data = $.parseJSON(data);
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadData();
+									relaodFormData();
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				});
+			});
+
+			$('#deleteBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '确定删除考核数据？请慎用！', function (r) {
+					if (r) {
+						$('#matAssessForm').iForm('submit', {
+							url: '/cost/matAssess/delete',
+							success: function (data) {
+								data = $.parseJSON(data);
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadData()
+									relaodFormData()
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				});
+			});
+
+			$('#saveBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '确定保存数据？', function (r) {
+					if (r) {
+						$('#matAssessForm').iForm('submit', {
+							url: '/cost/matAssess/save',
+							success: function (data) {
+								data = $.parseJSON(data);
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadData()
+									relaodFormData()
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				});
+			});
+		});
+
+		function relaodFormData(){
+			$('#matAssessForm').iForm('submit', {
+				url: '/cost/matAssess/getForm',
+				success: function (data) {
+					data = $.parseJSON(data);
+					if (data.statusCode == 200) {
+						$('#awardBala').iTextbox('setValue', data.awardBala);
+						$('#keepBala').iTextbox('setValue', data.keepBala);
+						$('#delayBala').iTextbox('setValue', data.delayBala);
+						$('#monthBala').iTextbox('setValue', data.monthBala);
+						$('#remark').iTextbox('setValue', data.remark);
+						$('#lastKeepBala').text(data.lastKeepBala);
+						$('#lastDelayBala').text(data.lastDelayBala);
+					} else {
+						$.iMessager.alert({
+							icon: 'messager-error',
+							title: data.title,
+							msg: data.message
+						});
+					}
+				}
+			});
+		}
+
+		function reloadData(){
+			$('#matAssessDg').iDatagrid('reload',{
+				yearQry:$('#yearQry').iCombobox('getValue'),
+				monQry:$('#monQry').iCombobox('getValue'),
+				teamQry:$('#teamQry').iCombobox('getValue')
+			});
+		}
+	</script>
+</th:block>
+</body>
+</html>

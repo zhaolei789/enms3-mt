@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+	  layout:decorator="public/layout">
+
+<head>
+	<th:block layout:fragment="css">
+
+	</th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+	<div data-toggle="topjui-layout" data-options="fit:true">
+		<form id="directForm" method="post">
+			<div th:each="list,status:${dList}" class="topjui-fluid">
+				<div th: class="topjui-row">
+					<div class="topjui-col-sm4">
+						<label class="topjui-form-label" >123</label>
+						<div class="topjui-input-block">
+							<input type="text" name="matCode" data-toggle="topjui-textbox" data-options="prompt:'',required:true">
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+</th:block>

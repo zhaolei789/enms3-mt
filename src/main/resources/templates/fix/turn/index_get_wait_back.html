@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<!--井下周转登记-->
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="turnRegForm" style="height:50%">
+		<div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+			<table id="turnRegDg"></table>
+		</div>
+	</form>
+	<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+		<table id="detailDg"></table>
+	</div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="turnRegDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'turnRegDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:70px">计划月份：</label>
+	<select id="yearQry" data-toggle="topjui-combobox" name="yearQry" data-options="width:80" >
+		<option th:each="i:${#numbers.sequence(2015, endYear)}" th:value="${i}" th:text="${i}" th:selected="${i==currentYear}"></option>
+	</select>
+	<select id="monQry" data-toggle="topjui-combobox" name="monQry" data-options="width:80" >
+		<option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}" th:selected="${i==currentMonth}"></option>
+	</select>
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">业务科室：</label>
+	<input data-toggle="topjui-combobox" id="teamQry" name="teamQry" value="" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',width:'150px'">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料信息：</label>
+	<input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'" value="">
+
+	<label class="topjui-form-label" style="width:100px;float:none;display:inline-block">计划地点：</label>
+	<input id="addrQry" data-toggle="topjui-textbox" name="addrQry" data-options="width:'150px'" value="">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<br />
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">回收日期：</label>
+	<input id="occDate" name="occDate" th:value="${curDate}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">回收地点：</label>
+	<input id="backAddr" data-toggle="topjui-textbox" name="backAddr" data-options="width:'150px'" value="">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">暂存地点：</label>
+	<input id="storeAddr" data-toggle="topjui-textbox" name="storeAddr" data-options="width:'150px'" value="">
+
+	<a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">提交数据</span>
+			<span class="l-btn-icon fa fa-save">&nbsp;</span>
+		</span>
+	</a>
+
+</div>
+
+	<div id="detailDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'detailDg'
+       }" style="display:none">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">申请日期：</label>
+		<input id="date1Qry" name="date1Qry" th:value="${date1Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+		<label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+		<input id="date2Qry" name="date2Qry" th:value="${curDate}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料信息：</label>
+		<input id="matQry1" data-toggle="topjui-textbox" name="matQry1" data-options="width:'150px'" value="">
+
+		<label class="topjui-form-label" style="width:70px;float:none;display:inline-block">状态：</label>
+		<input data-toggle="topjui-combobox" name="stepQry" id="stepQry" value="" data-options="valueField:'processNo',textField:'processName',url:'/system/sysAuditProcess/getListByFuuid?fuuid=D5D250903AE74DD0BF76DC1DFC0BB1DB',width:'150px'">
+
+		<a href="javascript:void(0)" id="searchBtn1" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+		</a>
+	</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+
+			$('#teamQry').iCombobox({
+				loadFilter:function(data){
+					data.unshift({id:'', text:'--全部--'});
+					return data
+				}
+			})
+
+			$('#stepQry').iCombobox({
+				loadFilter:function(data){
+					data.unshift({processNo:'', processName:'--全部--'});
+					return data
+				}
+			})
+
+			$('#turnRegDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/fix/turnReg/getPageSet',
+				queryParams:{
+					yearQry:$('#yearQry').iCombobox('getValue'),
+					monQry:$('#monQry').iCombobox('getValue'),
+					teamQry:$('#teamQry').iCombobox('getValue'),
+					addrQry:$('#addrQry').iTextbox('getValue'),
+					matQry:$('#matQry').iTextbox('getValue')
+				},
+				columns:[ [
+					{
+						field:'planNo', sortable:false, title:'', checkbox:true
+					},{
+						field:'planMonth', sortable:false, title:'计划月份', formatter:function (value, row, index) {
+							return value.substring(0, 4) + "-" + value.substring(4, 6)
+						}
+					},{
+						field:'planTeamName', sortable:false, title:'业务科室'
+					},{
+						field:'matCode', sortable:false, title:'物料编码'
+					},{
+						field:'matName', sortable:false, title:'物料描述'
+					},{
+						field:'matUnit', sortable:false, title:'单位'
+					},{
+						field:'matPrice', sortable:false, title:'单价', align:'right'
+					},{
+						field:'planAmount', sortable:false, title:'计划数', align:'right'
+					},{
+						field:'prjName', sortable:false, title:'计划回收地点'
+					},{
+						field:'amount', sortable:false, title:'本次回收数', width:'90px', formatter:function (value, row, index) {
+							return '<span class="textbox" style="width: 85px"><input class="textbox-text" style="width: 80px" type="number" id="amount_'+ row.planNo +'" name="amount_'+ row.planNo +'" value="" disabled /></span>'
+						}
+					},{
+						field:'remark', sortable:false, title:'备注信息', formatter:function (value, row, index) {
+							return '<span class="textbox"><input class="textbox-text" type="text" id="remark_'+ row.planNo +'" name="remark_'+ row.planNo +'" value="" disabled /></span>'
+						}
+					}
+				] ],
+				onCheck:function(index, row){
+					var planNo = row.planNo;
+					$('#amount_' + planNo +', #remark_'+ planNo).removeAttr('disabled');
+				},
+				onUncheck:function(index, row){
+					var planNo = row.planNo;
+					$('#amount_' + planNo +', #remark_'+ planNo).attr('disabled', 'disabled');
+				},
+				onCheckAll:function(rows){
+					$('[name^="amount_"], [name^="remark_"]').removeAttr("disabled");
+				},
+				onUncheckAll:function(rows){
+					$('[name^="amount_"], [name^="remark_"]').attr("disabled", 'disabled');
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#submitBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '您确定提交申请吗？', function (r) {
+					if (r) {
+						$('#turnRegForm').iForm('submit', {
+							url:'/fix/turnReg/insert',
+							success:function(data){
+								data = $.parseJSON(data);
+								if(data.statusCode == 200){
+									$.iMessager.show({
+										title:data.title,
+										msg:data.message
+									})
+									reloadData();
+									reloadDetail();
+								} else {
+									$.iMessager.alert({
+										icon:'messager-error',
+										title:data.title,
+										msg:data.message
+									});
+								}
+							}
+						});
+					}
+				});
+			});
+
+			$('#detailDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/fix/turnReg/getDetail',
+				queryParams:{
+					date1Qry:$('#date1Qry').iDatebox('getValue'),
+					date2Qry:$('#date2Qry').iDatebox('getValue'),
+					matQry1:$('#matQry1').iTextbox('getValue'),
+					stepQry:$('#stepQry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'billNo', sortable:false, title:'删除', formatter:function(value, row, index){
+							if(row.inStep=='77013'){
+								return '<a style="font-weight: bold; color: #00b7ee" deleteBtn="'+value+'">删除</a>'
+							}else{
+								return '---'
+							}
+						}
+					},{
+						field:'inStepName', sortable:false, title:'申请状态'
+					},{
+						field:'applyDate', sortable:false, title:'申请日期', formatter:function(value, row, index){
+							return value.substring(0, 4)+'-'+value.substring(4, 6)+ '-' +value.substring(6, 8)
+						}
+					},{
+						field:'billDate', sortable:false, title:'确认日期', formatter:function(value, row, index){
+							if(value!=null && value!=''){
+								return value.substring(0, 4)+'-'+value.substring(4, 6)+ '-' +value.substring(6, 8)
+							}else{
+								return ''
+							}
+						}
+					},{
+						field:'matCode', sortable:false, title:'物料编码'
+					},{
+						field:'matName', sortable:false, title:'物料描述'
+					},{
+						field:'matUnit', sortable:false, title:'单位'
+					},{
+						field:'setPrice', sortable:false, title:'单价', align:'right'
+					},{
+						field:'applyAmount', sortable:false, title:'申请数', align:'right'
+					},{
+						field:'billAmount', sortable:false, title:'确认数', align:'right'
+					},{
+						field:'storeName', sortable:false, title:'仓库'
+					},{
+						field:'offerTeamName', sortable:false, title:'业务科室'
+					},{
+						field:'reserve1', sortable:false, title:'暂存地点'
+					},{
+						field:'remark', sortable:false, title:'备注'
+					}
+				] ],
+				onLoadSuccess:function (data) {
+					$('[deleteBtn]').click(function(){
+						var billNo = $(this).attr('deleteBtn');
+						$.iMessager.confirm('确认对话框', '您确定删除当前申请吗？', function (r) {
+							if (r) {
+								var postData = { billNo:billNo};
+								var url = '/fix/turnReg/delete';
+								$.post(url,postData,function (res) {
+									if(res.statusCode == 200){
+										$.iMessager.show({title: '我的消息', msg: res.message, timeout: 5000, showType: 'slide'});// '消息窗口'组件
+										reloadDetail()
+									}else {
+										$.iMessager.alert('操作提示', res.message, 'messager-error');
+									}
+								},"JSON")
+							}
+						});
+					})
+				}
+			});
+
+			$('#searchBtn1').click(function(){
+				reloadDetail();
+			});
+		})
+
+		function reloadData(){
+			$('#turnRegDg').iDatagrid('reload',{
+				yearQry:$('#yearQry').iCombobox('getValue'),
+				monQry:$('#monQry').iCombobox('getValue'),
+				teamQry:$('#teamQry').iCombobox('getValue'),
+				addrQry:$('#addrQry').iTextbox('getValue'),
+				matQry:$('#matQry').iTextbox('getValue')
+			});
+		}
+
+		function reloadDetail(){
+			$('#detailDg').iDatagrid('reload',{
+				date1Qry:$('#date1Qry').iDatebox('getValue'),
+				date2Qry:$('#date2Qry').iDatebox('getValue'),
+				matQry1:$('#matQry1').iTextbox('getValue'),
+				stepQry:$('#stepQry').iCombobox('getValue')
+			});
+		}
+	</script>
+
+</th:block>
+</body>
+</html>

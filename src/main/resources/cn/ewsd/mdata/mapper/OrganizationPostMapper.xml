@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.mdata.mapper.OrganizationPostMapper">
+
+    <sql id="Base_Column_List">*</sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.mdata.model.OrganizationPost">
+		select
+		<include refid="Base_Column_List"></include>
+		from sys_organization_post
+		<where>
+			<if test="filterSort != null">
+				${filterSort}
+			</if>
+		</where>
+    </select>
+
+    <select id="queryObject" resultType="cn.ewsd.mdata.model.OrganizationPost">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_organization_post where uuid = #{uuid}
+    </select>
+
+    <select id="queryList" resultType="cn.ewsd.mdata.model.OrganizationPost">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_organization_post
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by uuid desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+
+
+    <select id="queryTotal" resultType="int">
+		select count(*) from sys_organization_post
+	</select>
+
+
+	<update id="executeUpdate">
+		UPDATE sys_organization_post SET name = ${paramsMap.name} WHERE uuid = #{paramsMap.uuid}
+	</update>
+
+	<delete id="executeDelete">
+		delete from sys_organization_post where uuid = #{value}
+	</delete>
+
+    <delete id="executeDeleteBatch">
+        delete from sys_organization_post where uuid in
+        <foreach item="uuid" collection="uuids" open="(" separator="," close=")">
+            #{uuid}
+        </foreach>
+    </delete>
+
+	<!--<insert id="executeSave" parameterType="cn.ewsd.erp.model.CntPartnerBase">
+		insert into sys_organization_post
+		(
+		`uuid`,
+		`creatorId`,
+		`creator`,
+		`createTime`,
+		`modifierId`,
+		`modifier`,
+		`modifyTime`,
+		`prtName`,
+		`prnNamePinyin`,
+		`prnType`,
+		`prnKind`,
+		`prnCredited`,
+		`prnJuridicalperson`,
+		`prnProsecutionStart`,
+		`prnProsecutionEnd`,
+		`prnAddress`,
+		`prnProsecutionContent`,
+		`prnSource`,
+		`prnCompany`,
+		`prnRegCapital`,
+		`prnRegCode`,
+		`prnOrganCode`,
+		`prnCount`,
+		`prnOperationTime`,
+		`prnAudit`,
+		`prnOperationUserId`,
+		`prnOperationUserName`,
+		`isDel`,
+		`prnLinkman`,
+		`prnLinkmanTel`,
+		`prnIspublish`,
+		`prnCreditedText`,
+		`prnAuditText`,
+		`prnIspublishText`,
+		`id`,
+		`pid`,
+		`leveId`,
+		`state`
+		)
+		values
+		(
+		#{uuid},
+		#{creatorId},
+		#{creator},
+		#{createTime},
+		#{modifierId},
+		#{modifier},
+		#{modifyTime},
+		#{prtName},
+		#{prnNamePinyin},
+		#{prnType},
+		#{prnKind},
+		#{prnCredited},
+		#{prnJuridicalperson},
+		#{prnProsecutionStart},
+		#{prnProsecutionEnd},
+		#{prnAddress},
+		#{prnProsecutionContent},
+		#{prnSource},
+		#{prnCompany},
+		#{prnRegCapital},
+		#{prnRegCode},
+		#{prnOrganCode},
+		#{prnCount},
+		#{prnOperationTime},
+		#{prnAudit},
+		#{prnOperationUserId},
+		#{prnOperationUserName},
+		#{isDel},
+		#{prnLinkman},
+		#{prnLinkmanTel},
+		#{prnIspublish},
+		#{prnCreditedText},
+		#{prnAuditText},
+		#{prnIspublishText},
+		#{id},
+		#{pid},
+		#{leveId},
+		#{state}
+		)
+	</insert>-->
+
+
+	<select id="getOrgPostByOrgUuidAndPost" resultType="cn.ewsd.mdata.model.OrganizationPost">
+		SELECT * FROM sys_organization_post WHERE  orgUuid = = '%#{arg0}' AND postValue = '%#{arg1}'
+	</select>
+
+
+
+</mapper>

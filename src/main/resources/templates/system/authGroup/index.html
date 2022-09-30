@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'west',title:'',split:true,border:false,width:'47%',headerCls:'border_right',bodyCls:'border_right'">
+            <!-- treegrid表格 -->
+            <table data-toggle="topjui-treegrid"
+                   data-options="id:'groupTreegrid',
+                   <!--fitColumns:true,-->
+               singleSelect:true,
+
+			   url:'/system/authGroup/getListByCodeSetIdAndLevelId?codeSetId=1&levelId=0',
+			   expandUrl:'/system/authGroup/getListByPid?pid={id}',
+			   childGrid:{
+                   param:'menuId,roleId:id,pid',
+                   grid:[
+                       {type:'treegrid',id:'authAccessTreegrid'},
+                   ]
+               }">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                    <th data-options="field:'text',title:'名称'"></th>
+                    <th data-options="field:'id',title:'ID',width:50"></th>
+                    <th data-options="field:'menuId',title:'菜单ID'"></th>
+                    <th data-options="field:'levelId',title:'层级',
+                    formatter: function(value,row,index){
+						if (value == 0){
+							return '顶级';
+						} else if (value == 1){
+							return '子级一层';
+						} else if (value == 2){
+							return '子级二层';
+						} else if (value == 3){
+							return '子级三层';
+						} else if (value == 4){
+							return '子级四层';
+						} else if (value == 5){
+							return '子级五层';
+						} else {
+							return '子级N层';
+						}
+                    }"></th>
+                    <th data-options="field:'sort',title:'排序'"></th>
+                    <th data-options="field:'status',title:'状态',
+					formatter: function(value,row,index){
+						if (value == '1'){
+							return '<span style=\'color:green\'>启用</span>';
+						} else {
+							return '<span style=\'color:red\'>禁用</span>';
+						}
+                    }"></th>
+                    <th data-options="field:'remark',title:'备注',width:100"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,bodyCls:'border_left'">
+            <!-- datagrid表格 -->
+            <table data-toggle="topjui-treegrid"
+                   data-options="id:'authAccessTreegrid',
+               idField:'id',
+               singleSelect:true,
+               checkbox:true,
+               onBeforeExpand:function(){},
+               <!--expandRoot:true,-->
+               expandRoots:false,
+                loadFilter:authAccessTreegridLoadFilter,
+                <!--parentGrid:{-->
+               <!--type:'treegrid',-->
+               <!--id:'groupTreegrid',-->
+               <!--param:'roleId' },-->
+			   <!--url:'/system/authAccess/getListByRoleId',-->
+			   <!--expandUrl:'/system/authAccess/getListByRoleIdAndPid'-->
+                url:'/system/authAccess/getListByRoleIdAllMenu'
+                ">
+                <thead>
+                <tr>
+                    <!--<th data-options="field:'uuid',title:'UUID',checkbox:true"></th>-->
+                    <th data-options="field:'text',title:'菜单名称'"></th>
+                    <th data-options="field:'accessAuth',title:'授权状态',
+					formatter: function(value,row,index){
+						if (value == '1'){
+							return '<span style=\'color:green\'>已授权</span>';
+						} else {
+							return '<span style=\'color:red\'>未授权</span>';
+						}
+                    }"></th>
+                    <th data-options="field:'id',title:'编号'"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- groupTreegrid 工具栏 -->
+    <div id="groupTreegrid-toolbar" class="topjui-toolbar">
+        <ewsd:rbac str="groupAddDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           btnCls:'topjui-btn-green',
+           grid:{
+               type:'treegrid',
+               id:'groupTreegrid',
+               idField:'id'
+           },
+           parentGrid:{
+               type:'treegrid',
+               id:'groupTreegrid',
+               param:'codeSetId,pid:id,levelId',
+               unselectedMsg:'请先选中要添加分组的上级分组！'
+           },
+           dialog:{
+               width:700,
+               height:380,
+               id:'groupAddDialog',
+               href:'/system/authGroup/edit',
+               buttonsGroup:[
+                   {text:'保存',url:'/system/authGroup/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+        </ewsd:rbac>
+
+        <ewsd:rbac str="groupEditDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           iconCls:'fa fa-pencil',
+           btnCls:'topjui-btn-blue',
+           grid:{
+               type:'treegrid',
+               id:'groupTreegrid',
+               parentIdField:'pid'
+           },
+           dialog:{
+               width:700,
+               height:380,
+               id:'groupEditDialog',
+               href:'/system/authGroup/edit',
+               url:'/system/authGroup/getDetailByUuid?uuid={uuid}',
+               buttonsGroup:[
+                   {text:'更新',url:'/system/authGroup/update',iconCls:'fa fa-save',handler:'ajaxForm'}
+               ]
+           }">编辑</a>
+        </ewsd:rbac>
+
+        <ewsd:rbac str="/system/authGroup/delete">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'doAjax',
+           iconCls:'fa fa-trash',
+           btnCls:'topjui-btn-red',
+           grid:{
+               type:'treegrid',
+               id:'groupTreegrid',
+           },
+            url:'/system/authGroup/delete'">删除</a>
+        </ewsd:rbac>
+        <!--</rbac:hasPermission>-->
+        <!--<rbac:hasPermission name="/system/authAccess/syncMenu">-->
+        <!--<ewsd:rbac str="/system/authAccess/syncMenu">-->
+            <!--<a href="javascript:void(0)"-->
+               <!--data-toggle="topjui-menubutton"-->
+               <!--data-options="method:'doAjax',-->
+           <!--iconCls:'fa fa-plus',-->
+           <!--btnCls:'topjui-btn-orange',-->
+           <!--url:'/system/authAccess/syncMenu',-->
+           <!--confirmMsg:'确定要执行该操作吗？',-->
+           <!--grid:{-->
+               <!--type:'treegrid',-->
+               <!--id:'groupTreegrid',-->
+               <!--uncheckedMsg:'请勾选要同步的分组'-->
+           <!--}">同步菜单</a>-->
+        <!--</ewsd:rbac>-->
+        <ewsd:rbac str="/system/authAccess/syncMenu">
+            <a href="javascript:void(0)"
+            data-toggle="topjui-menubutton"
+            data-options="method:'doAjax',
+            iconCls:'fa fa-refresh',
+            grid:{
+                type:'treegrid',
+                id:'groupTreegrid',
+                uncheckedMsg:'请勾选要重置的分组'
+            },
+            btnCls:'topjui-btn-orange',
+            url:'/system/authAccess/resetListByRoleId',
+            confirmMsg:'确定要执行该操作吗？'
+            ">重置菜单</a>
+        </ewsd:rbac>
+        <!--</rbac:hasPermission>-->
+    </div>
+
+    <!-- authAccessTreegrid 工具栏 -->
+    <div id="authAccessTreegrid-toolbar" class="topjui-toolbar">
+        <ewsd:rbac str="/system/authAccess/grant?roleId={parent.id}">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="
+	   iconCls:'fa fa-plus',
+	   btnCls:'topjui-btn-green',
+	   onClick:permissionOnclick
+	   ">赋予授权</a>
+        </ewsd:rbac>
+
+        <ewsd:rbac str="/system/authAccess/ungrant?roleId={parent.id}">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="
+           iconCls:'fa fa-trash',
+           btnCls:'topjui-btn-blue',
+           onClick:unPermissionOnclick">取消授权</a>
+        </ewsd:rbac>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        // 定义选择器
+        var SELECTOR = {
+            groupTgSelector: '#groupTreegrid', // 左边表格
+            authAccessTgSelector: '#authAccessTreegrid',// 右边表格
+        };
+        // 定义 URL
+        var SCOPE = {
+            permissionUrl: "/system/authAccess/grant", // 授予赋权的URL
+            unPermissionUrl: '/system/authAccess/ungrant' // 取消赋权的URL
+        };
+        // 定义提示消息
+        var MSG = {
+            permissionSuccess: '赋予授权成功！',
+            permissionFail: '赋予授权失败！',
+            unPermissionSuccess: "取消授权成功!",
+            unPermissionFail: '取消授权失败！'
+        };
+
+        /**
+         * 授权按钮点击的时候触发
+         */
+        function permissionOnclick() {
+            permissionHandle(1)
+        }
+
+        function unPermissionOnclick() {
+            $.iMessager.confirm('确认对话框', '确定要执行该操作吗？', function (r) {
+                if (r) {
+                    permissionHandle(0)
+                }
+            });
+        }
+
+        function permissionHandle(param) {
+            var $groupTg = $(SELECTOR.groupTgSelector);
+            var $authAccess = $(SELECTOR.authAccessTgSelector);
+            // 1.获取表格选中的数据
+            var postData = getAuthChecked($groupTg, $authAccess);
+            if(!postData){
+                return ;
+            }
+            // 2.发送赋权请求
+            // var url = (param ? SCOPE.permissionUrl : SCOPE.unPermissionUrl) + '?roleId=' + postData.roleId;
+            var url = (param ? SCOPE.permissionUrl : SCOPE.unPermissionUrl) ;
+            // var groupSelectedRow = $('#groupTreegrid').iTreegrid("getSelected");
+            $.iMessager.progress({title:"提示",text:'请等待……'});
+            $.post(url, {uuid: postData.idStr,roleId:postData.roleId}, function (res) {
+                if (res.statusCode == 200) {
+                    //更新节点信息
+                    var authSelectedRows = $authAccess.iTreegrid("getCheckedNodes");
+                    $.each(authSelectedRows,function (i) {
+                        $authAccess.treegrid('update', {
+                            id: authSelectedRows[i]['id'],
+                            row: res.data[i]
+                        });
+                    });
+                    //提示
+                    $.iMessager.show({
+                        title: '我的消息',
+                        msg: param ? MSG.permissionSuccess : MSG.unPermissionSuccess,
+                        timeout: 5000,
+                        showType: 'slide'
+                    });
+                } else {
+                    $.iMessager.alert('提示', param ? MSG.permissionFail : MSG.unPermissionFail, 'messager-error');
+                }
+                $.iMessager.progress("close");
+            })
+        }
+
+        /**
+         * 获取表格选中的数据
+         * @param $groupTg
+         * @param $authAccess
+         * @returns {{roleId: *}}
+         */
+        function getAuthChecked($groupTg, $authAccess) {
+            // 1.判断左边的角色权限是否勾选
+            var groupSelectedRow = $groupTg.iTreegrid("getSelected");
+            if (!groupSelectedRow) {
+                $.iMessager.alert('提示', '请选择左边的分组！', 'messager-info');
+                return;
+            }
+            // 2.判断右侧是否有选中行
+            var authSelectedRow = $authAccess.iTreegrid("getCheckedNodes");
+            if (authSelectedRow.length == 0) {
+                $.iMessager.alert('提示', '请选中授权的菜单或操作！', 'messager-info');
+                return;
+            }
+            // 3.获取左侧的数据的角色ID
+            var data = {
+                roleId: groupSelectedRow.id
+            }
+            // 4.获取右侧勾选的ID
+            var idStr = '';
+            $.each(authSelectedRow, function (i) {
+                idStr += authSelectedRow[i].uuid + ',';
+            });
+            data.idStr = idStr ? subString(idStr, 0, idStr.length - 1) : '';
+            return data;
+        }
+
+
+
+        var originalData = '';// 保存原始数据，方便做本地查询
+        //过滤
+        function authAccessTreegridLoadFilter(data, parentId) {
+            var topId1 = '';
+            var data = $.formateTreeData(data, 'text', 'id', 'pid'); // 将list中 motool字段赋值给text字段，''代表id字段数据里面有不用转，将里面的'pId'字段转为’pid‘
+            var rootNodeId = "1";//需要的顶级节点
+            originalData = $.getTreeList($.extend(true, [], data), rootNodeId);//对象克隆
+            data = $.getTreeList(data, parentId ? parentId : rootNodeId);// 这个方法两个参数 data 和根节点id 会将数据格式化成标准格式 {id：xxx,pid:xxx,text:xxx,children:[{}……]}
+
+            // 1.新的数据集合
+            return data;
+        }
+
+    </script>
+    <!--<script src="../../static/js/security/mainframe.js"-->
+    <!--th:src="@{/js/security/mainframe.js}"></script>-->
+</th:block>
+</body>
+</html>

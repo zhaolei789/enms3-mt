@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MPlanMapper">
+	<select id="getCountByMatNo" resultType="java.lang.Integer">
+		SELECT COUNT(mat_no) FROM m_plan WHERE mat_no=#{matNo}
+	</select>
+
+	<select id="getCountByPrjNo" resultType="java.lang.Integer">
+		SELECT COUNT(prj_no) FROM m_plan WHERE prj_no=#{prjNo}
+	</select>
+	
+	<select id="checkPrjItemHasPlaned" resultType="java.lang.Integer">
+		SELECT COUNT(plan_no)
+		FROM m_plan
+		WHERE prj_no=#{prjNo} AND item_no IN
+		<foreach collection="itemNos" item="itemNo" open="(" separator="," close=")">
+			#{itemNo}
+		</foreach>
+	</select>
+
+	<select id="getPageSet" resultType="cn.ewsd.material.model.MPlan">
+		SELECT a.plan_no, a.check_no, a.mat_no, a.plan_month, a.plan_type, a.item_no, a.team_no, a.mat_amount, a.mat_price, a.mat_amount*IFNULL(a.mat_price, 0) mat_bala, a.use_date, a.plan_step, ap.process_name plan_step_name,
+			   a.remark, a.mat_use, a.plan_date, a.plan_time, a.if_make, a.if_urgent, a.mat_addr, a.factory_no, a.cost_center, a.move_type, di3.text move_type_name, a.trax_no, a.offer_no, a.wbs_element, a.list_no, a.item_type,
+			   a.pur_group, a.tracking_no, a.plan_src, di2.text plan_src_name, e.usable_amount, c.mat_code, c.mat_name, c.mat_unit, c.mat_unit mat_unit_name, c.erp_type, c.type_name, c.real_flag, l.sum_amount, k.direct, mi.item_name, cc.center_name,
+			   IFNULL(k.back_count, 0) back_count, a.abc_type plan_abc, c.abc_type mat_abc, IFNULL(sb.type_code, '') sb_type, (SELECT SUM(stock_amount) FROM vo_stock WHERE mat_no=a.mat_no) old_amount,
+		       di4.text mat_addr_name, di5.text factory_name
+		FROM m_plan a
+		LEFT JOIN m_material c ON a.mat_no=c.mat_no
+		LEFT JOIN m_item mi ON a.item_no=mi.item_no
+		LEFT JOIN t_cost_center cc ON a.cost_center=cc.center_no
+		LEFT JOIN m_type_mat sb ON sb.mat_code=c.erp_type AND sb.type_code='m.TypeCode.10'
+		LEFT JOIN sys_audit_process ap ON ap.process_no=a.plan_step
+		LEFT JOIN sys_dic_item di2 ON di2.value=a.plan_src
+		LEFT JOIN sys_dic_item di3 ON di3.value=a.move_type
+		LEFT JOIN sys_dic_item di4 ON di4.value=a.mat_addr
+		LEFT JOIN sys_dic_item di5 ON di5.value=a.factory_no
+		LEFT JOIN (SELECT mat_no, SUM(usable_amount) usable_amount
+				   FROM m_plan WHERE prj_no=#{prjNo}
+				   GROUP BY mat_no) e ON a.mat_no=e.mat_no
+		LEFT JOIN (SELECT a.mat_no, SUM(a.stock_amount) sum_amount
+				   FROM m_stock a
+				   GROUP BY a.mat_no) l ON a.mat_no=l.mat_no
+		LEFT JOIN (SELECT check_no, COUNT(*) back_count, direct
+				   FROM t_check
+				   WHERE direct='sys.checkDirect.1' AND step_key='7105'
+				   GROUP BY check_no,direct) k ON a.check_no=k.check_no
+		WHERE a.prj_no=#{prjNo} AND a.plan_month=#{planMonth} AND a.team_no=#{teamNo} AND a.item_no=#{itemNo}
+		<choose>
+			<when test='"71050"==planStep'>
+				AND a.plan_step='71050'
+			</when>
+			<otherwise>
+				AND a.plan_step!='71050'
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getSumBala" resultType="java.lang.Double">
+		SELECT IFNULL(SUM(IFNULL(mat_amount, 0)*IFNULL(mat_price, 0)), 0)
+		FROM m_plan
+		WHERE prj_no=#{prjNo} AND plan_month=#{planMonth} AND team_no=#{teamNo} AND item_no=#{itemNo}
+		<choose>
+			<when test='"71050"==planStep'>
+				AND plan_step='71050'
+			</when>
+			<otherwise>
+				AND plan_step!='71050'
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="getGCSumBala" resultType="java.lang.Double">
+		SELECT IFNULL(SUM(mat_amount*mat_price), 0)
+		FROM m_plan
+	    WHERE prj_no=#{_parameter} AND plan_step NOT IN ('71050', '7105X')
+	</select>
+
+	<select id="getSCSumBala" resultType="java.lang.Double">
+		SELECT IFNULL(SUM(a.mat_amount*a.mat_price), 0)
+        FROM m_plan a,m_prj b
+        WHERE a.prj_no=b.prj_no AND a.pay_team=#{payTeam} AND a.plan_month=#{planMonth} AND b.prj_status!='m.prjStatus.1' AND a.if_urgent!='1' AND b.prj_type1='1' AND a.plan_step NOT IN ('71050', '7105X') AND a.item_no=#{itemNo}
+	</select>
+
+	<select id="getFactory" resultType="cn.ewsd.system.model.DicItem">
+		SELECT * FROM (
+			SELECT value, text, SUBSTRING_INDEX(value,'.',-1)+0 sort FROM sys_dic_item WHERE value LIKE 'm.factoryNo%'
+			UNION
+			SELECT '' value, '内部料' text, 9999 sort) a
+		ORDER BY sort
+	</select>
+
+	<select id="getPlanSrc" resultType="java.lang.String">
+		SELECT 'm.planSrc.O1' FROM m_material
+		WHERE mat_no=#{matNo} AND mat_type&gt;='01' AND mat_type&lt;='99' AND new_old='X' AND abc_type!='m.abcType.A'
+		UNION
+		SELECT 'm.planSrc.I2' FROM m_material
+		WHERE mat_no=#{matNo} AND mat_type='m.matType.FB' AND new_old='X'
+		UNION
+		SELECT 'm.planSrc.I3' FROM m_material
+		WHERE mat_no=#{matNo} AND new_old='J'
+	</select>
+
+	<insert id="savePlan" parameterType="cn.ewsd.material.model.MPlan">
+		INSERT INTO m_plan (`plan_no`, `prj_no`, `team_no`, `pay_team`, `plan_month`, `plan_type`, `item_no`, `mat_no`, `abc_type`, `mat_price`, `mat_amount`, `usable_amount`, `use_date`, `remark`, `plan_date`, `plan_time`,
+							`plan_step`, `check_no`, `order_dir`, `end_month`, `mat_addr`, `factory_no`, `cost_center`, `trax_no`, `wbs_element`, `move_type`, `list_no`, `item_type`, `pur_group`, `tracking_no`, `reserve_no`,
+							`purchase_no`, `if_make`, `plan_src`, `mat_use`, `need_comp`, `need_factory`, `pur_org`, `pm_number`, `if_urgent`, `offer_no`,
+							`uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{planNo}, #{prjNo}, #{teamNo}, #{payTeam}, #{planMonth}, #{planType}, #{itemNo}, #{matNo}, #{abcType}, #{matPrice}, #{matAmount}, #{usableAmount}, #{useDate}, #{remark}, #{planDate}, #{planTime},
+				#{planStep}, #{checkNo}, #{orderDir}, #{endMonth}, #{matAddr}, #{factoryNo}, #{costCenter}, #{traxNo}, #{wbsElement}, #{moveType}, #{listNo}, #{itemType}, #{purGroup}, #{trackingNo}, #{reserveNo},
+				#{purchaseNo}, #{ifMake}, #{planSrc}, #{matUse}, #{needComp}, #{needFactory}, #{purOrg}, #{pmNumber}, #{ifUrgent}, #{offerNo},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<update id="updatePlan" parameterType="cn.ewsd.material.model.MPlan">
+		UPDATE m_plan
+		<set>
+			<if test="matAmount!=null">`mat_amount`=#{matAmount},</if>
+			<if test="useDate!=null">`use_date`=#{useDate},</if>
+			<if test="remark!=null">`remark`=#{remark},</if>
+			<if test="matUse!=null">`mat_use`=#{matUse},</if>
+			<if test="offerNo!=null">`offer_no`=#{offerNo},</if>
+			<if test="abcType!=null">`abc_type`=#{abcType},</if>
+			<if test="planDate!=null">`plan_date`=#{planDate},</if>
+			<if test="planTime!=null">`plan_time`=#{planTime},</if>
+			<if test="planSrc!=null">`plan_src`=#{planSrc},</if>
+			<if test="matPrice!=null">`mat_price`=#{matPrice},</if>
+			<if test="usableAmount!=null">`usable_amount`=#{usableAmount},</if>
+			<if test="matAddr!=null">`mat_addr`=#{matAddr},</if>
+			<if test="planStep!=null">`plan_step`=#{planStep},</if>
+			<if test="ifMake!=null">`if_make`=#{ifMake},</if>
+			<if test="matNo!=null">`mat_no`=#{matNo},</if>
+			<if test="reserveNo!=null">`reserve_no`=#{reserveNo},</if>
+			<if test="purchaseNo!=null">`purchase_no`=#{purchaseNo},</if>
+			<if test="purchaseList!=null">`purchase_list`=#{purchaseList},</if>
+			<if test="itemType!=null">`item_type`=#{itemType},</if>
+			<if test="moveType!=null">`move_type`=#{moveType},</if>
+			<if test="costCenter!=null">`cost_center`=#{costCenter}</if>
+		</set>
+		WHERE plan_no=#{planNo}
+	</update>
+
+	<update id="updatePlanByReserveNo" parameterType="cn.ewsd.material.model.MPlan">
+		UPDATE m_plan
+		<set>
+			<if test="matNo!=null">`mat_no`=#{matNo},</if>
+			<if test="matAmount!=null">`mat_amount`=#{matAmount},</if>
+			<if test="matPrice!=null">`mat_price`=#{matPrice},</if>
+			<if test="purchaseNo!=null">`purchase_no`=#{purchaseNo},</if>
+			<if test="purchaseList!=null">`purchase_list`=#{purchaseList},</if>
+			<if test="itemType!=null">`item_type`=#{itemType},</if>
+			<if test="moveType!=null">`move_type`=#{moveType},</if>
+			<if test="costCenter!=null">`cost_center`=#{costCenter},</if>
+			<if test="matAddr!=null">`mat_addr`=#{matAddr},</if>
+			<if test="planStep!=null">`plan_step`=#{planStep}</if>
+		</set>
+		WHERE reserve_no=#{reserveNo}
+	</update>
+
+	<update id="updByReserveNo" parameterType="cn.ewsd.material.model.MPlan">
+		UPDATE m_plan
+		<set>
+			<if test="reserveNo!=null">`reserve_no`=#{itemNo},</if>
+			<if test="purchaseNo!=null">`purchase_no`=#{purchaseNo},</if>
+			<if test="purchaseList!=null">`purchase_list`=#{purchaseList}</if>
+		</set>
+		WHERE reserve_no=#{reserveNo}
+	</update>
+
+	<delete id="deletePlan">
+		DELETE FROM m_plan WHERE plan_no=#{planNo}
+	</delete>
+
+	<select id="getPlanByPlanNo" resultType="cn.ewsd.material.model.MPlan">
+		SELECT p.*, o.text team_name, m.mat_code, m.mat_name, m.mat_price m_mat_price, m.mat_type, pr.prj_type1, i.item_name
+		FROM m_plan p
+		LEFT JOIN sys_organization o ON o.id=p.team_no
+		LEFT JOIN m_material m ON m.mat_no=p.mat_no
+		LEFT JOIN m_item i ON i.item_no=p.item_no
+		LEFT JOIN m_prj pr ON pr.prj_no=p.prj_no
+		WHERE p.plan_no=#{planNo}
+	</select>
+	
+	<select id="getPlanByReserveNo" resultType="cn.ewsd.material.model.MPlan">
+		SELECT * FROM m_plan WHERE reserve_no=#{reserveNo}
+	</select>
+
+	<update id="updPlan">
+		UPDATE m_plan SET mat_amount=mat_amount-#{matAmount}, usable_amount=usable_amount-#{usableAmount}
+		WHERE reserve_no=#{reserveNo} AND if_urgent!='1'
+	</update>
+
+	<select id="getPlan" resultType="cn.ewsd.material.model.MPlan">
+		SELECT *
+		FROM m_plan
+		WHERE mat_no=#{matNo} AND plan_month=#{planMonth} AND plan_step=#{planStep}
+		LIMIT 1
+	</select>
+
+	<select id="getPlanList" resultType="cn.ewsd.material.model.MPlan" parameterType="cn.ewsd.material.model.MPlan">
+		SELECT * FROM m_plan
+		WHERE 1=1
+		<if test="matNo!=null"> AND `mat_no`=#{matNo}</if>
+		<if test="planMonth!=null"> AND `plan_month`=#{planMonth}</if>
+		<if test="planStep!=null"> AND `plan_step`=#{planStep}</if>
+		<if test="abcType!=null"> AND `abc_type`=#{abcType}</if>
+	</select>
+
+	<update id="updPlanSc">
+		UPDATE m_plan SET usable_amount=mat_amount
+		WHERE plan_step=#{planStep} AND NOT EXISTS (SELECT '1' FROM m_out WHERE plan_no=m_plan.plan_no)
+	</update>
+
+	<select id="getPlanStepData" resultType="cn.ewsd.material.model.MPlan">
+		SELECT COUNT(*) count, p.plan_step, p.team_no, SUM(p.mat_price*p.mat_amount) mat_bala
+		FROM m_plan p
+		WHERE p.team_no IN
+		<foreach collection="userDept.split(',')" item="id" index="index" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+		AND p.plan_month&gt;=#{beginMonth} AND p.plan_month&lt;=#{endMonth}
+		<if test="itemNoQry!=null">
+			AND p.item_no=#{itemNoQry}
+		</if>
+		<if test="ifRole">
+			AND EXISTS (SELECT '1' FROM t_dept_scope WHERE team_no=p.team_no AND dept_no=#{userTeam})
+		</if>
+		GROUP BY p.team_no, p.plan_step
+	</select>
+	
+	<select id="getPlanStepTeamList" resultType="cn.ewsd.material.model.MPlan">
+		SELECT a.team_no, o.text team_name FROM (
+			SELECT COUNT(*) count, p.plan_step, p.team_no, SUM(p.mat_price*p.mat_amount) mat_bala
+			FROM m_plan p
+			WHERE p.team_no IN
+			<foreach collection="userDept.split(',')" item="id" index="index" open="(" close=")" separator=",">
+				#{id}
+			</foreach>
+			AND p.plan_month&gt;=#{beginMonth} AND p.plan_month&lt;=#{endMonth}
+			<if test="itemNoQry!=null">
+				AND p.item_no=#{itemNoQry}
+			</if>
+			<if test="ifRole">
+				AND EXISTS (SELECT '1' FROM t_dept_scope WHERE team_no=p.team_no AND dept_no=#{userTeam})
+			</if>
+			GROUP BY p.team_no, p.plan_step
+		) a
+		LEFT JOIN sys_organization o ON a.team_no=o.id
+		GROUP BY a.team_no
+	</select>
+
+	<select id="getDetailPageSet" resultType="cn.ewsd.material.model.MPlan">
+		SELECT p.plan_no, p.team_no, p.plan_month, p.plan_type, p.item_no, p.plan_step, m.mat_code, p.check_no, m.mat_name, m.mat_unit, p.mat_addr, p.mat_amount, p.usable_amount, p.mat_price, p.mat_amount*p.mat_price mat_bala,
+			   p.use_date, p.remark, p.mat_use, p.plan_date, p.plan_time, p.plan_step, di2.text factory_no, p.reserve_no, di3.text move_type, p.plan_src, p.pay_team, cc.center_name, i.item_name, i.pay_team znks_team, pj.prj_name,
+			   o.text team_name, o1.text znks_team_name, m.mat_unit matUnitName, di1.text plan_src_name
+		FROM m_plan p
+		LEFT JOIN m_material m ON p.mat_no=m.mat_no
+		LEFT JOIN m_item i ON p.item_no=i.item_no
+		LEFT JOIN m_prj pj ON p.prj_no=pj.prj_no
+		LEFT JOIN sys_organization o ON o.id=p.team_no
+		LEFT JOIN sys_organization o1 ON o1.id=i.pay_team
+		LEFT JOIN t_cost_center cc ON p.cost_center=cc.center_no
+		LEFT JOIN sys_dic_item di1 ON di1.value=p.plan_src
+		LEFT JOIN sys_dic_item di2 ON di2.value=p.factory_no
+		LEFT JOIN sys_dic_item di3 ON di3.value=p.move_type
+		WHERE p.plan_month&gt;=#{beginMonth} AND p.plan_month&lt;=#{endMonth}
+		<if test="teamNo!=''">
+			AND p.team_no=#{teamNo}
+		</if>
+		<if test="planStep!=''">
+			AND p.plan_step=#{planStep}
+		</if>
+		<if test="itemNo!=null">
+			AND p.item_no=#{itemNo}
+		</if>
+		<if test="planSrc!=''">
+			AND p.plan_src=#{planSrc}
+		</if>
+		<if test="matBala!='' and balaFlag=='d'">
+			AND p.mat_amount*p.mat_price&gt;#{matBala}
+		</if>
+		<if test="matBala!='' and balaFlag=='x'">
+			AND p.mat_amount*p.mat_price&lt;#{matBala}
+		</if>
+		<if test="matQry!=''">
+			AND m.mat_code+m.mat_name LIKE CONCAT('%', #{matQry}, '%')
+		</if>
+		<if test="ifRole">
+			AND EXISTS (SELECT '1' FROM t_dept_scope WHERE team_no=p.team_no AND dept_no=#{userTeam})
+		</if>
+	</select>
+
+	<select id="getQueryPlanList" resultType="cn.ewsd.material.model.MPlan">
+		SELECT p.plan_no, p.team_no, p.plan_month, p.tracking_no, p.item_no, di5.text mat_addr, p.pay_team, p.plan_type, p.mat_no, p.mat_price, p.abc_type, p.mat_amount, p.mat_price*p.mat_amount mat_bala,
+			   p.usable_amount, p.prj_no, p.offer_no, p.use_date, p.remark, p.plan_step, p.plan_src, p.if_urgent, p.check_no, p.plan_date, p.plan_time, p.plan_date+' '+p.plan_time plan_dt, p.reserve_no,
+			   p.factory_no, p.move_type, p.cost_center, p.wbs_element, cc.center_name, pj.prj_name, i.item_name, i.pay_team znks_team, p.mat_use, m.mat_code, m.new_old, m.mat_name, m.mat_unit, m.erp_type,
+			   m.type_name, m.mat_type, di.text direct, IFNULL(bk.back_count,0)	count, o.text znks_team_name, o1.text offer_dept_name, ap.process_name plan_step_name, m.mat_unit mat_unit_name, di2.text plan_src_name,
+			   di3.text factory_name, di4.text move_type_name, o2.text team_name, di6.text plan_type_name
+		FROM m_plan p
+		LEFT JOIN m_material m ON m.mat_no=p.mat_no
+		LEFT JOIN t_cost_center cc ON p.cost_center=cc.center_no
+		LEFT JOIN m_prj pj ON p.prj_no=pj.prj_no
+		LEFT JOIN m_item i ON p.item_no=i.item_no
+		LEFT JOIN sys_organization o ON o.id=i.pay_team
+		LEFT JOIN sys_organization o1 ON CONCAT(o1.id, '')=p.offer_no
+		LEFT JOIN sys_organization o2 ON o2.id=p.team_no
+		LEFT JOIN sys_audit_process ap ON ap.process_no=p.plan_step
+		LEFT JOIN (SELECT check_no, COUNT(*) back_count, direct
+				   FROM t_check
+				   WHERE direct='sys.checkDirect.1' AND step_key='7105'
+				   GROUP BY check_no, direct) bk ON p.check_no=bk.check_no
+		LEFT JOIN sys_dic_item di ON di.value=bk.direct
+		LEFT JOIN sys_dic_item di2 ON di2.value=p.plan_src
+		LEFT JOIN sys_dic_item di3 ON di3.value=p.factory_no
+		LEFT JOIN sys_dic_item di4 ON di4.value=p.move_type
+		LEFT JOIN sys_dic_item di5 ON di5.value=p.mat_addr
+		LEFT JOIN sys_dic_item di6 ON di6.value=p.plan_type
+		WHERE p.team_no IN
+		<foreach collection="userDept.split(',')" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		<if test="teamNo!=''">
+			AND p.team_no=#{teamNo}
+		</if>
+		<if test="prjStatus!=''">
+			AND pj.prj_status=#{prjStatus}
+		</if>
+		<if test="matBala!='' and 'd'==balaFlag">
+			AND p.mat_price*p.mat_amount&gt;#{matBala}
+		</if>
+		<if test="matBala!='' and 'x'==balaFlag">
+			AND p.mat_price*p.mat_amount&lt;#{matBala}
+		</if>
+		<if test="prjNo!=''">
+			AND p.prj_no=#{prjNo}
+		</if>
+		<if test="itemNo!=''">
+			AND p.item_no=#{itemNo}
+		</if>
+		<if test="reserveNo!=''">
+			AND p.reserve_no LIKE CONCAT(#{reserveNo}, '%')
+		</if>
+		<if test="mon1==''">
+			AND p.plan_month LIKE CONCAT(#{year}, '%')
+		</if>
+		<if test="mon1!='' and mon2==''">
+			AND p.plan_month=CONCAT(#{year}, #{mon1})
+		</if>
+		<if test="mon2!=''">
+			AND p.plan_month&gt;=CONCAT(#{year}, #{mon1}) AND p.plan_month&lt;=CONCAT(#{year}, #{mon2})
+		</if>
+		<if test="planStep!=''">
+			AND p.plan_step=#{planStep}
+		</if>
+		<if test="matName!=''">
+			AND m.mat_name LIKE CONCAT('%', #{matName}, '%')
+		</if>
+		<if test="matCode!=''">
+			AND (m.mat_code LIKE CONCAT('_', #{matCode}, '%') OR m.mat_code LIKE CONCAT(#{matCode}, '%'))
+		</if>
+		<if test="reseFlag=='NO'">
+			AND IFNULL(p.reserve_no, '')=''
+		</if>
+		<if test="reseFlag=='ONLY'">
+			AND IFNULL(p.reserve_no, '')!=''
+		</if>
+	</select>
+
+	<select id="getMatHis" resultType="cn.ewsd.material.model.MPlan">
+		SELECT p.plan_no, p.team_no, p.plan_month, p.tracking_no, p.item_no, p.mat_no, di4.text mat_addr, p.pay_team, di2.text plan_type, p.mat_price, p.abc_type, p.mat_amount,
+		 	   p.mat_price*m.mat_amount mat_bala, p.usable_amount, p.prj_no, p.use_date, p.remark, p.plan_step, p.check_no, p.plan_date, p.plan_time, p.reserve_no,
+		 	   p.factory_no, p.move_type, p.cost_center, p.wbs_element, (SELECT center_name FROM t_cost_center WHERE center_no=p.cost_center) center_name,
+			   (SELECT prj_name FROM m_prj WHERE prj_no=p.prj_no) prj_name, (SELECT item_name FROM m_item WHERE item_no=p.item_no) item_name, p.mat_use, m.mat_code,
+			   m.new_old, m.mat_name, m.mat_unit, CASE WHEN IFNULL(mp.old_center, '')='' THEN '无调整' ELSE mp.old_center END old_center, o.text team_name,
+			   di.text plan_step_name,m.mat_unit mat_unit_name, di3.text move_type_name
+		FROM m_plan p
+		LEFT JOIN m_material m ON p.mat_no=m.mat_no
+		LEFT JOIN m_modi_plan mp ON p.plan_no=mp.plan_no
+		LEFT JOIN sys_organization o ON o.id=p.team_no
+		LEFT JOIN sys_dic_item di ON di.value=p.plan_step
+		LEFT JOIN sys_dic_item di2 ON di2.value=p.plan_type
+		LEFT JOIN sys_dic_item di3 ON di3.value=p.move_type
+		LEFT JOIN sys_dic_item di4 ON di4.value=p.mat_addr
+		WHERE p.team_no IN
+		<foreach collection="userDept" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+			AND p.plan_step='7105F' AND LEFT(p.plan_month, 4)=#{year} AND p.mat_no=#{matNo}
+		ORDER BY p.plan_month
+	</select>
+
+	<update id="updPlan1" parameterType="cn.ewsd.material.model.MPlan">
+		UPDATE m_plan SET mat_amount=mat_amount-#{matAmount}, usable_amount=usable_amount-#{usableAmount}, remark=#{remark}, plan_step=#{planStep}, reserve_no=#{reserveNo}, purchase_no=#{puchaseNo}
+		WHERE plan_no=#{planNo}
+	</update>
+
+	<update id="updPlan2">
+		UPDATE m_plan SET usable_amount=mat_amount WHERE plan_no=#{_parameter}
+	</update>
+
+	<update id="updPlan3">
+		UPDATE m_plan SET usable_amount=usable_amount+#{usableAmount} WHERE plan_no=#{planNo}
+	</update>
+
+	<select id="getDrawApply" resultType="cn.ewsd.material.model.MPlan">
+		SELECT IFNULL(mo.amount, 0) zt_amount,
+			mm.mat_code,mm.mat_no, mm.mat_name, mm.mat_unit, mm.erp_type, mm.type_name,
+			IFNULL(st.stock_amount, 0) fact_amount,
+			IFNULL(st.store_no, '0') store,
+			(SELECT store_name FROM m_store WHERE store_no=st.store_no) store_name,
+			mm.mat_unit mat_unit_name,
+		    mm.mat_price
+		FROM m_material mm
+		LEFT JOIN m_stock st ON mm.mat_no=st.mat_no
+		LEFT JOIN (SELECT store_no,mat_no, SUM(chk_amount) amount
+			FROM m_out
+			WHERE out_type=#{applyType} AND plan_team=#{teamNo} AND draw_step NOT IN ('7202F','7202X')
+			GROUP BY store_no,mat_no
+		) mo ON mo.mat_no = st.mat_no AND mo.store_no=st.store_no
+		WHERE IFNULL(st.stock_amount, 0) &gt; 0
+		AND EXISTS (SELECT '1' FROM m_store WHERE store_no=st.store_no AND store_type='r.storeType2.11')
+		<if test="storeNo!=''">
+			AND st.store_no=#{storeNo}
+		</if>
+		<if test="matCodeQry!=''">
+			AND (mm.mat_code LIKE CONCAT('_', #{matCodeQry}, '%') OR mm.erp_code LIKE CONCAT('%', #{matCodeQry}, '%'))
+		</if>
+		<if test="matNameQry!=''">
+			AND mm.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+		ORDER BY mm.mat_code ASC
+	</select>
+
+	<!--<select id="getDrawApply" resultType="cn.ewsd.material.model.MPlan">
+		SELECT p.plan_no, p.plan_month, (p.usable_amount - IFNULL(mo.amount,0)) usable_amount, IFNULL(mo.amount, 0) zt_amount,
+			   P.mat_no, mm.mat_code, mm.mat_name, mm.mat_unit, mm.erp_type, mm.type_name, p.mat_price, p.reserve_no,
+    		   IFNULL(st.stock_amount, 0) fact_amount, p.cost_center, p.mat_use,
+			   (SELECT item_name FROM m_item WHERE item_no=p.item_no) item_name, IFNULL(st.store_no, '0') store,
+    		   (SELECT store_name FROM m_store WHERE store_no=st.store_no) store_name, mm.mat_unit mat_unit_name
+		FROM m_plan p
+    	INNER JOIN m_material mm ON p.mat_no=mm.mat_no
+    	LEFT JOIN m_stock st ON mm.mat_no=st.mat_no
+    	LEFT JOIN (SELECT plan_no, MAX(bill_date) in_date
+    			   FROM m_in
+    			   WHERE in_step='7201F'
+    			   GROUP BY plan_no) mi ON p.reserve_no=mi.plan_no
+    	LEFT JOIN (SELECT plan_no, SUM(chk_amount) amount
+    			   FROM m_out
+    			   WHERE out_type=#{applyType} AND plan_team=#{teamNo} AND draw_step NOT IN ('7202F','7202X')
+    			   GROUP BY plan_no) mo ON p.plan_no=mo.plan_no
+    	WHERE p.team_no=#{teamNo} AND p.usable_amount &gt; 0 AND IFNULL(st.stock_amount, 0) &gt; 0
+		AND EXISTS (SELECT '1' FROM m_store WHERE store_no=st.store_no AND store_type='r.storeType2.11')
+		  AND ((IFNULL(mi.in_date, #{currentDate}) &gt;= #{inDate} AND (p.abc_type='m.abcType.C' OR IFNULL(p.abc_type, '')='')) OR p.if_urgent='1' OR mm.mat_type='07' OR p.abc_type='m.abcType.A')
+		  <if test="storeNo!=''">
+			  AND st.store_no=#{storeNo}
+		  </if>
+		  <if test="matCodeQry!=''">
+			  AND (mm.mat_code LIKE CONCAT('_', #{matCodeQry}, '%') OR mm.erp_code LIKE CONCAT('%', #{matCodeQry}, '%'))
+		  </if>
+		  <if test="matNameQry!=''">
+			  AND mm.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		  </if>
+        ORDER BY p.plan_month DESC, mm.mat_code ASC
+	</select>-->
+
+	<select id="getRikuQryList" resultType="cn.ewsd.material.model.MPlan">
+		SELECT mp.plan_no, mp.team_no, mp.plan_month, mp.mat_no, mp.mat_price, mp.mat_amount, mp.reserve_no, mp.mat_use, mp.remark,
+			   mp.plan_step, mm.mat_code, mm.mat_name, mm.mat_unit, mm.erp_type, mm.type_name, mp.check_no, mp.wbs_element,
+			   ep.mat_amount pur_amount, o.text team_name, ap.process_name plan_step_name,
+			   (CASE WHEN mp.abc_type='A' THEN IFNULL(gd.bef_amount,0) ELSE IFNULL(lk.lkq_amount,0) END) lkq_amount,
+			   (CASE WHEN mp.abc_type='A' THEN IFNULL(gd.aft_amount,0) ELSE IFNULL(lk.lkh_amount,0) END) lkh_amount
+		FROM m_plan mp
+		LEFT JOIN m_material mm ON mp.mat_no=mm.mat_no
+		LEFT JOIN sys_organization o ON o.id=mp.team_no
+		LEFT JOIN m_ep_plan ep ON mp.reserve_no=ep.ep_id
+		LEFT JOIN sys_audit_process ap ON ap.process_no=mp.plan_step
+		LEFT JOIN (SELECT check_no, MAX(bef_amount) bef_amount, MIN(aft_amount) aft_amount
+				   FROM t_check
+			  	   WHERE ((step_code='7105M' AND idea='记录') OR (step_code='71050' AND idea='利库，A类'))
+			  	   GROUP BY check_no) gd ON mp.check_no=gd.check_no
+		LEFT JOIN (SELECT check_no, MAX(bef_amount) lkq_amount, MIN(aft_amount) lkh_amount
+				   FROM t_check
+			  	   WHERE step_code='7105M' AND idea='利库，完成' GROUP BY check_no) lk ON mp.check_no=lk.check_no
+		WHERE EXISTS (SELECT '1'
+					  FROM t_check
+					  WHERE check_no=mp.check_no AND step_key='7105' AND (step_code='7105M' OR idea='利库，A类'))
+		  AND mp.plan_month LIKE CONCAT(#{monthQry}, '%')
+		<if test="teamQry!=''">
+			AND mp.team_no=#{teamQry}
+		</if>
+		<if test="stepQry!=''">
+			AND mp.plan_step=#{stepQry}
+		</if>
+		<if test="matQry!=''">
+			AND (mm.mat_code LIKE CONCAT('_', #{matQry}, '%') OR mm.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+	</select>
+	
+	<select id="getMatAnalyMatList" resultType="java.util.HashMap">
+		SELECT mp.mat_no, mm.mat_code, mm.mat_name, mm.mat_unit, mm.erp_type, mm.type_name
+		FROM m_plan mp
+		LEFT JOIN m_material mm ON mp.mat_no=mm.mat_no
+		WHERE LEFT(mp.plan_month, 4) IN (#{nowYear}, #{befOne}, #{befTwo})
+		  AND mp.plan_step IN ('7105S','7105F','7105O')
+		<if test="matQry!=''">
+			AND CONCAT(mm.mat_code, mm.mat_name) LIKE CONCAT('%', #{matQry}, '%')
+		</if>
+		GROUP BY mp.mat_no, mm.mat_code, mm.mat_name, di.text ,mm.erp_type, mm.type_name
+		ORDER BY mm.erp_type
+	</select>
+
+	<select id="getMatAnalyPlanList" resultType="cn.ewsd.material.model.MPlan">
+		SELECT CONCAT('20', SUBSTRING(mp.ep_id, 2, 2)) occ_year, mp.mat_code, SUM(mp.mat_amount) mat_amount, SUM(mp.mat_amount*mp.mat_price) mat_bala
+		FROM m_ep_plan mp
+		WHERE EXISTS (SELECT '1' FROM m_material WHERE RIGHT(mat_code, 8)=mp.mat_code AND mat_no IN
+		<foreach collection="matNos.split(',')" item="matNo" open="(" separator="," close=")">
+			#{matNo}
+		</foreach>
+		)
+		  AND CONCAT('20', SUBSTRING(mp.ep_id, 2, 2)) IN (#{nowYear}, #{befOne}, #{befTwo})
+		GROUP BY SUBSTRING(mp.ep_id, 2, 2), mp.mat_code
+	</select>
+	
+	<select id="getMatAnalyInList" resultType="cn.ewsd.material.model.MPlan">
+		SELECT LEFT(mi.bill_date, 4) occ_year, mi.mat_no, SUM(mi.bill_amount) mat_amount, SUM(mi.bill_amount*mi.set_price) mat_bala
+		FROM m_in mi
+		WHERE mi.mat_no IN
+		<foreach collection="matNos.split(',')" item="matNo" open="(" separator="," close=")">
+			#{matNo}
+		</foreach>
+		  AND LEFT(mi.bill_date, 4) IN (#{nowYear}, #{befOne}, #{befTwo}) AND mi.in_step='7201F'
+		GROUP BY LEFT(mi.bill_date, 4), mi.mat_no
+	</select>
+
+	<select id="getMatAnalyOutList" resultType="cn.ewsd.material.model.MPlan">
+		SELECT LEFT(mo.f_month, 4) occ_year, mo.mat_no, SUM(mo.out_amount) mat_amount, SUM(mo.out_amount*mo.mat_price) mat_bala
+		FROM m_out mo
+		WHERE mo.mat_no IN
+		<foreach collection="matNos.split(',')" item="matNo" open="(" separator="," close=")">
+			#{matNo}
+		</foreach>
+		  AND LEFT(mo.f_month, 4) IN (#{nowYear}, #{befOne}, #{befTwo}) AND mo.draw_step='7202F'
+		GROUP BY LEFT(mo.f_month, 4), mo.mat_no
+	</select>
+</mapper>

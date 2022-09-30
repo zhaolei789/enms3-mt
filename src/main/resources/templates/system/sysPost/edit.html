@@ -1,0 +1,40 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<div class="topjui-fluid">
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">职位编码</label>
+            <div class="topjui-input-block">
+                <input type="text" name="postCode"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'职位编码',required:true">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">职位名称</label>
+            <div class="topjui-input-block">
+                <input type="text" name="postName"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'职位名称',required:true">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">职位类型</label>
+            <div class="topjui-input-block">
+                <input type="hidden" name="postTypeName">
+                <input type="text" name="postType"
+                       data-toggle="topjui-combobox"
+                       data-options="prompt:'职位类型',
+                       required:true,
+                       url:'/system/dicSet/getDicItemByCode?code=t.postType',
+                       valueField:'value',
+    				   textField:'text',
+    				   param:'postTypeName:text'">
+            </div>
+        </div>
+    </div>
+</div>

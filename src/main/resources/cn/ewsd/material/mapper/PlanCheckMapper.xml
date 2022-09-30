@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.PlanCheckMapper">
+	<select id="getIndexData" resultType="cn.ewsd.material.model.PlanCheckIndex">
+        SELECT a.plan_type, a.plan_month, a.prj_no, a.plan_step, ap.process_name plan_step_name, a.cnt, a.bala, a.prj_type2, di.text prj_type2_name, a.up_name, a.prj_name, a.team_no, o.text team_name, a.begin_date
+        FROM (SELECT p.plan_type, p.plan_month, p.prj_no, p.plan_step, pr.prj_type2, pr.up_name, pr.prj_name, pr.team_no, pr.begin_date, COUNT(*) cnt, SUM(P.mat_amount*p.mat_price) bala
+              FROM m_plan p
+              LEFT JOIN  m_prj pr ON p.prj_no=pr.prj_no
+              WHERE p.plan_step IN (SELECT process_no
+		  					  FROM sys_audit_process
+		  					  WHERE uuid IN (SELECT step_uuid
+		  					  				 FROM sys_user_step
+		  					  				 WHERE user_id=#{userId} AND process_uuid='9C5389EA53854E12A8031ACF5AB9A3DB'))
+                AND (p.plan_step='71051' AND p.team_no=#{teamNo}
+					OR
+					p.plan_step='7105A'
+					OR
+					p.plan_step='71059'
+					OR
+					p.plan_step='71057' AND p.offer_no=#{teamNo}
+					OR
+					p.plan_step='71052' AND EXISTS (SELECT '1' FROM m_item WHERE item_no=p.item_no AND pay_team=#{teamNo})
+					OR
+					p.plan_step='71053'
+					OR
+					p.plan_step='71054' AND EXISTS (SELECT '1' FROM t_user_dept WHERE dept_no=pr.team_no AND user_id=#{userId})
+					OR
+					p.plan_step='7105B' AND EXISTS (SELECT '1' FROM t_user_dept WHERE dept_no=pr.team_no AND user_id=#{userId})
+					<if test="userItemCnt>0">
+						AND EXISTS (SELECT '1' FROM sys_user_item WHERE item_no=p.item_no AND user_id=#{userId})
+					</if>
+					OR
+					p.plan_step='71055'
+					OR
+					p.plan_step='71056'
+					)
+                AND pr.prj_status='m.prjStatus.0'
+              GROUP BY p.plan_type, p.plan_month, p.prj_no, p.plan_step, pr.prj_type1, pr.up_name, pr.prj_name, pr.team_no, pr.begin_date) a
+        LEFT JOIN sys_audit_process ap ON ap.process_no=a.plan_step
+        LEFT JOIN sys_organization o ON o.id=a.team_no
+        LEFT JOIN sys_dic_item di ON di.value=a.prj_type2
+        ORDER BY a.plan_type, a.team_no, a.prj_name
+    </select>
+
+	<select id="getPLanPendingRecords" resultType="cn.ewsd.material.model.PlanCheckIndex">
+		SELECT COUNT(*) cnt
+		FROM m_plan p
+		LEFT JOIN  m_prj pr ON p.prj_no=pr.prj_no
+		WHERE p.plan_step IN (SELECT process_no
+							FROM sys_audit_process
+							WHERE uuid IN (SELECT step_uuid
+										   FROM sys_user_step
+										   WHERE user_id=#{userId} AND process_uuid='9C5389EA53854E12A8031ACF5AB9A3DB'))
+		AND (p.plan_step='71051' AND p.team_no=#{teamNo}
+		OR
+		p.plan_step='7105A'
+		OR
+		p.plan_step='71059'
+		OR
+		p.plan_step='71057' AND p.offer_no=#{teamNo}
+		OR
+		p.plan_step='71052' AND EXISTS (SELECT '1' FROM m_item WHERE item_no=p.item_no AND pay_team=#{teamNo})
+		OR
+		p.plan_step='71053'
+		OR
+		p.plan_step='71054' AND EXISTS (SELECT '1' FROM t_user_dept WHERE dept_no=pr.team_no AND user_id=#{userId})
+		OR
+		p.plan_step='7105B' AND EXISTS (SELECT '1' FROM t_user_dept WHERE dept_no=pr.team_no AND user_id=#{userId})
+		<if test="userItemCnt>0">
+			AND EXISTS (SELECT '1' FROM sys_user_item WHERE item_no=p.item_no AND user_id=#{userId})
+		</if>
+		OR
+		p.plan_step='71055'
+		OR
+		p.plan_step='71056')
+		AND pr.prj_status='m.prjStatus.0'
+	</select>
+
+    <select id="getPlanList" resultType="cn.ewsd.material.model.MPlan">
+        SELECT a.plan_no, a.check_no, a.mat_no, a.plan_month, a.plan_type, a.item_no, a.team_no, a.mat_amount, a.mat_price, a.mat_amount*IFNULL(a.mat_price, 0) mat_bala, a.use_date, a.plan_step, ap.process_name plan_step_name,
+			   a.remark, a.mat_use, a.plan_date, a.plan_time, a.if_make, a.if_urgent, a.mat_addr, a.factory_no, a.cost_center, a.move_type, a.trax_no, a.offer_no, a.wbs_element, a.list_no, a.item_type,
+			   a.pur_group, a.tracking_no, a.plan_src, di2.text plan_src_name, e.usable_amount, c.mat_code, c.mat_name, c.mat_unit, c.mat_unit mat_unit_name, c.erp_type, c.type_name, c.real_flag, l.sum_amount, k.direct, mi.item_name, cc.center_name,
+			   IFNULL(k.back_count, 0) back_count, a.abc_type plan_abc, c.abc_type mat_abc, IFNULL(sb.type_code, '') sb_type, (SELECT SUM(stock_amount) FROM vo_stock WHERE mat_no=a.mat_no) old_amount
+		FROM m_plan a
+		LEFT JOIN m_material c ON a.mat_no=c.mat_no
+		LEFT JOIN m_item mi ON a.item_no=mi.item_no
+		LEFT JOIN t_cost_center cc ON a.cost_center=cc.center_no
+		LEFT JOIN m_type_mat sb ON sb.mat_code=c.erp_type AND sb.type_code='m.TypeCode.10'
+		LEFT JOIN sys_audit_process ap ON ap.process_no=a.plan_step
+		LEFT JOIN sys_dic_item di2 ON di2.value=a.plan_src
+		LEFT JOIN (SELECT mat_no, SUM(usable_amount) usable_amount
+				   FROM m_plan WHERE prj_no=#{prjNo}
+				   GROUP BY mat_no) e ON a.mat_no=e.mat_no
+		LEFT JOIN (SELECT a.mat_no, SUM(a.stock_amount) sum_amount
+				   FROM m_stock a
+				   GROUP BY a.mat_no) l ON a.mat_no=l.mat_no
+		LEFT JOIN (SELECT check_no, COUNT(*) back_count, direct
+				   FROM t_check
+				   WHERE direct='sys.checkDirect.1' AND step_key='7105'
+				   GROUP BY check_no,direct) k ON a.check_no=k.check_no
+		WHERE a.prj_no=#{prjNo} AND a.plan_month=#{planMonth} AND a.plan_type=#{planType} AND a.plan_step=#{planStep}
+		<if test='""!=matCodeQry'>
+            AND (c.mat_code LIKE CONCAT('_', #{matCodeQry}, '%') OR c.mat_code LIKE CONCAT(#{matCodeQry}, '%'))
+        </if>
+        <if test='""!=matNameQry'>
+            AND c.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+        </if>
+        <if test='"71057"==planStep'>
+            AND a.offer_no=#{teamNo}
+        </if>
+        <if test='""!=itemQry'>
+            AND a.item_no=#{itemQry}
+        </if>
+        <if test='"71052"==planStep'>
+            AND EXISTS (SELECT '1' FROM m_item WHERE item_no=a.item_no AND pay_team=#{teamNo})
+        </if>
+    </select>
+
+	<select id="getUserItemCnt" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM sys_user_item WHERE user_id=#{userId}
+	</select>
+</mapper>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MSiteMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.material.model.MSite" id="mSiteMap">
+        <result property="uuid" column="uuid"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="create_time" column="create_time"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+        <result property="store_no" column="store_no"/>
+        <result property="site_code" column="site_code"/>
+        <result property="site_name" column="site_name"/>
+        <result property="remark" column="remark"/>
+        <result property="word_level" column="word_level"/>
+        <result property="note" column="note"/>
+        <result property="type" column="type"/>
+        <result property="status" column="status"/>
+        <result property="is_del" column="is_del"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 create_time
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 store_no
+		  ,  	  	     			 site_code
+		  ,  	  	     			 site_name
+		  ,  	  	     			 remark
+		  ,  	  	     			 word_level
+		  ,  	  	     			 note
+		  ,  	  	     			 type
+		  ,  	  	     			 status
+		  ,  	  	     			 is_del
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.material.model.MSite">
+        select
+        <include refid="Base_Column_List"></include>
+        from m_site
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.material.model.MSite">
+		select  <include refid="Base_Column_List" />  from m_site where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.material.model.MSite">
+		select  <include refid="Base_Column_List" />  from m_site
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from m_site 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.material.model.MSite">
+		insert into m_site
+		(
+			`uuid`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`create_time`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`, 
+			`store_no`, 
+			`site_code`, 
+			`site_name`, 
+			`remark`, 
+			`word_level`, 
+			`note`, 
+			`type`, 
+			`status`, 
+			`is_del`
+		)
+		values
+		(
+			#{uuid}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{create_time}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time}, 
+			#{store_no}, 
+			#{site_code}, 
+			#{site_name}, 
+			#{remark}, 
+			#{word_level}, 
+			#{note}, 
+			#{type}, 
+			#{status}, 
+			#{is_del}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.material.model.MSite">
+		update m_site 
+		<set>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}, </if>
+			<if test="store_no != null">`store_no` = #{store_no}, </if>
+			<if test="site_code != null">`site_code` = #{site_code}, </if>
+			<if test="site_name != null">`site_name` = #{site_name}, </if>
+			<if test="remark != null">`remark` = #{remark}, </if>
+			<if test="word_level != null">`word_level` = #{word_level}, </if>
+			<if test="note != null">`note` = #{note}, </if>
+			<if test="type != null">`type` = #{type}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="is_del != null">`is_del` = #{is_del}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from m_site where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from m_site where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+	<select id="queryListByIds" resultType="cn.ewsd.material.model.MSite">
+		select  <include refid="Base_Column_List" />  from m_site
+		where uuid in
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</select>
+
+</mapper>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'west',iconCls:'icon-reload',width:'50%',title:'',split:true,border:false">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'sysAuditProcessDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               childGrid:{
+                    param:'fuuid:uuid',
+                    grid:[
+                    {type:'datagrid',id:'sysAuditProcessSubDg'}
+                    ]
+                },
+               url:'/system/sysAuditProcess/getRootPageSet'">
+            <thead>
+            <tr>
+				<th data-options="field:'uuid',title:'主键',sortable:true,checkbox:true"></th>
+				<th data-options="field:'processNo',title:'流程编号',sortable:true"></th>
+				<th data-options="field:'processName',title:'流程名称',sortable:true"></th>
+				<th data-options="field:'processSequence',title:'排序',sortable:true"></th>
+				<!--<th data-options="field:'level',title:'层级',sortable:true"></th>-->
+				<th data-options="field:'initState',title:'初始化状态',sortable:true,
+					formatter:function(value,row,index){
+                        if (value == '1') {
+                            return '待初始化';
+                        } else if (value == '2') {
+                            return '完成';
+                        } else {
+                            return '';
+                        }
+                    }"></th>
+				<th data-options="field:'deployState',title:'部署状态',sortable:true,
+					formatter:function(value,row,index){
+                        if (value == '1') {
+                            return '待部署';
+                        } else if (value == '2') {
+                            return '完成';
+                        } else {
+                            return '';
+                        }
+                    }"></th>
+				<th data-options="field:'note',title:'备注',sortable:true"></th>
+				<th data-options="field:'formatterA',title:'代码',sortable:true,
+					formatter:function(value,row,index){
+                            return row.uuid;
+                    }"></th>
+			</tr>
+            </thead>
+        </table>
+    </div>
+	<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+		<table data-toggle="topjui-datagrid"
+			   data-options="id:'sysAuditProcessSubDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/system/sysAuditProcess/getPageSet'">
+			<thead>
+			<tr>
+				<th data-options="field:'uuid',title:'主键',sortable:true,checkbox:true"></th>
+				<th data-options="field:'processNo',title:'步骤编号',sortable:true"></th>
+				<th data-options="field:'processName',title:'步骤名称',sortable:true"></th>
+				<th data-options="field:'processSequence',title:'步骤序列',sortable:true"></th>
+				<!--<th data-options="field:'level',title:'层级',sortable:true"></th>-->
+				<!--<th data-options="field:'fuuid',title:'父级ID',sortable:true"></th>-->
+				<!--<th data-options="field:'lastStep',title:'上一步',sortable:true"></th>
+				<th data-options="field:'nextStep',title:'下一步',sortable:true"></th>-->
+				<!--<th data-options="field:'initState',title:'初始化状态',sortable:true"></th>
+				<th data-options="field:'deployState',title:'部署状态',sortable:true"></th>-->
+				<th data-options="field:'note',title:'备注',sortable:true"></th>
+				<th data-options="field:'formatterB',title:'代码',sortable:true,
+					formatter:function(value,row,index){
+                            return row.uuid;
+                    }"></th>
+			</tr>
+			</thead>
+		</table>
+	</div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="sysAuditProcessDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'sysAuditProcessDg'
+       }" style="display:none">
+		<ewsd:rbac str="sysAuditProcessAddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#sysAuditProcessDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'sysAuditProcessAddDg',
+               href:'/system/sysAuditProcess/editRoot',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/system/sysAuditProcess/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="sysAuditProcessEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#sysAuditProcessDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'sysAuditProcessEditDg',
+               href:'/system/sysAuditProcess/editRoot',
+               url:'/system/sysAuditProcess/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/system/sysAuditProcess/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'sysAuditProcessDg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/system/sysAuditProcess/deleteBatch">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#sysAuditProcessDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的数据',param:'uuid:uuid'},
+	       url:'/system/sysAuditProcess/deleteBatch'">删除</a>
+		</ewsd:rbac>
+
+	<ewsd:rbac str="/system/sysAuditProcess/initBatch">
+		<a href="javascript:void(0)"
+		   data-toggle="topjui-menubutton"
+		   data-options="method:'doAjax',
+           extend:'#sysAuditProcessDg-toolbar',
+           btnCls:'topjui-btn-blue',
+	       iconCls:'fa fa-repeat',
+	       grid:{uncheckedMsg:'请先勾选要初始化的数据',param:'uuid:uuid'},
+	       url:'/system/sysAuditProcess/initBatch'">初始化流程</a>
+	</ewsd:rbac>
+
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#sysAuditProcessDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#sysAuditProcessDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+</div>
+
+<!--流程步骤-->
+<div id="sysAuditProcessSubDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'sysAuditProcessSubDg'
+       }" style="display:none">
+		<ewsd:rbac str="sysAuditProcessSubAddDialog">
+			<a href="javascript:void(0)"
+			   data-toggle="topjui-menubutton"
+			   data-options="method:'openDialog',
+           extend:'#sysAuditProcessSubDg-toolbar',
+           btnCls:'topjui-btn-green',
+           parentGrid:{
+               type:'datagrid',
+               id:'sysAuditProcessDg',
+               param:'fuuid:uuid,fProcessNo:processNo',
+               unselectedMsg:'请先选择左侧流程'
+           },
+           dialog:{
+               id:'sysAuditProcessSubAddDg',
+               href:'/system/sysAuditProcess/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/system/sysAuditProcess/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+		<ewsd:rbac str="sysAuditProcessSubEditDialog">
+			<a href="javascript:void(0)"
+			   data-toggle="topjui-menubutton"
+			   data-options="method:'openDialog',
+           extend:'#sysAuditProcessSubDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'sysAuditProcessSubEditDg',
+               href:'/system/sysAuditProcess/edit',
+               url:'/system/sysAuditProcess/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/system/sysAuditProcess/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'sysAuditProcessDg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+		<ewsd:rbac str="/system/sysAuditProcessSub/deleteBatch">
+			<a href="javascript:void(0)"
+			   data-toggle="topjui-menubutton"
+			   data-options="method:'doAjax',
+           extend:'#sysAuditProcessSubDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/system/sysAuditProcess/deleteBatch'">删除</a>
+		</ewsd:rbac>
+		<a href="javascript:void(0)"
+		   data-toggle="topjui-menubutton"
+		   data-options="method:'filter',
+       extend:'#sysAuditProcessSubDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+		<a href="javascript:void(0)"
+		   data-toggle="topjui-menubutton"
+		   data-options="method:'search',
+       extend:'#sysAuditProcessSubDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+	</div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

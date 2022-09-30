@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+	  layout:decorator="public/layout">
+
+<style>
+	.topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+		margin-top: 10px;
+	}
+</style>
+
+<th:block layout:fragment="css">
+
+</th:block>
+<th:block layout:fragment="content">
+	<div class="topjui-fluid">
+		<div class="topjui-row">
+			<div class="topjui-col-sm6" style="margin-top: 10px">
+				<label class="topjui-form-label">发生部门：</label>
+				<div class="topjui-input-block">
+					<input data-toggle="topjui-combobox" name="teamNo" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',loadFilter:function(data){
+						data.unshift({id:'', text:'--请选择--'});
+						return data
+					},onChange:function(newValue, oldValue){
+						$('#itemNo').iCombobox('reload', '/cost/mFeeItem/getItemForSelect?teamNo='+newValue);
+						$('#prjNo').iCombobox('reload', '/material/mPrj/getPrjList1?teamNo='+newValue);
+						$('#itemNo').iCombobox('setValue', '');
+						$('#prjNo').iCombobox('setValue', '');
+					}">
+					<input type="hidden" name="yearQry" th:value="${yearQry}" />
+					<input type="hidden" name="monQry" th:value="${monQry}" />
+				</div>
+			</div>
+			<div class="topjui-col-sm6" style="margin-top: 10px">
+				<label class="topjui-form-label">考核科目：</label>
+				<div class="topjui-input-block">
+					<input data-toggle="topjui-combobox" id="itemNo" name="itemNo" data-options="valueField:'itemNo',textField:'itemName',url:'/cost/mFeeItem/getItemForSelect',loadFilter:function(data){
+						data.unshift({itemNo:'', itemName:'--请选择--'});
+						return data
+					}">
+				</div>
+			</div>
+			<div class="topjui-col-sm6" style="margin-top: 10px">
+				<label class="topjui-form-label">工程项目：</label>
+				<div class="topjui-input-block">
+					<input data-toggle="topjui-combobox" id="prjNo" name="prjNo" data-options="valueField:'prjNo',textField:'prjName',url:'/material/mPrj/getPrjList1',loadFilter:function(data){
+						data.unshift({prjNo:'', prjName:'--请选择--'});
+						return data
+					}">
+				</div>
+			</div>
+			<div class="topjui-col-sm6" style="margin-top: 10px">
+				<label class="topjui-form-label">发生物料：</label>
+				<div class="topjui-input-block">
+					<select id="matNo" name="matNo"></select>
+				</div>
+			</div>
+			<div class="topjui-col-sm6" style="margin-top: 10px">
+				<label class="topjui-form-label">发生数量：</label>
+				<div class="topjui-input-block">
+					<input type="text" name="amount" data-toggle="topjui-textbox" data-options="prompt:''" value="">
+				</div>
+			</div>
+			<div class="topjui-col-sm6" style="margin-top: 10px">
+				<label class="topjui-form-label">发生日期：</label>
+				<div class="topjui-input-block">
+					<input name="occDate" th:value="${occDate}" type="text" data-toggle="topjui-datebox">
+				</div>
+			</div>
+			<div class="topjui-col-sm12" style="margin-top: 10px">
+				<label class="topjui-form-label">备注说明：</label>
+				<div class="topjui-input-block">
+					<input type="text" name="remark" data-toggle="topjui-textbox" data-options="prompt:''" value="">
+				</div>
+			</div>
+		</div>
+	</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function() {
+			$('#matNo').iCombogrid({
+				panelWidth: '400px',
+				idField: 'matNo',
+				textField: 'matName',
+				mode: 'remote',
+				url: '/material/mMaterial/getMatListForSel',
+				columns: [ [
+					{field: 'matCode', title: '材料编码'},
+					{field: 'matName', title: '材料名称'},
+					{field: 'matPrice', title: '价格'}
+				] ]
+			});
+		});
+	</script>
+</th:block>
+</html>

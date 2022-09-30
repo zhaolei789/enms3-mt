@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.MOutAssessMapper">
+	<select id="getDetailUpDataList" resultType="cn.ewsd.cost.model.MOutAssess">
+		SELECT a.*, b.mat_name, b.erp_type, b.type_name, b.mat_unit, c.item_name, o.text team_name,
+			   (SELECT store_name FROM m_store WHERE store_no=a.store_no) store_name, di1.text draw_src_name
+		FROM m_out_assess a
+		LEFT JOIN m_material b ON a.mat_code=b.mat_code
+		LEFT JOIN m_fee_item c ON a.item_no=c.item_no
+		LEFT JOIN sys_organization o ON o.id=a.team_no
+		LEFT JOIN sys_dic_item di1 ON di1.value=a.draw_src
+		WHERE LEFT(a.ass_date,6) = #{monthQry}
+		<if test="teamQry!=''">
+			AND a.team_no=#{teamQry}
+		</if>
+		<if test="storeQry!=''">
+			AND a.store_no=#{storeQry}
+		</if>
+		<if test="addrQry!=''">
+			AND a.use_addr LIKE CONCAT('%', #{addrQry}, '%')
+		</if>
+		<if test="purchaseQry!=''">
+			AND b.abc_type=#{purchaseQry}
+		</if>
+		<if test="reserveNoQry!=''">
+			AND CONCAT(a.reserve_no, a.draw_no) LIKE CONCAT('%', #{reserveNoQry}, '%')
+		</if>
+		<if test="drawSrcQry!=''">
+			AND a.draw_src=#{drawSrcQry}
+		</if>
+		<if test="itemNameQry!=''">
+			AND c.item_name LIKE CONCAT('%', #{itemNameQry}, '%')
+		</if>
+		<if test="matQry!=''">
+			AND (a.mat_code LIKE CONCAT('_', #{matQry}, '%') OR b.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+		<if test="ifMngDept">
+			AND (NOT EXISTS (SELECT '1' FROM m_fee_item WHERE item_no=a.item_no AND item_type='m.itemType.42' AND mng_dept!=#{matMngTeam})
+				 OR a.status='1')
+		</if>
+		ORDER BY b.erp_type, a.draw_no
+	</select>
+
+	<select id="getItemList" resultType="cn.ewsd.cost.model.MOutAssess">
+		SELECT b.item_name
+		FROM m_out_assess a, m_fee_item b
+		WHERE a.item_no=b.item_no AND LEFT(a.occ_date,6)=#{_parameter}
+		GROUP BY b.item_name
+	</select>
+
+	<select id="getItemForSelect" resultType="cn.ewsd.cost.model.MOutAssess">
+		SELECT item_no, item_name
+		FROM m_fee_item
+		WHERE item_type = 'm.itemType.42' AND if_use = '1' AND team_no=#{teamNo}
+		<if test="ifMngDept">
+		UNION
+		SELECT b.item_no, b.item_name
+		FROM sys_organization a, m_fee_item b
+		WHERE a.id=b.team_no AND b.item_type='m.itemType.42'
+		  AND a.level_id='3' AND b.if_use='1' AND a.id=#{teamNo}
+		</if>
+		ORDER BY item_name
+	</select>
+
+	<select id="getPrjForSelect" resultType="cn.ewsd.cost.model.MOutAssess">
+		SELECT an.prj_no, an.prj_name
+		FROM m_assess_norm an
+		WHERE (an.norm_amount &gt; 0 OR an.norm_price &gt; 0) AND an.team_no=#{_parameter}
+		GROUP BY an.prj_no, an.prj_name
+	</select>
+
+	<insert id="insertMOutAssess" parameterType="cn.ewsd.cost.model.MOutAssess">
+		INSERT INTO m_out_assess (`draw_no`, `split_no`, `occ_date`, `ass_date`, `team_no`, `store_no`, `center_no`, `prj_no`, `prj_name`, `plan_item`, `mat_no`,
+								  `mat_code`, `mat_price`, `mat_amount`, `mat_bala`, `reserve_no`, `draw_src`, `if_access`, `item_no`, `status`, `remark`, `use_addr`, `wbs`,
+								  `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{drawNo}, #{splitNo}, #{occDate}, #{assDate}, #{teamNo}, #{storeNo}, #{centerNo}, #{prjNo}, #{prjName}, #{planItem}, #{matNo},
+				#{matCode}, #{matPrice}, #{matAmount}, #{matBala}, #{reserveNo}, #{drawSrc}, #{ifAccess}, #{itemNo}, #{status}, #{remark}, #{useAddr}, #{wbs},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<insert id="insertDetailUpData">
+		INSERT INTO m_out_assess (`draw_no`, `split_no`, `occ_date`, `ass_date`, `team_no`, `store_no`, `center_no`, `prj_no`, `prj_name`, `plan_item`, `mat_no`,
+								  `mat_code`, `mat_price`, `mat_amount`, `mat_bala`, `reserve_no`, `draw_src`, `if_access`, `item_no`, `status`, `remark`, `use_addr`, `wbs`)
+		SELECT CONCAT(REPLACE(a.erp_mat_bill, ' ', ''), '|', RTRIM(a.mat_bill_no)) AS draw_no, 1 split_no, a.occ_date, #{endDate} ass_date, a.team_no, '' store_no,
+			   b.dept_code center_no, 0 prj_no, '' prj_name, '' plan_item, 0 mat_no, CONCAT('X', a.mat_code) mat_code, a.occ_bala/a.mat_amount mat_price,
+			   a.mat_amount, a.occ_bala AS mat_bala, a.reserve_no, 'm.drawSrc.FACT' draw_src,
+			   '1' if_access, 0 item_no, '1' status, '' remark, '' use_addr, '' wbs
+		FROM m_erp_mat a
+		LEFT JOIN sys_organization b ON a.team_no=b.id
+		WHERE a.move_type='' AND a.center_no='' AND a.erp_mat_bill LIKE CONCAT(#{month}, '%')
+		  AND NOT EXISTS (SELECT '1' FROM m_out_assess WHERE draw_no=CONCAT(REPLACE(a.erp_mat_bill, ' ', ''), '|', RTRIM(a.mat_bill_no)))
+		UNION
+		SELECT CONCAT('TGK', a.draw_no) draw_no, 1 split_no, a.out_date, #{endDate} ass_date, a.team_no,
+			   a.store_no, c.dept_code center_no, a.prj_no, mp.prj_name, a.item_no plan_item, a.mat_no, b.mat_code,
+			   a.mat_price, a.out_amount mat_amount, a.mat_price*a.out_amount mat_bala,
+			   a.reserve_no, 'm.drawSrc.TGK' draw_src,
+			   '1' if_access, 0 item_no, '1' status, a.apply_info remark, a.use_addr, a.reserve3
+		FROM m_out a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN m_prj mp ON a.prj_no=mp.prj_no
+		LEFT JOIN sys_organization c ON a.team_no=c.id
+		WHERE a.out_date &gt;= #{beginDate} AND a.out_date &lt;= #{endDate}
+		  AND a.data_src='m.dataSrc.3'
+		  AND a.draw_step='7202F'
+		  AND NOT EXISTS (SELECT '1' FROM m_out_assess WHERE draw_no=CONCAT('TGK', a.draw_no))
+		UNION
+		SELECT CONCAT('TGK', a.draw_no) draw_no, 1 split_no, a.out_date, #{endDate} ass_date, a.team_no,
+			   a.store_no, c.dept_code center_no, a.prj_no, mp.prj_name, a.item_no plan_item, a.mat_no, b.mat_code,
+			   CASE WHEN b.new_old='X' THEN (a.mat_price * 0.3) ELSE a.price1 END mat_price, a.out_amount mat_amount,
+			   (CASE WHEN b.new_old='X' THEN (a.mat_price * 0.3) ELSE a.price1 END)*a.out_amount mat_bala,
+			   a.reserve_no, 'm.drawSrc.TGK' draw_src,
+			   '1' if_access, 0 item_no, '1' status, a.apply_info remark, a.use_addr, a.reserve3
+		FROM m_out a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN m_prj mp ON a.prj_no=mp.prj_no
+		LEFT JOIN sys_organization c ON a.team_no=c.id
+		WHERE a.out_date &gt;= #{beginDate} AND a.out_date &lt;= #{endDate}
+		  AND a.data_src='m.dataSrc.P'
+		  AND a.out_type!=''
+		  AND a.draw_step='7202F'
+		  AND NOT EXISTS (SELECT '1' FROM m_out_assess WHERE draw_no=CONCAT('TGK', a.draw_no))
+	</insert>
+
+	<update id="updateJDK">
+		UPDATE m_out_assess
+		SET if_access='0'
+		WHERE EXISTS (SELECT '1' FROM m_store WHERE store_no=m_out_assess.store_no AND mng_team=#{mngTeam})
+		  AND m_out_assess.ass_date LIKE CONCAT(#{month}, '%')
+	</update>
+
+	<update id="updateZJCL">
+		UPDATE m_out_assess b, m_fee_item a
+		SET b.item_no=a.item_no
+		WHERE b.team_no=a.team_no
+		  AND a.item_name=#{itemName} AND a.if_use='1'
+		  AND b.ass_date LIKE CONCAT(#{month},'%')
+		  AND b.store_no='12'
+	</update>
+
+	<update id="updateRHY">
+		UPDATE m_out_assess b, m_fee_item a
+		SET b.item_no=a.item_no
+		WHERE b.team_no=a.team_no
+		  AND a.item_name=#{itemName} AND a.if_use='1'
+		  AND b.ass_date LIKE CONCAT(#{month},'%')
+		  AND (b.store_no='15' AND EXISTS (SELECT '1' FROM m_material WHERE b.mat_no=mat_no AND mat_code IN ('X10105604', 'X10320805', 'X11176118')))
+	</update>
+
+	<update id="updateZHCL">
+		UPDATE m_out_assess b, m_fee_item a
+		SET b.item_no=a.item_no, prj_no='0', prj_name=''
+		WHERE b.team_no=a.team_no
+		  AND a.item_name='支护材料' AND a.if_use='1'
+		  AND b.store_no='13'
+		  AND b.ass_date LIKE CONCAT(#{_parameter}, '%')
+		  AND EXISTS (SELECT '1' FROM m_material WHERE mat_no=b.mat_no AND mat_type='07')
+	</update>
+
+	<update id="updateDC">
+		UPDATE m_out_assess b, (SELECT fm.item_no, fm.mat_no, fi.team_no
+							    FROM m_fitem_mat fm, m_fee_item fi
+							    WHERE fm.item_no=fi.item_no) a
+		SET b.item_no=a.item_no
+		WHERE b.mat_no=a.mat_no
+		  AND b.team_no=a.team_no
+		  AND b.ass_date LIKE CONCAT(#{_parameter}, '%')
+	</update>
+
+	<update id="updateTYCL">
+		UPDATE m_out_assess b, m_fee_item a
+		SET b.item_no=a.item_no
+		WHERE b.team_no=a.team_no
+		  AND a.item_name='通用材料' AND a.if_use='1'
+		  AND b.if_access='1'
+		  AND b.ass_date LIKE CONCAT(#{_parameter}, '%')
+		  AND b.item_no='0'
+	</update>
+
+	<update id="updatePrj">
+		UPDATE m_out_assess
+		SET prj_no=0, prj_name=''
+		WHERE prj_no NOT IN (SELECT prj_no
+						     FROM m_assess_norm
+						     WHERE m_out_assess.team_no=team_no
+							   AND m_out_assess.item_no=item_no)
+		  AND ass_date LIKE CONCAT(#{_parameter}, '%')
+	</update>
+
+	<delete id="deleteDetailUpDataAll">
+		DELETE FROM m_out_assess
+		WHERE occ_date LIKE CONCAT(#{month}, '%')
+		<if test="drawSrcQry!=''">
+			AND draw_src=#{drawSrcQry}
+		</if>
+		<if test="teamQry!=''">
+			AND team_no=#{teamQry}
+		</if>
+	</delete>
+
+	<update id="updateMOutAssess" parameterType="cn.ewsd.cost.model.MOutAssess">
+		UPDATE m_out_assess
+		<set>
+			<if test="itemNo!=null">`item_no`=#{itemNo},</if>
+			<if test="prjNo!=null">`prj_no`=#{prjNo},</if>
+			<if test="prjName!=null">`prj_name`=#{prjName}</if>
+		</set>
+		WHERE draw_no=#{drawNo} AND split_no=#{splitNo}
+	</update>
+
+	<select id="getOutAssessDept" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT a.team_no id, (SELECT text FROM sys_organization WHERE id=a.team_no) text
+		FROM m_out_assess a
+		WHERE a.occ_date LIKE CONCAT(#{_parameter}, '%')
+		GROUP BY a.team_no
+	</select>
+	
+	<select id="getMatAssessOccList" resultType="cn.ewsd.cost.model.MOutAssess">
+		SELECT mi.up_item, mo.item_no, mo.prj_no, SUM(mo.mat_amount) amount, SUM(mo.mat_bala) bala
+		FROM m_out_assess mo
+		LEFT JOIN m_fee_item mi ON mo.item_no=mi.item_no
+		WHERE LEFT(mo.ass_date, 6) &gt;= #{month1} AND LEFT(mo.ass_date, 6) &lt;= #{month2}
+		  AND mo.team_no=#{teamNo}
+		GROUP BY mi.up_item, mo.item_no, mo.prj_no
+	</select>
+
+</mapper>

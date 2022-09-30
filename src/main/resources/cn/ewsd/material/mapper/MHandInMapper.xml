@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MHandInMapper">
+	<insert id="insertHandIn" parameterType="cn.ewsd.material.model.MHandIn">
+		insert into m_hand_in ( `bill_no`, `mat_no`, `team_no`, `store_no`, `mat_amount`, `old_rate`, `occ_date`, `plan_give`, `link_no`, `remark`,
+								`modi_emp`, `modi_date`, `check_step`, `check_no`, `pause_month`, `data_src`,
+							 	`uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`
+		) values ( #{billNo}, #{matNo}, #{teamNo}, #{storeNo}, #{matAmount}, #{oldRate}, #{occDate}, #{planGive}, #{linkNo}, #{remark},
+		 		   #{modiEmp}, #{modiDate}, #{checkStep}, #{checkNo}, #{pauseMonth}, #{dataSrc},
+				   #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime}
+		)
+	</insert>
+	
+	<select id="getOldMatRegList" resultType="cn.ewsd.material.model.MHandIn">
+		SELECT a.bill_no, a.team_no, a.mat_no, a.occ_date, b.mat_code, b.mat_name, b.mat_unit, a.remark,
+			   b.mat_price, b.erp_type, a.mat_amount, a.link_no, IFNULL(ml.back_amount, 0) back_amount, o.text team_name
+		FROM m_hand_in a
+		INNER JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN sys_organization o ON a.team_no=o.id
+		LEFT JOIN (SELECT link_no, SUM(mat_amount) back_amount
+				   FROM m_hand_in
+				   GROUP BY link_no) ml ON CAST(a.bill_no AS CHAR)=ml.link_no
+		WHERE a.store_no='' AND a.mat_amount - IFNULL(ml.back_amount,0) > 0
+		  AND a.occ_date&gt;=#{date1Qry} AND a.occ_date&lt;=#{date2Qry}
+		<if test="teamNoQry!=''">
+			AND a.team_no=#{teamNoQry}
+		</if>
+		<if test="matCodeQry!=''">
+			AND (b.mat_code LIKE CONCAT('_', #{matCodeQry}, '%') OR b.mat_code LIKE CONCAT('%', #{matCodeQry}, '%'))
+		</if>
+		<if test="matNameQry!=''">
+			AND b.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+	</select>
+
+	<select id="getTeamSet" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT a.team_no id, o.text
+		FROM (SELECT a.team_no
+			  FROM m_hand_in a
+			  INNER JOIN m_material b ON a.mat_no=b.mat_no
+			  LEFT JOIN (SELECT link_no, SUM(mat_amount) back_amount
+					     FROM m_hand_in
+					     GROUP BY link_no) ml ON CAST(a.bill_no AS CHAR)=ml.link_no
+			  WHERE a.store_no='' AND a.mat_amount - IFNULL(ml.back_amount,0) > 0
+				AND a.occ_date&gt;=#{date1Qry} AND a.occ_date&lt;=#{date2Qry}
+				<if test="teamNoQry!=''">
+					AND a.team_no=#{teamNoQry}
+				</if>
+				<if test="matCodeQry!=''">
+					AND (b.mat_code LIKE CONCAT('_', #{matCodeQry}, '%') OR b.mat_code LIKE CONCAT('%', #{matCodeQry}, '%'))
+				</if>
+				<if test="matNameQry!=''">
+					AND b.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+				</if>) a
+		LEFT JOIN sys_organization o ON a.team_no=o.id
+		GROUP by a.team_no, o.text
+	</select>
+
+	<select id="getMatList" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT a.mat_no, a.mat_code, a.mat_name, a.mat_unit, a.mat_price, b.make_price
+		FROM m_material a, m_make_mat_dept b
+		WHERE a.mat_no=b.mat_no
+		  AND (a.mat_code LIKE CONCAT('_', #{q}, '%') OR a.mat_code LIKE CONCAT(#{q}, '%') OR a.mat_name LIKE CONCAT('%', #{q}, '%'))
+		  AND b.make_dept=#{userTeam}
+	</select>
+
+	<select id="getMHandInByBillNo" resultType="cn.ewsd.material.model.MHandIn">
+		SELECT * FROM m_hand_in WHERE bill_no=#{_parameter}
+	</select>
+
+	<delete id="delMHandInByBillNo">
+		DELETE FROM m_hand_in WHERE bill_no=#{_parameter}
+	</delete>
+
+	<delete id="delMHandInByLinkNo">
+		DELETE FROM m_hand_id WHERE link_no=#{_parameter}
+	</delete>
+
+	<select id="getOldMatRegDetailList" resultType="cn.ewsd.material.model.MHandIn">
+		SELECT a.bill_no, a.team_no, a.mat_amount, a.occ_date, a.remark, a.modi_date, a.check_step, ap.process_name check_step_name,
+	    	   b.mat_code, b.mat_name, b.mat_unit, b.mat_price, c.user_name modi_emp_name, d.store_name, o.text team_name
+	    FROM m_hand_in a
+	    LEFT JOIN m_material b ON a.mat_no=b.mat_no
+	    LEFT JOIN sys_user c ON a.modi_emp=c.uuid
+	    LEFT JOIN m_store d ON a.store_no=d.store_no
+		LEFT JOIN sys_organization o ON o.id=a.team_no
+		LEFT JOIN sys_audit_process ap ON ap.process_no=a.check_step
+	    WHERE LEFT(a.occ_date, 6) = #{monthQry}
+	      AND a.team_no IN
+	    <foreach collection="userDeptIds.split(',')" item="deptId" open="(" separator="," close=")">
+			#{deptId}
+		</foreach>
+	      AND a.store_no != '' AND a.data_src='交旧'
+	    <if test="teamNoQry!=''">
+			AND a.team_no=#{teamNoQry}
+		</if>
+		<if test="matCodeQry!=''">
+			AND b.mat_code LIKE CONCAT('%', matCodeQry, '%')
+		</if>
+		<if test="matNameQry!=''">
+			AND b.mat_name LIKE CONCAT('%', matNameQry, '%')
+		</if>
+	    ORDER BY a.occ_date DESC
+	</select>
+
+	<select id="getRetDetailList1" resultType="cn.ewsd.material.model.MHandIn">
+		SELECT a.bill_no, a.mat_no, a.team_no, c.mat_code, c.mat_name, c.mat_unit, c.erp_type, c.type_name, c.mat_price,
+			   a.occ_date ly_date, IFNULL(a.mat_amount,0) ly_amount, g.occ_date jj_date,
+			   IFNULL(g.mat_amount,0) jj_amount, a.old_rate, g.remark,
+			   (SELECT text FROM sys_organization WHERE id=a.team_no) AS dept_name,
+			   (SELECT user_name FROM sys_user WHERE uuid=g.modi_emp) AS emp_name
+		FROM m_hand_in a
+		LEFT JOIN m_material c ON a.mat_no=c.mat_no
+		LEFT JOIN (SELECT * FROM m_hand_in WHERE store_no!='') g ON a.bill_no=g.link_no
+		WHERE a.store_no='' AND a.team_no IN
+		<foreach collection="userDeptIds.split(',')" item="userDept" open="(" separator="," close=")">
+			#{userDept}
+		</foreach>
+		  AND a.occ_date &gt;= #{date1Qry} AND a.occ_date &lt;= #{date2Qry}
+		<if test="teamNoQry!=''">
+		  AND a.team_no=#{teamNoQry}
+		</if>
+		<if test="typeQry!=''">
+		  AND (c.erp_type LIKE CONCAT(#{typeQry}, '%') OR c.type_name LIKE CONCAT('%', #{typeQry}, '%'))
+		</if>
+		<if test="matQry!=''">
+		  AND (c.mat_code LIKE CONCAT('%', #{matQry}, '%') OR c.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+		ORDER BY a.team_no, g.bill_no
+	</select>
+
+	<select id="getRetDetailList2" resultType="cn.ewsd.material.model.MHandIn">
+		SELECT a.bill_no, a.mat_no, a.team_no, c.mat_code, c.mat_name, c.mat_unit, c.erp_type, c.type_name, c.mat_price,
+			   g.occ_date ly_date, IFNULL(g.mat_amount,0) ly_amount, a.occ_date jj_date,
+			   IFNULL(a.mat_amount,0) jj_amount, a.old_rate, a.remark,
+			   (SELECT text FROM sys_organization WHERE id=a.team_no) AS dept_name,
+			   (SELECT user_name FROM sys_user WHERE uuid=a.modi_emp) AS emp_name
+		FROM m_hand_in a
+		LEFT JOIN m_material c ON a.mat_no=c.mat_no
+		LEFT JOIN (SELECT * FROM m_hand_in WHERE store_no='') g ON g.bill_no=a.link_no
+		WHERE a.store_no!='' AND a.team_no IN
+		<foreach collection="userDeptIds.split(',')" item="userDept" open="(" separator="," close=")">
+			#{userDept}
+		</foreach>
+		  AND a.occ_date &gt;= #{date1Qry} AND a.occ_date &lt;= #{date2Qry}
+		<if test="teamNoQry!=''">
+			AND a.team_no=#{teamNoQry}
+		</if>
+		<if test="typeQry!=''">
+			AND (c.erp_type LIKE CONCAT(#{typeQry}, '%') OR c.type_name LIKE CONCAT('%', #{typeQry}, '%'))
+		</if>
+		<if test="matQry!=''">
+			AND (c.mat_code LIKE CONCAT('%', #{matQry}, '%') OR c.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+		ORDER BY a.team_no, g.bill_no
+	</select>
+</mapper>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <form id="drawApplyForm">
+		<div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false,height:'400px'">
+			<table id="drawApplyDg"></table>
+		</div>
+	</form>
+	<form id="detailForm">
+	<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+		<table id="detailDg"></table>
+	</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="drawApplyDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'drawApplyDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料编码：</label>
+	<input id="matCodeQry" data-toggle="topjui-textbox" name="matCodeQry" data-options="width:'150px'" value="">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料描述：</label>
+	<input id="matNameQry" data-toggle="topjui-textbox" name="matNameQry" data-options="width:'150px'" value="">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+	</a>
+
+	<br />
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">领料仓库：</label>
+	<input data-toggle="topjui-combobox" name="storeNo" id="storeNo" value="" data-options="valueField:'storeNo',textField:'storeName',url:'/repository/mStore/getStoreList1',width:'150px'">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">费用项目：</label>
+	<input data-toggle="topjui-combobox" name="itemNo" id="itemNo" value="" data-options="valueField:'itemNo',textField:'itemName',url:'/material/mItem/getItemList1',width:'150px'">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">工程项目：</label>
+	<input data-toggle="topjui-combobox" name="prjNo" id="prjNo" value="" data-options="valueField:'prjNo',textField:'prjName',url:'/material/mPrj/getPrjList2',width:'160px'">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">用料班组：</label>
+	<input data-toggle="topjui-combobox" name="deptNo" id="deptNo" value="" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getListByPid',width:'150px'">
+
+	<br />
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">是否配送：</label>
+	<input data-toggle="topjui-combobox" id="ifSend" value="0" name="ifSend" data-options="width:'150px',valueField:'value',textField:'text',data:[
+    				{value:'0', text:'否'},
+    				{value:'1', text:'是'}
+    			]">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">配送地点：</label>
+	<input data-toggle="topjui-combobox" id="sendAddr" name="sendAddr" data-options="editable:true,valueField:'matAddr',textField:'matAddr',url:'/repository/mAddr/getAddr',width:'150px'">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">配送时间：</label>
+	<input name="sendTime" id="sendTime" value="" data-toggle="topjui-datetimebox" data-options="width:160,showSeconds:false">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">接货人：</label>
+	<input id="getEmp" data-toggle="topjui-textbox" name="getEmp" data-options="width:'150px'" value="">
+
+	<a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">提交申请</span>
+            <span class="l-btn-icon fa fa-save">&nbsp;</span>
+        </span>
+	</a>
+
+</div>
+
+	<div id="detailDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'detailDg'
+       }" style="display:none">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">申请日期：</label>
+		<input id="date1Qry" name="date1Qry" th:value="${date1Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+		<label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+		<input id="date2Qry" name="date2Qry" th:value="${date2Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">申请类型：</label>
+		<input data-toggle="topjui-combobox" id="appTypeQry" value="" name="appTypeQry" data-options="width:'150px',valueField:'value',textField:'text',data:[
+					{value:'', text:'--全部--'},
+    				{value:'r.outStockType.1', text:'正常'},
+    				{value:'r.outStockType.2', text:'直接'}
+    			]">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">工程项目：</label>
+		<input id="addrQry" data-toggle="topjui-textbox" name="addrQry" data-options="width:'150px'" value="">
+
+		<a href="javascript:void(0)" id="searchBtn1" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+		</a>
+
+		<br />
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">领料仓库：</label>
+		<input data-toggle="topjui-combobox" name="storeNoQry" id="storeNoQry" value="" data-options="valueField:'storeNo',textField:'storeName',url:'/repository/mStore/getStoreList?storeType=r.storeType2.11&storeLevel=r.storeLevel.1,r.storeLevel.0',width:'150px'">
+
+		<label class="topjui-form-label" style="width:50px;float:none;display:inline-block">步骤：</label>
+		<input data-toggle="topjui-combobox" name="planStepQry" id="planStepQry" value="7202F" data-options="valueField:'processNo',textField:'processName',url:'/system/sysAuditProcess/getListByFuuid?fuuid=D0180DF7E4324DD091306C26F2207145',width:'120px'">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料编码：</label>
+		<input id="matCodeQry1" data-toggle="topjui-textbox" name="matCodeQry1" data-options="width:'150px'" value="">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料描述：</label>
+		<input id="matNameQry1" data-toggle="topjui-textbox" name="matNameQry1" data-options="width:'150px'" value="">
+
+		<a href="javascript:void(0)" id="printBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">打印领料单</span>
+            <span class="l-btn-icon fa fa-save">&nbsp;</span>
+        </span>
+		</a>
+
+	</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#storeNo').iCombobox({
+				loadFilter:function(data){
+					data.unshift({storeNo:'', storeName:'--全部--'});
+					return data
+				}
+			})
+
+			$('#itemNo').iCombobox({
+				loadFilter:function(data){
+					data.unshift({itemNo:'', itemName:'--全部--'});
+					return data
+				}
+			})
+
+			$('#prjNo').iCombobox({
+				loadFilter:function(data){
+					data.unshift({prjNo:'', prjName:'--全部--'});
+					return data
+				}
+			})
+
+			$('#deptNo').iCombobox({
+				loadFilter:function(data){
+					data.unshift({id:'', text:'--全部--'});
+					return data
+				}
+			})
+
+			$('#storeNoQry').iCombobox({
+				loadFilter:function(data){
+					data.unshift({storeNo:'', storeName:'--全部--'});
+					return data
+				}
+			})
+
+			$('#drawApplyDg').iDatagrid({
+				queryParams:{
+					storeNo:$('#storeNo').iCombobox('getValue'),
+					matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+					matNameQry:$('#matNameQry').iTextbox('getValue')
+				},
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/repository/drawApply/getPageSet',
+				columns:[ [
+					{
+						field:'reserveNo',title:'提报单号',sortable:false
+					},{
+						field:'planMonth',title:'计划月份',sortable:false, formatter:function(value, row, index){
+							return value==''||value==null ? '' : value.substring(0, 4)+'-'+value.substring(4, 6)
+						}
+					},{
+						field:'costCenter',title:'成本中心',sortable:false
+					},{
+						field:'erpType',title:'分类描述',sortable:false, formatter:function(value, row, index){
+							return value + " " + row.typeName
+						}
+					},{
+						field:'matCode',title:'物料编码',sortable:false, formatter:function (value, row, index){
+							return value.substring(0, 1) == 'X' ? value.substring(1) : value
+						}
+					},{
+						field:'matName',title:'物料描述',sortable:false
+					},{
+						field:'matUnitName',title:'单位',sortable:false
+					},{
+						field:'usableAmount',title:'可领数',sortable:false,align:'right'
+					},{
+						field:'ztAmount',title:'待出库',sortable:false, align:'right'
+					},{
+						field:'planNo',title:'',sortable:false,checkbox:true
+					},{
+						field:'storeName',title:'仓库',sortable:false
+					},{
+						field:'factAmount',title:'库存数',sortable:false, align:'right'
+					},{
+						field:'matAmount',title:'申请数',sortable:false, align:'right', width:'80px', formatter:function(value, row, index){
+							var key = row.planNo+'_'+row.matNo+'_'+row.store;
+							return '<input type="hidden" name="key" id="key_'+ key +'"><span class="textbox"><input style="text-align:right; width: 54px" class="textbox-text" type="number" id="amount_'+ key +'" name="amount_'+ key +'" value="" disabled /></span>'
+						}
+					},{
+						field:'matPrice',title:'价格',sortable:false, align:'right'
+					},{
+						field:'bala',title:'金额',sortable:false, align:'right', formatter:function(value, row, index){
+							return '0'
+						}
+					},{
+						field:'stockAmount',title:'申请说明',sortable:false, formatter:function(value, row, index){
+							var key = row.planNo+'_'+row.matNo+'_'+row.store;
+							return '<span class="textbox"><input class="textbox-text" type="text" id="remark_'+ key +'" name="remark_'+ key +'" value="" disabled /></span>'
+						}
+					}
+				] ],
+				onLoadSuccess:function(data){
+					var fields = ['reserveNo', 'planMonth', 'costCenter', 'accountTypeName', 'erpType', 'matCode', 'matName', 'matUnitName', 'usableAmount', 'ztAmount'];
+
+					var tempRowIdx = 0;
+					var tempPlanNo = '';
+					for(var i=0; i<data.rows.length; i++){
+						var planNo = data.rows[i].planNo;
+						if(tempPlanNo != planNo){
+							mergeCell(i, tempRowIdx, fields);
+							tempRowIdx = i;
+							tempPlanNo = planNo;
+						}
+					}
+					if(tempRowIdx != data.rows.length-1){
+						mergeCell(data.rows.length, tempRowIdx, fields);
+					}
+				},
+				onCheck:function(index, row){
+					var key = row.planNo+'_'+row.matNo+'_'+row.store;
+					$('#amount_' + key +', #remark_'+ key).removeAttr('disabled');
+					$('#key_'+key).val(key);
+				},
+				onUncheck:function(index, row){
+					var key = row.planNo+'_'+row.matNo+'_'+row.store;
+					$('#amount_' + key +', #remark_'+ key).attr('disabled', 'disabled');
+					$('#key_'+key).val('');
+				},
+				onCheckAll:function(rows){
+					$('[name^="amount_"], [name^="remark_"]').removeAttr("disabled");
+					for(var i=0; i<rows.length; i++){
+						var row = rows[i];
+						var key = row.planNo+'_'+row.matNo+'_'+row.store;
+						$('#key_'+key).val(key);
+					}
+				},
+				onUncheckAll:function(rows){
+					$('[name^="amount_"], [name^="remark_"]').attr("disabled", 'disabled');
+					for(var i=0; i<rows.length; i++){
+						var row = rows[i];
+						var key = row.planNo+'_'+row.matNo+'_'+row.store;
+						$('#key_'+key).val('');
+					}
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#detailDg').iDatagrid({
+				queryParams:{
+					date1Qry:$('#date1Qry').iDatebox('getValue'),
+					date2Qry:$('#date2Qry').iDatebox('getValue'),
+					storeNoQry:$('#storeNoQry').iCombobox('getValue'),
+					appTypeQry:$('#appTypeQry').iCombobox('getValue'),
+					matCodeQry:$('#matCodeQry1').iTextbox('getValue'),
+					matNameQry:$('#matNameQry1').iTextbox('getValue'),
+					addrQry:$('#addrQry').iTextbox('getValue'),
+					planStepQry:$('#planStepQry').iCombobox('getValue')
+				},
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/repository/drawApply/getDetailPageSet',
+				columns:[ [
+					{
+						field:'drawNo',title:'',sortable:false,checkbox:true
+					},{
+						field:'drawStepName',title:'审核步骤',sortable:false
+					},{
+						field:'uuid',title:'领料单号',sortable:false, formatter:function(value, row, index){
+							return row.reserve2
+						}
+					},{
+						field:'applyDate',title:'申请日期',sortable:false, formatter:function(value, row, index){
+							return value==''||value==null ? '' : value.substring(0, 4)+'-'+value.substring(4, 6)+'-'+value.substring(6, 8)
+						}
+					},{
+						field:'planTeamName',title:'申请单位',sortable:false
+					},{
+						field:'erpType',title:'分类编码',sortable:false
+					},{
+						field:'matCode',title:'物料编码',sortable:false, formatter:function (value, row, index){
+							if(value!=null && value!=undefined){
+								return value.substring(0, 1) == 'X' ? value.substring(1) : value
+							}else {
+								return value
+							}
+						}
+					},{
+						field:'matName',title:'物料描述',sortable:false
+					},{
+						field:'matUnit',title:'单位',sortable:false
+					},{
+						field:'matPrice',title:'价格',sortable:false, align:'right'
+					},{
+						field:'applyAmount',title:'申请数',sortable:false, align:'right'
+					},{
+						field:'bala',title:'金额',sortable:false, align:'right'
+					},{
+						field:'chkAmount',title:'审批数',sortable:false, align:'right'
+					},{
+						field:'outAmount',title:'出库数',sortable:false, align:'right'
+					},{
+						field:'applyInfo',title:'申请说明',sortable:false
+					},{
+						field:'storeName',title:'领料仓库',sortable:false
+					},{
+						field:'reserveNo',title:'提报单号',sortable:false
+					},{
+						field:'prjName',title:'工程项目',sortable:false
+					},{
+						field:'offerTeamName',title:'用料班组',sortable:false
+					},{
+						field:'ifSend',title:'是否配送',sortable:false, align:'right', formatter:function(value, row, index){
+							if(value=='0'){
+								return '否'
+							}else{
+								return '是'
+							}
+						}
+					},{
+						field:'useAddr',title:'配送地点',sortable:false
+					},{
+						field:'pickDate',title:'配送时间',sortable:false, formatter:function(value, row, index){
+							var date = value==''||value==null ? '' : value.substring(0, 4)+'-'+value.substring(4, 6)+'-'+value.substring(6, 8);
+							var time = row.pickTime!='' && row.pickTime!=null ? row.pickTime.substring(0, 2) : '';
+							return date+' '+time
+						}
+					},{
+						field:'typeName',title:'分类描述',sortable:false
+					}
+				] ],
+				onLoadSuccess:function (data){
+					if(data.rows!=null && data.rows.length>0){
+						for(var i=0; i<data.rows.length; i++){
+							var row = data.rows[i];
+							if(row.drawStep!='7202T'){
+								$('[value="'+ row.drawNo +'"]').attr('disabled', 'disabled')
+							}
+						}
+					}
+				}
+			});
+
+			$('#searchBtn1').click(function(){
+				reloadDetail();
+			});
+
+			$('#submitBtn').click(function(){
+				$('#drawApplyForm').iForm('submit', {
+					url:'/repository/drawApply/submit',
+					success:function(data){
+						data = $.parseJSON(data);
+						if(data.statusCode == 200){
+							$.iMessager.show({
+								title:data.title,
+								msg:data.message
+							})
+							reloadData();
+							reloadDetail();
+						} else {
+							$.iMessager.alert({
+								icon:'messager-error',
+								title:data.title,
+								msg:data.message
+							});
+						}
+					}
+				});
+			});
+
+			$('#printBtn').click(function(){
+				var drawNos = "";
+				$('[name="drawNo"]:checked:not(:disabled)').each(function(i){
+					drawNos += (i==0 ? "" : ",") + $(this).val();
+				});
+				if(drawNos==''){
+					$.iMessager.alert({
+						icon:'messager-error',
+						title:'提示消息',
+						msg:'请选择要打印的料单！'
+					});
+					return;
+				}
+				window.open("/repository/drawApply/print?drawNos="+drawNos, '_blank');
+			})
+		});
+
+		function mergeCell(endIdx, startIdx, fields){
+			for(var j=0; j<fields.length; j++){
+				$('#drawApplyDg').iDatagrid('mergeCells', {
+					index:startIdx,
+					field:fields[j],
+					rowspan:endIdx-startIdx,
+					colspan:0
+				})
+			}
+		}
+
+		function reloadData(){
+			$('#drawApplyDg').iDatagrid('reload',{
+				storeNo:$('#storeNo').iCombobox('getValue'),
+				matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+				matNameQry:$('#matNameQry').iTextbox('getValue')
+			});
+		}
+
+		function reloadDetail(){
+			$('#detailDg').iDatagrid('reload',{
+				date1Qry:$('#date1Qry').iDatebox('getValue'),
+				date2Qry:$('#date2Qry').iDatebox('getValue'),
+				storeNoQry:$('#storeNoQry').iCombobox('getValue'),
+				appTypeQry:$('#appTypeQry').iCombobox('getValue'),
+				matCodeQry:$('#matCodeQry1').iTextbox('getValue'),
+				matNameQry:$('#matNameQry1').iTextbox('getValue'),
+				addrQry:$('#addrQry').iTextbox('getValue'),
+				planStepQry:$('#planStepQry').iCombobox('getValue')
+			});
+		}
+	</script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,35 @@
+package ${package1}.service;
+
+import ${basepackage1}.common.utils.easyui.PageParam;
+import ${basepackage1}.common.utils.easyui.PageSet;
+import ${package1}.model.${className1};
+import ${package1}.service.${SystemName1}BaseService;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * ${comments1}
+ * 
+ * @Author ${author1}
+ * @Email ${email1}
+ * @Date ${datetime1}
+ */
+public interface ${className1}Service extends ${SystemName1}BaseService<${className1}, String> {
+
+    PageSet<${className1}> getPageSet(PageParam pageParam, String filterSort);
+
+	${className1} queryObject(${pk1.attrType} ${pk1.attrname});
+	
+	List<${className1}> queryList(Map<String, Object> map);
+	
+	int queryTotal(Map<String, Object> map);
+
+    int executeSave(${className1} ${classname1});
+	
+	int executeUpdate(${className1} ${classname1});
+	
+	int executeDelete(${pk1.attrType} ${pk1.attrname});
+	
+	int executeDeleteBatch(${pk1.attrType}[] ${pk1.attrname}s);
+}

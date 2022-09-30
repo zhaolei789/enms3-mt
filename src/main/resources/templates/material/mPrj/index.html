@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'50%'">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'mPrjDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/material/mPrj/getPageSet',
+               childGrid:{
+                    param:'prjNo:prjNo',
+                    grid:[
+                        {type:'datagrid',id:'mPrjItemDg'}
+                    ]
+               },">
+            <thead>
+				<tr>
+					<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+					<th data-options="field:'upName',title:'主工程名',sortable:true"></th>
+					<th data-options="field:'prjName',title:'子工程名',sortable:true"></th>
+					<th data-options="field:'teamName',title:'施工单位',sortable:true"></th>
+					<th data-options="field:'prjType2Name',title:'工程类型',sortable:true"></th>
+					<th data-options="field:'planPeriodName',title:'计划周期',sortable:true"></th>
+					<th data-options="field:'prjStatusName',title:'工程状态',sortable:true"></th>
+					<th data-options="field:'matBala',title:'工程预算',sortable:true"></th>
+					<th data-options="field:'beginDate',title:'开工日期',sortable:true,formatter:function(value, row, index){
+					    return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+					}"></th>
+				</tr>
+            </thead>
+        </table>
+    </div>
+    <form id="piForm" method="post">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,width:'50%'">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'mPrjItemDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/material/mPrjItem/getPrjItemList',
+               pagination:false,
+               ">
+            <thead>
+            <tr>
+                <th data-options="field:'itemNo',title:'',sortable:false,checkbox:true"></th>
+                <th data-options="field:'itemName',title:'材料科目',sortable:false"></th>
+                <th data-options="field:'payTypeName',title:'承包规则',sortable:false"></th>
+                <th data-options="field:'matBala',title:'预算',sortable:false,formatter:function(value, row, index){
+                    var payType = row.payType;
+                    var retStr = '';
+                    if(payType=='m.payType.3'){
+                        retStr = '<input name=&quot;matBala_'+ row.itemNo +'&quot; type=&quot;text&quot; value=&quot;'+ (value==-1 ? '' : value) +'&quot; />'
+                    }
+                    if(index==0){
+                        retStr += '<input id=&quot;prjNo&quot; name=&quot;prjNo&quot; type=&quot;hidden&quot; value=&quot;'+ row.prjNo +'&quot; />'
+                    }
+                    return retStr;
+                }"></th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    </form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="mPrjDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'mPrjDg'
+       }" style="display:none">
+		<ewsd:rbac str="mPrjAddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#mPrjDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'mPrjAddDg',
+               href:'/material/mPrj/edit',
+               height:450,
+               width:800,
+               buttonsGroup:[
+                   {text:'保存',url:'/material/mPrj/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="mPrjEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#mPrjDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'mPrjEditDg',
+               href:'/material/mPrj/edit',
+               url:'/material/mPrj/getDetailByUuid?uuid={uuid}',
+               height:450,
+               width:800,
+               buttonsGroup:[
+                   {text:'更新',url:'/material/mPrj/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'mPrjDg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/material/mPrj/delete">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#mPrjDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的供应商',param:'uuid:uuid'},
+	       url:'/material/mPrj/delete'">删除</a>
+		</ewsd:rbac>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#mPrjDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#mPrjDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+</div>
+
+    <div id="mPrjItemDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'mPrjItemDg'
+       }" style="display:none">
+        <ewsd:rbac str="/material/mPrjItem/saveData">
+        <a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">保存数据</span>
+			<span class="l-btn-icon fa fa-save">&nbsp;</span>
+		</span>
+        </a>
+        </ewsd:rbac>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#mPrjItemDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#mPrjItemDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('#mPrjItemDg').iDatagrid({
+                onLoadSuccess:function(data){
+                    $('[name^="matBala_"]').iNumberbox({
+                        min:0,
+                        precision:2
+                    })
+                    var rows = $('#mPrjItemDg').iDatagrid('getRows');
+                    for(var i=0; i<rows.length; i++){
+                        var row = rows[i];
+                        if(row.isChk=='1'){
+                            $('#mPrjItemDg').iDatagrid('checkRow', i);
+                        }
+                    }
+                }
+            });
+
+            $('#saveBtn').click(function(){
+                $('#piForm').iForm('submit', {
+                    url:'/material/mPrjItem/saveData',
+                    success:function(data){
+                        data = $.parseJSON(data);
+                        if(data.statusCode == 200){
+                            $.iMessager.show({
+                                title:data.title,
+                                msg:data.message
+                            })
+                            $('#mPrjItemDg').iDatagrid('reload',{
+                                prjNo:$('#prjNo').val()
+                            })
+                        } else {
+                            $.iMessager.alert({
+                                icon:'messager-error',
+                                title:data.title,
+                                msg:data.message
+                            });
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</th:block>
+
+</body>
+</html>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.ConfigMapper">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <!--<resultMap type="cn.ewsd.system.model.SysCategory" id="sysCategoryMap">-->
+    <!--<result property="uuid" column="uuid"/>-->
+    <!--<result property="id" column="id"/>-->
+    <!--<result property="pid" column="pid"/>-->
+    <!--<result property="text" column="text"/>-->
+    <!--<result property="state" column="state"/>-->
+    <!--<result property="type" column="type"/>-->
+    <!--<result property="code" column="code"/>-->
+    <!--<result property="levelId" column="levelId"/>-->
+    <!--<result property="creatorId" column="creatorId"/>-->
+    <!--<result property="creator" column="creator"/>-->
+    <!--<result property="createTime" column="createTime"/>-->
+    <!--<result property="modifierId" column="modifierId"/>-->
+    <!--<result property="modifier" column="modifier"/>-->
+    <!--<result property="modifyTime" column="modifyTime"/>-->
+    <!--</resultMap>-->
+
+    <sql id="Base_Column_List">*</sql>
+
+    <insert id="batchInsert">
+        INSERT INTO sys_config (uuid,create_time,creator,creator_id,modifier,modifier_id,modify_time,creator_org_id,code,description,name,type,value,modify_flag,sort)VALUE
+        <foreach collection="list" item="list" index="index" separator=",">
+            (
+            #{list.uuid},
+            #{list.createTime},
+            #{list.creator},
+            #{list.creatorId},
+            #{list.modifier},
+            #{list.modifierId},
+            #{list.modifyTime},
+            #{list.creatorOrgId},
+            #{list.code},
+            #{list.description},
+            #{list.name},
+            #{list.type},
+            #{list.value},
+            #{list.modifyFlag,jdbcType=VARCHAR},
+            #{list.sort,jdbcType=INTEGER}
+            )
+        </foreach>
+    </insert>
+
+    <select id="getMaxSort" resultType="java.lang.Integer">
+		SELECT MAX(t.sort) FROM sys_config t
+	</select>
+
+    <select id="getListByCodeAndUuid" resultType="cn.ewsd.system.model.Config">
+		SELECT * FROM sys_config WHERE code = #{param1} AND uuid !=  #{param2}
+	</select>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.Config">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_config
+        <where>
+            <if test="filterSort != null">
+                ${filterSort}
+            </if>
+        </where>
+    </select>
+
+    <select id="getConfigByCode" resultType="java.lang.String">
+		SELECT value FROM sys_config WHERE code =#{param1}
+	</select>
+
+    <select id="getListByAll" resultType="cn.ewsd.system.model.Config">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_config
+    </select>
+    <select id="getDataByTablesAndField" resultType="cn.ewsd.system.model.Config">
+        SELECT ${field} from ${tables}
+    </select>
+
+</mapper>

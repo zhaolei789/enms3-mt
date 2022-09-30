@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MAskCodeMapper">
+    <insert id="executeSave" parameterType="cn.ewsd.material.model.MAskCode">
+        INSERT INTO m_ask_code (`ask_no`, `ask_name`, `ask_model`, `mat_weight`, `ask_unit`, `ask_date`, `ask_team`, `ask_amount`, `pay_team`, `make_team`, `check_team`, `prj_no`, `item_no`, `mat_fee`, `pay_fee`, `other_fee`, `check_amount`,
+                                `do_date`, `mat_no`, `if_self`, `ask_step`, `check_no`, `need_date`, `use_addr`, `quota_id`, `if_oldmat`, `price_step`, `remark`, `need_type`,
+                                `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+        VALUES (#{askNo}, #{askName}, #{askModel}, #{matWeight}, #{askUnit}, #{askDate}, #{askTeam}, #{askAmount}, #{payTeam}, #{makeTeam}, #{checkTeam}, #{prjNo}, #{itemNo}, #{matFee}, #{payFee}, #{otherFee}, #{checkAmount},
+                #{doDate}, #{matNo}, #{ifSelf}, #{askStep}, #{checkNo}, #{needDate}, #{useAddr}, #{quotaId}, #{ifOldmat}, #{priceStep}, #{remark}, #{needType},
+                #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+    </insert>
+
+    <select id="getMAskCodeList" resultType="cn.ewsd.material.model.MAskCode">
+        SELECT a.*, pj.prj_name, mi.item_name, mm.mat_code, ap.process_name ask_step_name, di.text ask_unit_name, o.text make_team_name
+        FROM m_ask_code a
+        LEFT JOIN m_prj pj ON a.prj_no=pj.prj_no
+        LEFT JOIN m_item mi ON a.item_no=mi.item_no
+        LEFT JOIN m_material mm ON a.mat_no=mm.mat_no
+        LEFT JOIN sys_audit_process ap ON ap.process_no=a.ask_step
+        LEFT JOIN sys_dic_item di ON di.value=a.ask_unit
+        LEFT JOIN sys_organization o ON o.id=a.make_team
+        WHERE ask_team=#{userTeam}
+          AND ask_date&gt;=#{occDate1Qry} AND ask_date &lt;=#{occDate2Qry}
+        <if test="askNameQry!=''">
+            AND ask_name LIKE CONCAT('%', #{askNameQry}, '%')
+        </if>
+    </select>
+
+    <select id="getAskCode" resultType="cn.ewsd.material.model.MAskCode">
+        SELECT * FROM m_ask_code WHERE ask_name=#{_parameter} LIMIT 1
+    </select>
+
+    <select id="getAskCodeByNo" resultType="cn.ewsd.material.model.MAskCode">
+        SELECT * FROM m_ask_code WHERE ask_no=#{_parameter}
+    </select>
+
+    <delete id="deleteByNo">
+        DELETE FROM m_ask_code WHERE ask_no=#{_parameter}
+    </delete>
+
+    <update id="updateAskCode" parameterType="cn.ewsd.material.model.MAskCode">
+        UPDATE m_ask_code
+        <set>
+            <if test="askDate!=null">`ask_date`=#{askDate},</if>
+            <if test="askStep!=null">`ask_step`=#{askStep},</if>
+            <if test="remark!=null">`remark`=#{remark},</if>
+            <if test="checkAmount!=null">`check_amount`=#{checkAmount},</if>
+            <if test="makeTeam!=null">`make_team`=#{makeTeam},</if>
+            <if test="needDate!=null">`need_date`=#{needDate},</if>
+            <if test="askUnit!=null">`ask_unit`=#{askUnit},</if>
+            <if test="doDate!=null">`do_date`=#{doDate},</if>
+            <if test="matFee!=null">`mat_fee`=#{matFee},</if>
+            <if test="payFee!=null">`pay_fee`=#{payFee},</if>
+            <if test="otherFee!=null">`other_fee`=#{otherFee},</if>
+            <if test="matNo!=null">`mat_no`=#{matNo},</if>
+            <if test="preTeam!=null">`pre_team`=#{preTeam}</if>
+        </set>
+        WHERE ask_no=#{askNo}
+        <if test="creator!=null">
+            AND ask_step=#{creator}
+        </if>
+    </update>
+
+    <select id="getCheckIndexList" resultType="cn.ewsd.material.model.MAskCode">
+        SELECT a.ask_team, LEFT(a.ask_date, 6) ask_month, a.ask_step, COUNT(a.ask_no) ask_cnt,
+               ap.process_name ask_step_name, o.text ask_team_name
+    	FROM m_ask_code a
+        LEFT JOIN sys_audit_process ap ON ap.process_no=a.ask_step
+        LEFT JOIN sys_organization o ON o.id=a.ask_team
+    	WHERE a.ask_step NOT IN ('7300F')
+    	  AND a.ask_step IN (SELECT process_no
+                             FROM sys_user_step us
+                             LEFT JOIN sys_audit_process ap ON us.step_uuid=ap.uuid
+                             WHERE us.process_uuid='FF4F9BA295E54443A81BCD2D0FAD2A00' AND user_id=#{userId})
+    	  AND (
+    		(a.ask_step='73003' AND a.ask_team=#{userTeam})
+    		OR
+    		(a.ask_step='73004' AND a.check_team=#{userTeam})
+    		OR
+    		a.ask_step='73005'
+    		OR
+    		a.ask_step='7300A'
+    		OR
+    		a.ask_step='73001'
+    	  )
+    	GROUP BY a.ask_team, LEFT(a.ask_date, 6), a.ask_step, ap.process_name, o.text
+    </select>
+
+    <select id="getCheckPendingRecords" resultType="cn.ewsd.material.model.MAskCode">
+        SELECT COUNT(a.ask_no) ask_cnt
+    	FROM m_ask_code a
+    	WHERE a.ask_step NOT IN ('7300F')
+    	  AND a.ask_step IN (SELECT process_no
+                             FROM sys_user_step us
+                             LEFT JOIN sys_audit_process ap ON us.step_uuid=ap.uuid
+                             WHERE us.process_uuid='FF4F9BA295E54443A81BCD2D0FAD2A00' AND user_id=#{userId})
+    	  AND (
+    		(a.ask_step='73003' AND a.ask_team=#{userTeam})
+    		OR
+    		(a.ask_step='73004' AND a.check_team=#{userTeam})
+    		OR
+    		a.ask_step='73005'
+    		OR
+    		a.ask_step='7300A'
+    		OR
+    		a.ask_step='73001'
+    	  )
+    </select>
+
+    <select id="getCheckList" resultType="cn.ewsd.material.model.MAskCode">
+        SELECT a.*, b.mat_code, di.text ask_unit_name
+		FROM m_ask_code a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+        LEFT JOIN sys_dic_item di ON di.value=a.ask_unit
+		WHERE a.ask_team=#{askTeam} AND LEFT(a.ask_date, 6)=#{askMonth} AND a.ask_step=#{askStep}
+    </select>
+
+    <select id="getMakeBackList" resultType="cn.ewsd.material.model.MAskCode">
+        SELECT ma.*, mb.back_amount, o.text ask_team_name, di.text ask_unit_name, o1.text pre_team_name
+        FROM m_ask_code ma
+        LEFT JOIN sys_organization o ON o.id=ma.ask_team
+        LEFT JOIN sys_organization o1 ON o1.id=ma.pre_team
+        LEFT JOIN sys_dic_item di ON di.value=ma.ask_unit
+        LEFT JOIN (SELECT plan_no, SUM(bill_amount) back_amount
+                   FROM m_in
+                   WHERE data_src='m.dataSrc.C'
+                     AND in_type IN ('r.inBillType.C','r.inBillType.D')
+                     AND in_step NOT IN ('7201X','72010')
+                   GROUP BY plan_no) mb ON CAST(ma.ask_no AS CHAR) = mb.plan_no
+        WHERE (ma.check_amount - IFNULL(mb.back_amount, 0)) &gt; 0
+            AND ma.do_date &gt;= #{day1Qry} AND ma.do_date &lt;= #{day2Qry}
+        <if test="date1Qry!=''">
+            AND ma.need_date &lt;= #{date1Qry}
+        </if>
+        <if test="stepQry!=''">
+            AND ma.ask_step=#{stepQry}
+        </if>
+        <if test="addrQry!=''">
+            AND ma.use_addr LIKE CONCAT('%', #{addrQry}, '%')
+        </if>
+        <if test="matQry!=''">
+            AND ma.ask_name+ma.ask_model LIKE CONCAT('%', #{matQry}, '%')
+        </if>
+        <if test="teamQry!=''">
+            AND ma.ask_team=#{teamQry}
+        </if>
+        <if test="flagQry">
+            AND ma.need_date&lt;#{curDate}
+        </if>
+        <if test="needTypeQry!=''">
+            AND ma.need_type=#{needTypeQrye}
+        </if>
+        ORDER BY ma.ask_no DESC
+    </select>
+
+    <select id="getFileListByAskNo" resultType="cn.ewsd.material.model.MAskCode">
+        SELECT file_name, uuid file_path FROM sys_attachment WHERE puuid=#{_parameter}
+    </select>
+
+    <select id="getMakeBackDetailList" resultType="cn.ewsd.repository.model.MIn">
+        SELECT mi.*, mm.mat_code, mm.mat_name, mm.mat_unit, ma.need_date, ma.use_addr, di1.text in_type_name,
+               (SELECT store_name FROM m_store WHERE store_no=mi.store_no) store_name, o.text team_name
+        FROM m_in mi
+        LEFT JOIN m_material mm ON mi.mat_no=mm.mat_no
+        LEFT JOIN sys_dic_item di1 ON di1.value=mi.in_type
+        LEFT JOIN sys_organization o ON o.id=mi.team_no
+        LEFT JOIN m_ask_code ma ON mi.plan_no=ma.ask_no
+        WHERE mi.bill_date&gt;=#{startDateQry} AND mi.bill_date&lt;=#{endDateQry}
+          AND mi.data_src='m.dataSrc.C'
+          AND mi.in_type IN ('r.inBillType.C','r.inBillType.D')
+        <if test="matNameQry!=''">
+            AND (mm.mat_code LIKE CONCAT(#{matNameQry}, '%') OR mm.mat_name LIKE CONCAT('%', #{matNameQry}, '%'))
+        </if>
+        ORDER BY mi.bill_no DESC
+    </select>
+
+    <select id="getMakeBack" resultType="cn.ewsd.material.model.MAskCode">
+        SELECT a.*, (a.check_amount - IFNULL(b.back_amount,0)) wait_amount
+        FROM m_ask_code a
+		LEFT JOIN (SELECT plan_no, SUM(bill_amount) back_amount
+		           FROM m_in
+		    	   WHERE data_src='m.dataSrc.C' AND plan_no=#{_parameter}
+		    		 AND in_type IN ('r.inBillType.C','r.inBillType.D')
+		    		 AND in_step NOT IN ('7201X','72010')
+		    	   GROUP BY plan_no) b ON CAST(a.ask_no AS CHAR)=b.plan_no
+		WHERE a.ask_no = #{_parameter}
+    </select>
+
+    <select id="getAskCodeFileNum" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM sys_attachment where puuid=#{_parameter}
+    </select>
+</mapper>

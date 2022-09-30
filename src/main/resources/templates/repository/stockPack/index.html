@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'50%'">
+            <table id="matDg"></table>
+        </div>
+        <form id="storeForm">
+            <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+                <table id="storeDg"></table>
+            </div>
+        </form>
+    </div>
+
+    <div id="matDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'matDg'
+       }" style="display:none">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">仓库：</label>
+        <input data-toggle="topjui-combobox" id="storeQry" name="storeQry" value="" data-options="valueField:'storeNo',textField:'storeName',url:'/repository/mStore/getStoreList?chkUser=true&storeLevel=r.storeLevel.1',width:'150px'">
+
+        <label class="topjui-form-label" style="width:100px;float:none;display:inline-block">编码/描述：</label>
+        <input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'" value="">
+
+        <label class="topjui-form-label" style="width:90px;float:none;display:inline-block">未关联科室：</label>
+        <input data-toggle="topjui-combobox" id="flagQry" value="" name="flagQry" data-options="width:'150px',valueField:'value',textField:'text',data:[
+    				{value:'', text:'否'},
+    				{value:'1', text:'是'}
+    			]">
+
+        <a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">查询</span>
+                <span class="l-btn-icon fa fa-search">&nbsp;</span>
+            </span>
+        </a>
+    </div>
+
+    <div id="storeDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'storeDg'
+       }" style="display:none">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">审批科室：</label>
+        <input data-toggle="topjui-combobox" id="teamNo" name="teamNo" value="" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',width:'150px'">
+        <input type="hidden" name="matNo" id="matNo" />
+
+        <a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">保存</span>
+                <span class="l-btn-icon fa fa-save">&nbsp;</span>
+            </span>
+        </a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        $(document).ready(function(){
+            $('#matDg').iDatagrid({
+                queryParams:{
+                    storeQry:$('#storeQry').iCombobox('getValue'),
+                    matQry:$('#matQry').iTextbox('getValue'),
+                    flagQry:$('#flagQry').iCombobox('getValue')
+                },
+                singleSelect:true,
+                selectOnCheck:false,
+                checkOnSelect:false,
+                url:'/repository/stockPack/getPageSet',
+                columns:[ [
+                    {
+                        field:'erpType',title:'物料组',sortable:false
+                    },{
+                        field:'typeName',title:'物料组描述',sortable:false
+                    },{
+                        field:'matCode',title:'物料编码',sortable:false
+                    },{
+                        field:'matName',title:'物料描述',sortable:false
+                    },{
+                        field:'matUnitName',title:'单位',sortable:false
+                    }
+                ] ],
+                onSelect:function(index, row){
+                    reloadStore(row.matNo)
+                    $('#matNo').val(row.matNo)
+                }
+            });
+
+            $('#searchBtn').click(function(){
+                reloadData();
+            });
+
+            $('#storeDg').iDatagrid({
+                singleSelect:true,
+                selectOnCheck:false,
+                checkOnSelect:false,
+                pagination:false,
+                url:'/repository/stockPack/getStore',
+                columns:[ [
+                    {
+                        field:'storeNo',title:'',sortable:false, checkbox:true
+                    },{
+                        field:'storeName',title:'仓库名称',sortable:false
+                    },{
+                        field:'stockAmount',title:'实时库存',sortable:false
+                    },{
+                        field:'siteCode',title:'存储货位',sortable:false, formatter:function(value, row, index){
+                            return '<span class="textbox">' +
+                                '<input id="site_'+ row.storeNo +'" name="site_'+ row.storeNo +'" value="'+ value +'" ' +
+                                'data-toggle="topjui-combobox"' +
+                                ' data-options="' +
+                                'prompt:\'存储货位\',editable:true,' +
+                                ' url:\'/material/mSite/getListByStoreNo?storeNo=' +row.storeNo + '\',' +
+                                'valueField:\'uuid\',' +
+                                'textField:\'siteName\'' +
+                                '"' +
+                                '/>' +
+                                '</span>'
+                        }
+                    }/*,{
+                        field:'siteCode',title:'存储货位',sortable:false, formatter:function(value, row, index){
+                            return '<span class="textbox"><input class="textbox-text" type="text" id="site_'+ row.storeNo +'" name="site_'+ row.storeNo +'" value="'+ value +'" disabled /></span>'
+                        }
+                    }*/
+                ] ],
+                onLoadSuccess:function(data){
+                    if(data.rows.length > 0){
+                        var teamNo = data.rows[0].teamNo
+                        $('#teamNo').iCombobox('select', teamNo)
+                    }else{
+                        $('#teamNo').iCombobox('setValue', '')
+                    }
+                    $.parser.parse();
+                },
+                onCheck:function(index, row){
+                    //document.getElementsByName('#site_' + row.storeNo).iCombobox('disabled', false);
+                    //$('#site_' + row.storeNo).removeAttr('disabled');
+                },
+                onUncheck:function(index, row){
+                    //document.getElementsByName('#site_' + row.storeNo).iCombobox('disabled', true);
+                    //$('#site_' + row.storeNo).attr('disabled', 'disabled');
+                },
+                onCheckAll:function(rows){
+                    //$('[name^="site_"]').removeAttr("disabled");
+                },
+                onUncheckAll:function(rows){
+                    //$('[name^="site_"]').attr("disabled", 'disabled');
+                }
+            });
+
+            $('#saveBtn').click(function(){
+                $('#storeForm').iForm('submit', {
+                    url:'/repository/stockPack/save',
+                    success:function(data){
+                        data = $.parseJSON(data);
+                        if(data.statusCode == 200){
+                            $.iMessager.show({
+                                title:data.title,
+                                msg:data.message
+                            })
+                            $('#storeDg').iDatagrid('reload');
+                        } else {
+                            $.iMessager.alert({
+                                icon:'messager-error',
+                                title:data.title,
+                                msg:data.message
+                            });
+                        }
+                    }
+                });
+            });
+        });
+
+        function reloadData(){
+            $('#matDg').iDatagrid('reload',{
+                storeQry:$('#storeQry').iCombobox('getValue'),
+                matQry:$('#matQry').iTextbox('getValue'),
+                flagQry:$('#flagQry').iCombobox('getValue')
+            });
+        }
+
+        function reloadStore(matNo){
+            $('#storeDg').iDatagrid('reload', {
+                matNo:matNo
+            })
+        }
+    </script>
+</th:block>
+</body>
+</html>

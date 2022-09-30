@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.MAssessNormMapper">
+	<select id="getTeamItemQuotaList" resultType="cn.ewsd.cost.model.MAssessNorm">
+		SELECT a.item_no, b.item_name, b.item_unit, a.team_no, a.norm_id, a.prj_no, a.prj_name, a.norm_amount, a.norm_price, a.ass_team,
+			   (SELECT text FROM sys_organization WHERE id=a.team_no) team_name, (SELECT text FROM sys_organization WHERE id=a.ass_team) ass_team_name
+		FROM m_assess_norm a
+		LEFT JOIN m_fee_item b ON a.item_no=b.item_no
+		WHERE a.ass_team = #{assTeam}
+		<if test="teamNoQry!=''">
+		  AND a.team_no=#{teamNoQry}
+		</if>
+		<if test="prjQry!=''">
+		  AND a.prj_no=#{prjQry}
+		</if>
+		ORDER BY a.team_no
+	</select>
+
+	<update id="updateAssessNorm" parameterType="cn.ewsd.cost.model.MAssessNorm">
+		UPDATE m_assess_norm
+		<set>
+			<if test="normAmount!=null">`norm_amount`=#{normAmount},</if>
+			<if test="normPrice!=null">`norm_price`=#{normPrice},</if>
+			<if test="modiDate!=null">`modi_date`=#{modiDate}</if>
+		</set>
+		WHERE 1=1
+		<if test="itemNo!=null">
+		  AND item_no=#{itemNo}
+		</if>
+		<if test="teamNo!=null">
+		  AND team_no=#{teamNo}
+		</if>
+		<if test="prjNo!=null">
+		  AND prj_no=#{prjNo}
+		</if>
+		<if test="normId!=null">
+		  AND norm_id=#{normId}
+		</if>
+	</update>
+	
+	<insert id="insertAssessNorm" parameterType="cn.ewsd.cost.model.MAssessNorm">
+		INSERT INTO m_assess_norm (`norm_id`, `begin_month`, `item_no`, `team_no`, `prj_no`, `prj_name`, `norm_amount`, `norm_price`, `ass_team`, `modi_date`, `modi_emp`, `end_date`,
+								   `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{normId}, #{beginMonth}, #{itemNo}, #{teamNo}, #{prjNo}, #{prjName}, #{normAmount}, #{normPrice}, #{assTeam}, #{modiDate}, #{modiEmp}, #{endDate},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<delete id="deleteAssessNorm">
+		DELETE FROM m_assess_norm WHERE norm_id=#{_parameter}
+	</delete>
+
+	<select id="getMatAssDcNormList" resultType="cn.ewsd.cost.model.MAssessNorm">
+		SELECT mn.team_no, CASE WHEN mn.prj_name='' THEN '地坪' ELSE mn.prj_name END prj_name, mn.norm_amount,
+			   CASE WHEN td.text IS NULL THEN mi.item_name ELSE td.text END item_name
+		FROM m_assess_norm mn
+		INNER JOIN m_fee_item mi ON mn.item_no=mi.item_no
+		LEFT JOIN sys_dic_item td ON mi.up_item=td.value
+		WHERE mn.team_no IN
+		<foreach collection="_parameter.split(',')" item="teamNo" open="(" separator="," close=")">
+			#{teamNo}
+		</foreach>
+	</select>
+</mapper>

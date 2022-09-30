@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <table data-toggle="topjui-datagrid"
+                   data-options="id:'sysLoggerInfoDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               queryParams:{isError:true},
+               checkOnSelect:false,
+               url:'/system/sysLoggerInfo/getPageSet'">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'UUID',sortable:true,checkbox:true"></th>
+                    <th data-options="field:'aliClientIp',title:'客户端IP',sortable:true"></th>
+                    <th data-options="field:'aliUri',title:'URI',sortable:true"></th>
+                    <th data-options="field:'aliType',title:'类型',sortable:true"></th>
+                    <th data-options="field:'aliMethod',title:'请求方式',sortable:true"></th>
+                    <th data-options="field:'aliParamData',title:'数据参数',sortable:true"></th>
+                    <th data-options="field:'aliSessionId',title:'Sesssion',sortable:true"></th>
+                    <th data-options="field:'aliTime',title:'时间',sortable:true"></th>
+                    <th data-options="field:'aliReturnTime',title:'返回时间',sortable:true,formatter: function(value,row,index){
+                        return transformTime(value);
+                    }
+                    "></th>
+                    <th data-options="field:'aliHttpStatusCode',title:'HTTP状态代码',sortable:true"></th>
+                    <th data-options="field:'aliTimeConsuming',title:'耗时',sortable:true"></th>
+                    <th data-options="field:'creator',title:'创建人',sortable:true"></th>
+                    <th data-options="field:'createTime',title:'创建时间',sortable:true"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- 表格工具栏 -->
+    <div id="sysLoggerInfoDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'sysLoggerInfoDg'
+       }" style="display:none">
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#sysLoggerInfoDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'sysLoggerInfoAddDg',
+               href:'/system/sysLoggerInfo/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/system/sysLoggerInfo/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#sysLoggerInfoDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'sysLoggerInfoEditDg',
+               href:'/system/sysLoggerInfo/edit',
+               url:'/system/sysLoggerInfo/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/system/sysLoggerInfo/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'sysLoggerInfoDg'}]}
+               ]
+           }">编辑</a>
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#sysLoggerInfoDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/system/sysLoggerInfo/deleteBatch'">删除</a>
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#sysLoggerInfoDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#sysLoggerInfoDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        function transformTime(timestamp) {
+            timestamp = timestamp || new Date();
+            if (timestamp) {
+                var time = new Date(parseInt(timestamp));
+                var y = time.getFullYear(); //getFullYear方法以四位数字返回年份
+                var M = time.getMonth() + 1; // getMonth方法从 Date 对象返回月份 (0 ~ 11)，返回结果需要手动加一
+                var d = time.getDate() > 9 ? time.getDate(): "0" + time.getDate(); // getDate方法从 Date 对象返回一个月中的某一天 (1 ~ 31)
+                var h = time.getHours() > 9 ? time.getHours(): "0" + time.getHours(); // getHours方法返回 Date 对象的小时 (0 ~ 23)
+                var m = time.getMinutes()> 9 ? time.getMinutes(): "0" + time.getMinutes(); // getMinutes方法返回 Date 对象的分钟 (0 ~ 59)
+                var s = time.getSeconds()> 9 ? time.getSeconds(): "0" + time.getSeconds(); // getSeconds方法返回 Date 对象的秒数 (0 ~ 59)
+                return y + '-' + M + '-' + d + ' ' + h + ':' + m + ':' + s;
+            } else {
+                return '';
+            }
+        }
+    </script>
+</th:block>
+</body>
+</html>

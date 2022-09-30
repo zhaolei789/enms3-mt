@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <form id="wzscPlanForm" method="post">
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <table id="wzscPlanDg"></table>
+        </div>
+    </form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="wzscPlanDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'wzscPlanDg'
+       }" style="display:none">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">计划月份：</label>
+    <select id="yearQry" data-toggle="topjui-combobox" name="yearQry" data-options="width:75" >
+        <option th:each="i:${#numbers.sequence(2015, endYear)}" th:value="${i}" th:text="${i}" th:selected="${i==currentYear}"></option>
+    </select>
+    <select id="monQry" data-toggle="topjui-combobox" name="monQry" data-options="width:70" >
+        <option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}" th:selected="${i==currentMonth}"></option>
+    </select>
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">成本中心：</label>
+    <input data-toggle="topjui-combobox" id="centerQry" name="centerQry" data-options="valueField:'centerNo',textField:'centerName',url:'/material/costCenter/getCenterSet?userId=true',width:'150px'">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">科目类型：</label>
+    <input data-toggle="topjui-combobox" id="typeQry" name="typeQry" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.erpItem',width:'150px'">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">发货状态：</label>
+    <input data-toggle="topjui-combobox" id="statusQry" name="statusQry" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.supplyFlag',width:'150px'">
+
+    <a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+    </a>
+
+    <ewsd:rbac str="/material/wzscPlan/import">
+        <a href="javascript:void(0)" id="uploadBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">导入</span>
+                <span class="l-btn-icon fa fa-upload">&nbsp;</span>
+            </span>
+        </a>
+    </ewsd:rbac>
+
+    <ewsd:rbac str="/material/wzscPlan/export">
+        <a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+        </a>
+    </ewsd:rbac>
+
+    <ewsd:rbac str="/material/wzscPlan/delete">
+        <a href="javascript:void(0)" id="deleteBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">删除</span>
+            <span class="l-btn-icon fa fa-trash">&nbsp;</span>
+        </span>
+        </a>
+    </ewsd:rbac>
+
+    <br />
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">材料编码：</label>
+    <input id="codeQry" data-toggle="topjui-textbox" name="codeQry" data-options="width:'150px'" value="">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">材料描述：</label>
+    <input id="nameQry" data-toggle="topjui-textbox" name="nameQry" data-options="width:'150px'" value="">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">采购单号：</label>
+    <input id="purcQry" data-toggle="topjui-textbox" name="purcQry" data-options="width:'150px'" value="">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料组：</label>
+    <input id="matTypeQry" data-toggle="topjui-textbox" name="matTypeQry" data-options="width:'150px'" value="">
+
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        $(document).ready(function(){
+            var hasRight = [[${hasRight}]];
+            $('#wzscPlanDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                url: '/material/wzscPlan/getPageSet',
+                queryParams:{
+                    yearQry:$('#yearQry').iCombobox("getValue"),
+                    monQry:$('#monQry').iCombobox("getValue"),
+                    centerQry:$('#centerQry').iCombobox("getValue"),
+                    typeQry:$('#typeQry').iCombobox("getValue"),
+                    statusQry:$('#statusQry').iCombobox("getValue"),
+                    purcQry:$('#purcQry').iTextbox("getValue"),
+                    matTypeQry:$('#matTypeQry').iTextbox("getValue"),
+                    codeQry:$('#codeQry').iTextbox("getValue"),
+                    nameQry:$('#nameQry').iTextbox("getValue")
+                },
+                columns:[ [
+                    {
+                        field:'uuid', sortable:false, title:'', checkbox:true
+                    },{
+                        field:'centerNo', sortable:false, title:'成本中心'
+                    },{
+                        field:'centerName', sortable:false, title:'中心描述'
+                    },{
+                        field:'matAddrName', sortable:false, title:'库存地'
+                    },{
+                        field:'erpType', sortable:false, title:'物料组'
+                    },{
+                        field:'typeName', sortable:false, title:'物料组描述'
+                    },{
+                        field:'matCode', sortable:false, title:'材料编码'
+                    },{
+                        field:'matName', sortable:false, title:'材料描述'
+                    },{
+                        field:'matUnit', sortable:false, title:'单位'
+                    },{
+                        field:'matPrice', sortable:false, title:'价格'
+                    },{
+                        field:'matAmount', sortable:false, title:'提报数量'
+                    },{
+                        field:'matBala', sortable:false, title:'金额'
+                    },{
+                        field:'amount', sortable:false, title:'出账数'
+                    },{
+                        field:'followNo', sortable:false, title:'完成率',formatter:function (value, row, index) {
+                            var amount = parseFloat(row.amount)
+                            var matAmount = parseFloat(row.matAmount);
+                            return parseFloat((amount/matAmount).toFixed(4)) * 100;
+                        }
+                    },{
+                        field:'sumBala', sortable:false, title:'结算金额', hidden:!hasRight
+                    },{
+                        field:'epId', sortable:false, title:'提报单号'
+                    },{
+                        field:'createDate', sortable:false, title:'提报日期'
+                    },{
+                        field:'planTypeName', sortable:false, title:'计划类型'
+                    },{
+                        field:'wbs', sortable:false, title:'wbs元素'
+                    },{
+                        field:'purchaseNo', sortable:false, title:'采购单号'
+                    },{
+                        field:'purchaseList', sortable:false, title:'行号'
+                    },{
+                        field:'remark', sortable:false, title:'备注'
+                    },{
+                        field:'itemTypeName', sortable:false, title:'科目类型'
+                    }
+                ] ],
+                rowStyler:function(index, row){
+                    var amount = parseFloat(row.amount)
+                    var matAmount = parseFloat(row.matAmount);
+                    var val = amount/matAmount;
+                    if(val==0){
+                        return 'background-color:#FFD2D2'
+                    }else if(val==1){
+                        return 'background-color:#AEDD81'
+                    }else{
+                        return 'background-color:#FFF8D7'
+                    }
+                }
+            });
+
+            $('#uploadBtn').click(function(){
+                var $editDialog = $('<form id="myDialog"></form>');
+                $editDialog.iDialog({
+                    title: '导入Excel',
+                    width: 950,
+                    height: 450,
+                    closed: false,
+                    cache: false,
+                    href: '/material/wzscPlan/importPage',
+                    modal: true
+                });
+            });
+
+            $('#searchBtn').click(function(){
+                reloadPlan();
+            });
+
+            $('#downloadBtn').click(function(){
+                $('#wzscPlanForm').iForm('submit', {
+                    url:'/material/wzscPlan/export',
+                    success:function(data){
+
+                    }
+                });
+            });
+
+            $('#deleteBtn').click(function(){
+                $('#wzscPlanForm').iForm('submit', {
+                    url:'/material/wzscPlan/delete',
+                    success:function(data){
+                        data = $.parseJSON(data);
+                        if(data.statusCode == 200){
+                            $.iMessager.show({
+                                title:data.title,
+                                msg:data.message
+                            })
+                            reloadPlan();
+                        } else {
+                            $.iMessager.alert({
+                                icon:'messager-error',
+                                title:data.title,
+                                msg:data.message
+                            });
+                        }
+                    }
+                });
+            });
+        });
+
+        function reloadPlan(){
+            $('#wzscPlanDg').iDatagrid('reload',{
+                yearQry:$('#yearQry').iCombobox("getValue"),
+                monQry:$('#monQry').iCombobox("getValue"),
+                centerQry:$('#centerQry').iCombobox("getValue"),
+                typeQry:$('#typeQry').iCombobox("getValue"),
+                statusQry:$('#statusQry').iCombobox("getValue"),
+                purcQry:$('#purcQry').iTextbox("getValue"),
+                matTypeQry:$('#matTypeQry').iTextbox("getValue"),
+                codeQry:$('#codeQry').iTextbox("getValue"),
+                nameQry:$('#nameQry').iTextbox("getValue")
+            });
+        }
+    </script>
+</th:block>
+</body>
+</html>

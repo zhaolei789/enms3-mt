@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+
+        <!-- treegrid表格 -->
+        <table data-toggle="topjui-treegrid"
+               data-options="id:'menuTreegrid',
+               idField:'id',
+			   treeField:'text',
+			   expandRoots:false,
+			   singleSelect:true,
+               url:'/system/codeItem/getListByLevelId?levelId=1',
+               expandUrl:'/system/codeItem/getListByPid?pid={id}',
+               fitColumns:true">
+            <thead>
+            <!--url:'/system/codeItem/getListByLevelId?levelId=${param.levelId}',-->
+            <tr>
+                <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                <th data-options="field:'text',title:'名称'"></th>
+                <th data-options="field:'codeSetId',title:'体系代码'"></th>
+                <th data-options="field:'id',title:'编号'"></th>
+                <th data-options="field:'pid',title:'父级编号'"></th>
+                <th data-options="field:'levelId',title:'层级',
+                    formatter: function(value,row,index){
+						if (value == 1){
+							return '一级';
+						} else if (value == 2){
+							return '二级';
+						} else if (value == 3){
+							return '三级';
+						} else if (value == 4){
+							return '四级';
+						} else if (value == 5){
+							return '五级';
+						} else if (value == 6){
+							return '六级';
+						} else if (value == 7){
+							return '七级';
+						} else if (value == 8){
+							return '八级';
+						} else if (value == 9){
+							return '九级';
+						} else if (value == 10){
+							return '十级';
+						} else {
+							return 'N级资源';
+						}
+                    }"></th>
+                <th data-options="field:'sort',title:'排序'"></th>
+                <th data-options="field:'code',title:'代码'"></th>
+                <th data-options="field:'status',title:'状态',
+                    formatter: function(value,row,index){
+						if (value == '1'){
+							return '<span style=\'color:green\'>启用</span>';
+						} else if (value == '0') {
+							return '<span style=\'color:red\'>禁用</span>';
+						} else {
+						    return '';
+						}
+                    }"></th>
+                <th data-options="field:'remark',title:'备注'"></th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+</div>
+
+<!-- 菜单 表格工具栏 -->
+<div id="menuTreegrid-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+	       type:'treegrid',
+           id:'menuTreegrid',
+           parentIdField:'pid'
+       }" style="display:none">
+        <ewsd:rbac str="codeItemAddDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="menu:'#moreSubMenu',
+           btnCls:'topjui-btn-green',
+           iconCls:'fa fa-plus',
+           hasDownArrow:true">新增</a>
+            <div id="moreSubMenu" class="topjui-toolbar" style="width:100px;">
+                <a href="javascript:void(0)"
+                   data-toggle="topjui-menubutton"
+                   data-options="method:'openDialog',
+           extend:'#menuTreegrid-toolbar',
+           iconCls:'fa fa-plus',
+           dialog:{
+               id:'codeItemAddDialog',
+               height:400,
+               href:'/system/codeItem/editRoot',
+               buttonsGroup:[
+                   {text:'保存',url:'/system/codeItem/saveRoot',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增根节点</a>
+                <a href="javascript:void(0)"
+                   data-toggle="topjui-menubutton"
+                   data-options="method:'openDialog',
+           extend:'#menuTreegrid-toolbar',
+           iconCls:'fa fa-plus',
+           parentGrid:{
+               type:'treegrid',
+               id:'menuTreegrid',
+               param:'codeSetId,pid:id,levelId',
+               unselectedMsg:'请先选中要添加内容的父项！'
+           },
+           dialog:{
+               id:'codeItemAddDialog',
+               href:'/system/codeItem/edit',
+               height:400,
+               buttonsGroup:[
+                   {text:'保存',url:'/system/codeItem/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增子节点</a>
+            </div>
+        </ewsd:rbac>
+        <ewsd:rbac str="codeItemEditDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#menuTreegrid-toolbar',
+           iconCls:'fa fa-pencil',
+           btnCls:'topjui-btn-blue',
+           dialog:{
+               id:'codeItemEditDialog',
+               href:'/system/codeItem/edit',
+               height:400,
+               url:'/system/codeItem/getDetailByUuid?uuid={uuid}',
+               buttonsGroup:[
+                   {text:'更新',url:'/system/codeItem/update',iconCls:'fa fa-save',handler:'ajaxForm'}
+               ]
+           }">编辑</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="/system/codeItem/delete">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'doAjax',
+           extend:'#menuTreegrid-toolbar',
+           btnCls:'topjui-btn-red',
+           grid:{uncheckedMsg:'请先勾选要删除的指标',param:'uuid:uuid'},
+           url:'/system/codeItem/delete'">删除</a>
+        </ewsd:rbac>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#menuTreegrid-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#menuTreegrid-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+        <!--<%&#45;&#45;<a href="javascript:void(0)"&#45;&#45;%>-->
+        <!--<%&#45;&#45;data-toggle="topjui-menubutton"&#45;&#45;%>-->
+        <!--<%&#45;&#45;data-options="method:'export',&#45;&#45;%>-->
+        <!--<%&#45;&#45;extend:'#menuTreegrid-toolbar',&#45;&#45;%>-->
+        <!--<%&#45;&#45;btnCls:'topjui-btn-brown'">导出</a>&#45;&#45;%>-->
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <!--<script src="../../static/js/security/mainframe.js"-->
+    <!--th:src="@{/js/security/mainframe.js}"></script>-->
+</th:block>
+</body>
+</html>

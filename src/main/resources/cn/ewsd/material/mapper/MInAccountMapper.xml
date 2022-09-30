@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MInAccountMapper">
+	<select id="getSumSetBalaGroupByOrderNo" resultType="cn.ewsd.material.model.MInAccount">
+        SELECT CONCAT('810', order_no) order_no, SUM(set_bala) set_bala
+        FROM m_in_account
+        GROUP BY order_no
+    </select>
+    
+    <select id="getInAccountList" resultType="cn.ewsd.material.model.MInAccount">
+        SELECT ia.*, ep.ep_id, ep.mat_code, ep.mat_name, ep.center_no, ep.purchase_no,
+        	   (SELECT center_name FROM t_cost_center WHERE center_no=ep.center_no) center_name
+        FROM m_in_account ia
+        LEFT JOIN m_ep_plan ep ON ia.order_no=RIGHT(ep.follow_no, 10)
+        WHERE ia.occ_date LIKE CONCAT(#{yearQry}, #{monQry}, '%')
+        <if test="numberQry!=''">
+            AND ia.bill_number LIKE CONCAT('%', #{numberQry}, '%')
+        </if>
+        <if test="orderQry!=''">
+            AND ia.order_no LIKE CONCAT('%', #{orderQry}, '%')
+        </if>
+        ORDER BY ia.account_id
+    </select>
+
+    <insert id="insertInAccount" parameterType="cn.ewsd.material.model.MInAccount">
+        INSERT INTO m_in_account (`account_id`, `bill_no`, `offer_no`, `order_no`, `occ_date`, `bill_number`, `out_amount`, `real_amount`, `set_price`,
+                                  `in_bala`, `tax_rate`, `tax_price`, `set_bala`, `remark`,
+                                  `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+        VALUES (#{accountId}, #{billNo}, #{offerNo}, #{orderNo}, #{occDate}, #{billNumber}, #{outAmount}, #{realAmount}, #{setPrice},
+                #{inBala}, #{taxRate}, #{taxPrice}, #{setBala}, #{remark},
+                #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+    </insert>
+    
+    <delete id="deleteByUuid">
+        DELETE FROM m_in_account WHERE uuid=#{_parameter}
+    </delete>
+</mapper>

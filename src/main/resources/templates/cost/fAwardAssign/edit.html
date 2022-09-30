@@ -1,0 +1,147 @@
+
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+
+<input type="hidden" name="uuid">
+<input type="hidden" id="awardId" name="awardId">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">责任单位</label>
+			<div class="topjui-input-block">
+		<input type="text" name="teamNo" id="teamNo" disabled="disabled"
+			   data-toggle="topjui-combobox"
+			   data-options="prompt:'责任单位',
+					required:true,
+					valueField:'id',
+                    textField:'text',
+                    panelHeight:'200',
+                      icons:[{
+                          iconCls:'fa fa-remove',
+                          handler: function(e){
+                              $(e.data.target).combobox('clear');
+                          }
+                      }],
+                    url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department'
+					">
+			</div>
+		</div>
+		<div class="topjui-col-sm12">
+			<label class="topjui-form-label">员工</label>
+			<div class="topjui-input-block">
+				<input type="hidden" name="empName">
+				<input type="text" name="empId" id="empId">
+
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">罚款金额</label>
+			<div class="topjui-input-block">
+				<input type="text" name="awardBala"
+					   data-toggle="topjui-numberbox"
+					   data-options="prompt:'罚款金额',required:true,min:0,precision:2">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">分配说明</label>
+			<div class="topjui-input-block">
+				<input type="text" name="remark"
+					   data-toggle="topjui-textbox"
+					   data-options="prompt:'分配说明'">
+			</div>
+		</div>
+	</div>
+		<!--<div class="topjui-col-sm6">
+			<label class="topjui-form-label">分配ID</label>
+			<div class="topjui-input-block">
+								<input type="text" name="assignId"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'分配ID'">
+							</div>
+		</div>
+    				<div class="topjui-col-sm6">
+			<label class="topjui-form-label">罚款ID</label>
+			<div class="topjui-input-block">
+								<input type="text" name="awardId"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'罚款ID'">
+							</div>
+		</div>
+    				<div class="topjui-col-sm6">
+			<label class="topjui-form-label">分配类型</label>
+			<div class="topjui-input-block">
+								<input type="text" name="assignType"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'分配类型'">
+							</div>
+		</div>
+    				<div class="topjui-col-sm6">
+			<label class="topjui-form-label">上报日期</label>
+			<div class="topjui-input-block">
+								<input type="text" name="modiDate"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'上报日期'">
+							</div>
+		</div>
+    				<div class="topjui-col-sm6">
+			<label class="topjui-form-label">上报人员</label>
+			<div class="topjui-input-block">
+								<input type="text" name="modiUser"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'上报人员'">
+							</div>
+		</div>
+    				<div class="topjui-col-sm6">
+			<label class="topjui-form-label">用户描述</label>
+			<div class="topjui-input-block">
+								<input type="text" name="userName"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'用户描述'">
+							</div>
+		</div>
+    				<div class="topjui-col-sm6">
+			<label class="topjui-form-label">删除标记</label>
+			<div class="topjui-input-block">
+								<input type="text" name="isDel"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'删除标记'">
+							</div>
+		</div>-->
+</div>
+<script>
+	$(function () {
+		$('#teamNo').iCombobox({
+			onLoadSuccess : function (){
+				var teamNo= $('#teamNo').iCombo('getValue');
+
+				$('#empId').iCombogrid({
+					required:true,
+					idField:'user_name_id',
+					textField:'user_name',
+					editable:true,
+					url:'/cost/fAward/getSysUserListByKeywords?teamNo='+teamNo,
+					loadFilter:function(data) {
+						if (data && data.length > 0) {
+							return {rows: data, total: data.length}
+						} else {
+							return {rows: [], total: 0}
+						}
+					},
+					columns:[ [
+						{field:'user_name',title:'姓名',width:100},
+						{field:'user_name_id',title:'员工号',width:100},
+						{field:'org_name',title:'组织机构',width:150}
+					] ],
+					param:'empName:user_name'
+				});
+
+			}
+
+		})
+
+	})
+</script>

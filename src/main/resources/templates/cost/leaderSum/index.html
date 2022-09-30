@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="leaderSumForm" style="width:100%; height:30%">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+			<table id="leaderSumDg"></table>
+		</div>
+	</form>
+	<div data-options="region:'south',iconCls:'icon-reload',title:'',split:true,border:false,height:'70%'">
+		<div data-toggle="topjui-layout" data-options="fit:true">
+			<div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'50%'">
+				<table id="detailDg"></table>
+			</div>
+			<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,width:'50%'">
+				<table id="deptDg"></table>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<!-- 表格工具栏 -->
+<div id="leaderSumDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'leaderSumDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:60px">月份：</label>
+	<select id="yearQry" data-toggle="topjui-combobox" name="yearQry" data-options="width:80" >
+		<option th:each="i:${#numbers.sequence(2015, endYear)}" th:value="${i}" th:text="${i}" th:selected="${i==currentYear}"></option>
+	</select>
+	<select id="mon1Qry" data-toggle="topjui-combobox" name="mon1Qry" data-options="width:80" >
+		<option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}" th:selected="${i==currentMonth}"></option>
+	</select>
+	<label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+	<select id="mon2Qry" data-toggle="topjui-combobox" name="mon2Qry" data-options="width:80" >
+		<option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}" th:selected="${i==currentMonth}"></option>
+	</select>
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+	</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#leaderSumDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/cost/leaderSum/getPageSet',
+				pagination:false,
+				queryParams:{
+					yearQry:$('#yearQry').iCombobox('getValue'),
+					mon1Qry:$('#mon1Qry').iCombobox('getValue'),
+					mon2Qry:$('#mon2Qry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'leaderName', sortable:false, title:'分管领导'
+					},{
+						field:'yearBudText', sortable:false, title:'年度总费用', align:'right'
+					},{
+						field:'monthBalaText', sortable:false, title:'当期定额费用', align:'right'
+					},{
+						field:'assessBalaText', sortable:false, title:'当期考核金额', align:'right'
+					},{
+						field:'diffBalaText', sortable:false, title:'当期节+超-金额', align:'right'
+					},{
+						field:'diffScaleText', sortable:false, title:'当期节+超-比例', align:'right'
+					},{
+						field:'sumOccText', sortable:false, title:'累计发生金额', align:'right'
+					},{
+						field:'leftBalaText', sortable:false, title:'剩余金额', align:'right'
+					},{
+						field:'leftScaleText', sortable:false, title:'剩余比例', align:'right'
+					}
+				] ],
+				onClickRow:function(index, row){
+					if(row.leaderName!='合计'){
+						var leader = row.leader
+						reloadDetail(leader);
+					}
+				},
+				rowStyler: function(index, row){
+					if(row.leaderName == '合计'){
+						return 'background-color:lightBlue'
+					}
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#downloadBtn').click(function(){
+				$('#leaderSumForm').iForm('submit', {
+					url:'/cost/leaderSum/download',
+					success:function(data){
+
+					}
+				});
+			});
+
+			$('#detailDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/cost/leaderSum/getDetail',
+				pagination:false,
+				queryParams:{
+					yearQry:$('#yearQry').iCombobox('getValue'),
+					mon1Qry:$('#mon1Qry').iCombobox('getValue'),
+					mon2Qry:$('#mon2Qry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'teamName', sortable:false, title:'责任单位'
+					},{
+						field:'yearBudText', sortable:false, title:'年度总费用', align:'right'
+					},{
+						field:'monthBalaText', sortable:false, title:'当期发生', align:'right'
+					},{
+						field:'financeBalaText', sortable:false, title:'当期财务入账', align:'right'
+					},{
+						field:'sumOccText', sortable:false, title:'累计发生金额', align:'right'
+					},{
+						field:'sumFinance', sortable:false, title:'累计财务入账', align:'right'
+					},{
+						field:'leftBalaText', sortable:false, title:'剩余', align:'right'
+					}
+				] ],
+				onClickRow:function(index, row){
+					if(row.teamName!='合计'){
+						var teamNo = row.teamNo
+						var leader = row.leader
+						reloadDept(leader, teamNo);
+					}
+				},
+				rowStyler: function(index, row){
+					if(row.teamName == '合计'){
+						return 'background-color:lightBlue'
+					}
+				}
+			});
+
+			$('#deptDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/cost/leaderSum/getDept',
+				pagination:false,
+				queryParams:{
+					yearQry:$('#yearQry').iCombobox('getValue'),
+					mon1Qry:$('#mon1Qry').iCombobox('getValue'),
+					mon2Qry:$('#mon2Qry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'itemName', sortable:false, title:'项目名称'
+					},{
+						field:'calcWayName', sortable:false, title:'测算依据'
+					},{
+						field:'yearBudText', sortable:false, title:'年度总费用', align:'right'
+					},{
+						field:'monthBalaText', sortable:false, title:'当期发生', align:'right'
+					},{
+						field:'financeBalaText', sortable:false, title:'当期财务入账', align:'right'
+					},{
+						field:'sumOccText', sortable:false, title:'累计发生金额', align:'right'
+					},{
+						field:'sumFinance', sortable:false, title:'累计财务入账', align:'right'
+					},{
+						field:'leftBalaText', sortable:false, title:'剩余', align:'right'
+					}
+				] ],
+				rowStyler: function(index, row){
+					if(row.itemName == '合计'){
+						return 'background-color:lightBlue'
+					}
+				}
+			});
+		})
+
+		function reloadData(){
+			$('#leaderSumDg').iDatagrid('reload',{
+				yearQry:$('#yearQry').iCombobox('getValue'),
+				mon1Qry:$('#mon1Qry').iCombobox('getValue'),
+				mon2Qry:$('#mon2Qry').iCombobox('getValue')
+			});
+		}
+
+		function reloadDetail(leader){
+			$('#detailDg').iDatagrid('reload', {
+				yearQry:$('#yearQry').iCombobox('getValue'),
+				mon1Qry:$('#mon1Qry').iCombobox('getValue'),
+				mon2Qry:$('#mon2Qry').iCombobox('getValue'),
+				leader: leader
+			})
+		}
+
+		function reloadDept(leader, teamNo){
+			$('#deptDg').iDatagrid('reload', {
+				yearQry:$('#yearQry').iCombobox('getValue'),
+				mon1Qry:$('#mon1Qry').iCombobox('getValue'),
+				mon2Qry:$('#mon2Qry').iCombobox('getValue'),
+				leader: leader,
+				teamNo: teamNo
+			})
+		}
+	</script>
+
+</th:block>
+</body>
+</html>

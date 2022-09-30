@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<!--核减绩效统计-->
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+		<table id="fHjbfbDg"></table>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="fHjbfbDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'fHjbfbDg'
+       }" style="display:none">
+	<a href="javascript:void(0)"
+	   data-toggle="topjui-menubutton"
+	   data-options="
+       extend:'#fHjbfbDg-toolbar',
+       btnCls:'topjui-btn-purple',
+       onClick:exportDataKhhz
+		">考核汇总</a>
+	<a href="javascript:void(0)"
+	   data-toggle="topjui-menubutton"
+	   data-options="
+       extend:'#fHjbfbDg-toolbar',
+       btnCls:'topjui-btn-purple',
+       onClick:exportDataTdhj
+		">区队核减</a>
+	<a href="javascript:void(0)"
+	   data-toggle="topjui-menubutton"
+	   data-options="
+       extend:'#fHjbfbDg-toolbar',
+       btnCls:'topjui-btn-purple',
+       onClick:exportDataFkmx
+		">罚款明细</a>
+	<a href="javascript:void(0)"
+	   data-toggle="topjui-menubutton"
+	   data-options="
+       extend:'#fHjbfbDg-toolbar',
+       btnCls:'topjui-btn-purple',
+       onClick:exportDataFkbfb
+		">罚款百分比</a>
+	<form class="search-box" id="queryForm" name="dataForm" method="post">
+		年份:
+		<input type="text" name="query_year" id="query_year"
+			   data-toggle="topjui-combobox"
+			   data-options="prompt:'默认当年',
+                   		width:100,
+                   		panelHeight:150,
+                   		url:'/system/dicSet/getDicItemByCode?code=sys.year',
+                   		valueField:'value',
+    					textField:'text'"
+		>
+		月份:
+		<input type="text" name="query_month" id="query_month"
+			   data-toggle="topjui-combobox"
+			   data-options="prompt:'默认当月',
+                   		width:100,
+                   		panelHeight:150,
+                   		url:'/system/dicSet/getDicItemByCode?code=sys.month',
+                   		valueField:'value',
+    					textField:'text'"
+		>
+		<a href="javascript:void(0)" id="query_button"
+		   data-toggle="topjui-menubutton"
+		   data-options="method:'query',
+            iconCls:'fa fa-search',
+            btnCls:'topjui-btn-red',
+            form:{id:'queryForm'},
+            grid:{type:'datagrid','id':'fHjbfbDg'}">查询</a>
+	</form>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script th:inline="javascript">
+		//页面前置参数
+		var request_query_year = [[${query_year}]];
+		var request_query_month = [[${query_month}]];
+
+		$('#fHjbfbDg').iDatagrid({
+			singleSelect:true,
+			loadMsg:'正在努力统计数据...',
+			pagination:false,
+			url:'/cost/fTj/getHjbfb',
+			columns:[ [
+				{field:'uuid',title:'',sortable:true,checkbox:true},
+				{field:'team_no',title:'部门ID',sortable:true},
+				{field:'text',title:'部门',sortable:true},
+				{field:'cnt_all',title:'通知单合计',sortable:true,halign:'center'},
+				{field:'bala_all',title:'金额合计',sortable:true,halign:'center'},
+				{field:'bl_all',title:'百分比',sortable:true,halign:'center'},
+				{field:'cnt_1',title:'安全考核<br/>通知单',sortable:true,halign:'center'},
+				{field:'bala_1',title:'考核金额',sortable:true,halign:'center'},
+				{field:'bl_1',title:'百分比',sortable:true,halign:'center'},
+				{field:'cnt_2',title:'材料考核<br/>通知单',sortable:true,halign:'center'},
+				{field:'bala_2',title:'考核金额',sortable:true,halign:'center'},
+				{field:'bl_2',title:'百分比',sortable:true,halign:'center'},
+				{field:'cnt_3',title:'机电考核<br/>通知单',sortable:true,halign:'center'},
+				{field:'bala_3',title:'考核金额',sortable:true,halign:'center'},
+				{field:'bl_3',title:'百分比',sortable:true,halign:'center'},
+				{field:'cnt_4',title:'煤质考核<br/>通知单',sortable:true,halign:'center'},
+				{field:'bala_4',title:'考核金额',sortable:true,halign:'center'},
+				{field:'bl_4',title:'百分比',sortable:true,halign:'center'},
+				{field:'cnt_5',title:'企业考核<br/>通知单',sortable:true,halign:'center'},
+				{field:'bala_5',title:'考核金额',sortable:true,halign:'center'},
+				{field:'bl_5',title:'百分比',sortable:true,halign:'center'},
+				{field:'cnt_6',title:'三违考核<br/>通知单',sortable:true,halign:'center'},
+				{field:'bala_6',title:'考核金额',sortable:true,halign:'center'},
+				{field:'bl_6',title:'百分比',sortable:true,halign:'center'},
+				{field:'cnt_7',title:'生产考核<br/>通知单',sortable:true,halign:'center'},
+				{field:'bala_7',title:'考核金额',sortable:true,halign:'center'},
+				{field:'bl_7',title:'百分比',sortable:true,halign:'center'},
+				{field:'cnt_8',title:'质量考核<br/>通知单',sortable:true,halign:'center'},
+				{field:'bala_8',title:'考核金额',sortable:true,halign:'center'},
+				{field:'bl_8',title:'百分比',sortable:true,halign:'center'},
+				{field:'cnt_9',title:'通防考核<br/>通知单',sortable:true,halign:'center'},
+				{field:'bala_9',title:'考核金额',sortable:true,halign:'center'},
+				{field:'bl_9',title:'百分比',sortable:true,halign:'center'},
+				{field:'cnt_10',title:'环保考核<br/>通知单',sortable:true,halign:'center'},
+				{field:'bala_10',title:'考核金额',sortable:true,halign:'center'},
+				{field:'bl_10',title:'百分比',sortable:true,halign:'center'},
+				{field:'cnt_11',title:'运输考核<br/>通知单',sortable:true,halign:'center'},
+				{field:'bala_11',title:'考核金额',sortable:true,halign:'center'},
+				{field:'bl_11',title:'百分比',sortable:true,halign:'center'}
+			] ],
+			onLoadSuccess:function(data){
+				var cnt_all_all = 0;
+				var bala_all_all = 0;
+				var cnt_1_all = 0;
+				var bala_1_all = 0;
+				var cnt_2_all = 0;
+				var bala_2_all = 0;
+				var cnt_3_all = 0;
+				var bala_3_all = 0;
+				var cnt_4_all = 0;
+				var bala_4_all = 0;
+				var cnt_5_all = 0;
+				var bala_5_all = 0;
+				var cnt_6_all = 0;
+				var bala_6_all = 0;
+				var cnt_7_all = 0;
+				var bala_7_all = 0;
+				var cnt_8_all = 0;
+				var bala_8_all = 0;
+				var cnt_9_all = 0;
+				var bala_9_all = 0;
+				var cnt_10_all = 0;
+				var bala_10_all = 0;
+				var cnt_11_all = 0;
+				var bala_11_all = 0;
+				$.each(data.rows, function(i, row){
+					//alert(i+'==cnt_all='+row.cnt_all+';bala_all='+row.bala_all);
+					cnt_all_all += row.cnt_all;
+					bala_all_all += row.bala_all;
+					cnt_1_all += row.cnt_1;
+					bala_1_all += row.bala_1;
+					cnt_2_all += row.cnt_2;
+					bala_2_all += row.bala_2;
+					cnt_3_all += row.cnt_3;
+					bala_3_all += row.bala_3;
+					cnt_4_all += row.cnt_4;
+					bala_4_all += row.bala_4;
+					cnt_5_all += row.cnt_5;
+					bala_5_all += row.bala_5;
+					cnt_6_all += row.cnt_6;
+					bala_6_all += row.bala_6;
+					cnt_7_all += row.cnt_7;
+					bala_7_all += row.bala_7;
+					cnt_8_all += row.cnt_8;
+					bala_8_all += row.bala_8;
+					cnt_9_all += row.cnt_9;
+					bala_9_all += row.bala_9;
+					cnt_10_all += row.cnt_10;
+					bala_10_all += row.bala_10;
+					cnt_11_all += row.cnt_11;
+					bala_11_all += row.bala_11;
+				})
+				$('#fHjbfbDg').iDatagrid('appendRow',{
+					uuid:'fHjbfbDg',
+					team_no: '--',
+					text: '合计',
+					cnt_all: cnt_all_all,
+					bala_all: bala_all_all,
+					bl_all: '--',
+					cnt_1: cnt_1_all,
+					bala_1: bala_1_all,
+					bl_1: '--',
+					cnt_2: cnt_2_all,
+					bala_2: bala_2_all,
+					bl_2: '--',
+					cnt_3: cnt_3_all,
+					bala_3: bala_3_all,
+					bl_3: '--',
+					cnt_4: cnt_4_all,
+					bala_4: bala_4_all,
+					bl_4: '--',
+					cnt_5: cnt_5_all,
+					bala_5: bala_5_all,
+					bl_5: '--',
+					cnt_6: cnt_6_all,
+					bala_6: bala_6_all,
+					bl_6: '--',
+					cnt_7: cnt_7_all,
+					bala_7: bala_7_all,
+					bl_7: '--',
+					cnt_8: cnt_8_all,
+					bala_8: bala_8_all,
+					bl_8: '--',
+					cnt_9: cnt_9_all,
+					bala_9: bala_9_all,
+					bl_9: '--',
+					cnt_10: cnt_10_all,
+					bala_10: bala_10_all,
+					bl_10: '--',
+					cnt_11: cnt_11_all,
+					bala_11: bala_11_all,
+					bl_11: '--'
+				});
+				$('#query_year').iCombobox('setValue', request_query_year);
+				$('#query_month').iCombobox('setValue', request_query_month);
+			}
+		});
+
+		$(function () {
+			$('#query_button').bind('click', function(){
+				request_query_year = $('#query_year').iCombobox('getValue');
+				request_query_month = $('#query_month').iCombobox('getValue');
+			});
+		});
+
+		function exportDataKhhz() {
+			window.location.href = decodeURI('/cost/fTj/exportDataKhhz?query_year='+request_query_year+'&query_month='+request_query_month);
+		};
+		function exportDataTdhj() {
+			window.location.href = decodeURI('/cost/fTj/exportDataTdhj?query_year='+request_query_year+'&query_month='+request_query_month);
+		};
+		function exportDataFkmx() {
+			window.location.href = decodeURI('/cost/fTj/exportDataFkmx?query_year='+request_query_year+'&query_month='+request_query_month);
+		};
+		function exportDataFkbfb() {
+			window.location.href = decodeURI('/cost/fTj/exportDataFkbfb?query_year='+request_query_year+'&query_month='+request_query_month);
+		};
+	</script>
+
+</th:block>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.mdata.mapper.UtilMapper">
+	<select id="getRowCountByCondition"  resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM ${tableName}
+		<if test="conditionList != null">
+			WHERE
+			<foreach collection="conditionList" item="item" separator=" AND ">
+				<foreach collection="item" index="i" item="cond">
+			      	<if test="i&lt;2">
+						${cond}
+					</if>
+					<if test="i&gt;1">
+						#{cond}
+					</if>
+				</foreach>
+			</foreach>
+		</if>
+	</select>
+
+	<select id="getAuthAccessByRoleIdsAndId" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM sys_auth_access WHERE id=#{id} AND access_auth='1' AND role_id IN
+		<foreach collection="roleIds.split(',')" separator="," open="(" close=")" item="roleId">
+			#{roleId}
+		</foreach>
+	</select>
+
+	<select id="getMaxBillCode" resultType="java.lang.String">
+		SELECT IFNULL(MAX(${columnName}), '')
+		FROM ${tableName}
+		WHERE ${columnName} LIKE CONCAT(#{prefix}, '%')
+		<if test="conditionList!=null">
+			<foreach collection="conditionList" item="item" open=" AND" separator=" AND ">
+				<foreach collection="item" index="i" item="cond">
+					<if test="i&lt;2">
+						${cond}
+					</if>
+					<if test="i&gt;1">
+						#{cond}
+					</if>
+				</foreach>
+			</foreach>
+		</if>
+	</select>
+
+	<select id="getCheckRight" resultType="java.lang.Integer">
+		SELECT COUNT(us.user_id)
+		FROM sys_user_step us
+		LEFT JOIN sys_audit_process ap ON ap.uuid=us.step_uuid
+		WHERE ap.process_no=#{processNo} AND us.user_id=#{userId}
+	</select>
+</mapper>

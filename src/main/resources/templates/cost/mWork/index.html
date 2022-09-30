@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'mWorkDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/cost/mWork/getPageSet'">
+            <thead>
+            <tr>
+				<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+				<th data-options="field:'teamNoName',title:'生产单位',sortable:true"></th>
+				<th data-options="field:'workPrj',title:'工程项目',sortable:true"></th>
+				<th data-options="field:'planRawout',title:'计划原煤',sortable:true"></th>
+				<th data-options="field:'occRawout',title:'实际原煤',sortable:true"></th>
+				<th data-options="field:'planSaleout',title:'计划商品煤',sortable:true"></th>
+				<th data-options="field:'occSaleout',title:'实际商品煤',sortable:true"></th>
+				<th data-options="field:'planDig',title:'计划进尺',sortable:true"></th>
+				<th data-options="field:'occDig',title:'实际进尺',sortable:true"></th>
+				<th data-options="field:'remark',title:'备注信息',sortable:true"></th>
+
+			</tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="mWorkDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'mWorkDg'
+       }" style="display:none">
+		<ewsd:rbac str="mWorkAddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#mWorkDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'mWorkAddDg',
+               href:'/cost/mWork/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/cost/mWork/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="mWorkEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#mWorkDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'mWorkEditDg',
+               href:'/cost/mWork/edit',
+               url:'/cost/mWork/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/cost/mWork/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'mWorkDg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/cost/mWork/deleteBatch">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#mWorkDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/cost/mWork/deleteBatch'">删除</a>
+		</ewsd:rbac>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#mWorkDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#mWorkDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+	<form class="search-box" id="queryForm" name="dataForm" method="post">
+		年份:
+		<input type="text" name="query_year" id="query_year"
+			   data-toggle="topjui-combobox"
+			   data-options="prompt:'默认当年',
+                   		width:100,
+                   		panelHeight:150,
+                   		url:'/system/dicSet/getDicItemByCode?code=sys.year',
+                   		valueField:'value',
+    					textField:'text'"
+		>
+		月份:
+		<input type="text" name="query_month" id="query_month"
+			   data-toggle="topjui-combobox"
+			   data-options="prompt:'默认当月',
+                   		width:100,
+                   		panelHeight:150,
+                   		url:'/system/dicSet/getDicItemByCode?code=sys.month',
+                   		valueField:'value',
+    					textField:'text'"
+		>
+		<a href="javascript:void(0)" id="query_button"
+		   data-toggle="topjui-menubutton"
+		   data-options="method:'query',
+            iconCls:'fa fa-search',
+            btnCls:'topjui-btn-red',
+            form:{id:'queryForm'},
+            grid:{type:'datagrid','id':'mWorkDg'}">查询</a>
+	</form>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script th:inline="javascript">
+		//页面前置参数
+		var request_query_year = [[${query_year}]];
+		var request_query_month = [[${query_month}]];
+
+		$(function () {
+			//页面选择框初始赋值
+			$('#query_year').iCombobox('setValue', request_query_year);
+			$('#query_month').iCombobox('setValue', request_query_month);
+
+			//点击查询按钮时,将选择框中的参数赋予页面前置参数,刷新页面
+			$('#query_button').bind('click', function(){
+				request_query_year = $('#query_year').iCombobox('getValue');
+				request_query_month = $('#query_month').iCombobox('getValue');
+			});
+		})
+	</script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.repository.mapper.MCheckMapper">
+    <select id="getCheckList" resultType="cn.ewsd.repository.model.MCheck">
+        SELECT a.check_no, a.check_step, a.check_date, a.check_emp, b.store_name, ap.process_name check_step_name
+		FROM m_check a
+		LEFT JOIN m_store b ON a.store_no = b.store_no
+        LEFT JOIN sys_audit_process ap ON ap.process_no=a.check_step
+		WHERE a.store_no IN (SELECT store_no FROM sys_user_store WHERE user_id=#{userId})
+		<if test="yearQry!=''">
+            AND SUBSTRING(a.check_date, 1, 4)=#{yearQry}
+        </if>
+    </select>
+
+    <insert id="insertCheck" parameterType="cn.ewsd.repository.model.MCheck">
+        INSERT INTO m_check (`check_no`, `check_step`, `check_date`, `check_emp`, `store_no`,
+                             `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+        VALUES (#{checkNo}, #{checkStep}, #{checkDate}, #{checkEmp}, #{storeNo},
+                #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+    </insert>
+
+    <select id="getCheckByNo" resultType="cn.ewsd.repository.model.MCheck">
+        SELECT * FROM m_check WHERE check_no=#{_parameter}
+    </select>
+
+    <delete id="deleteCheckByNo">
+        DELETE FROM m_check WHERE check_no=#{_parameter}
+    </delete>
+
+    <update id="updateCheck" parameterType="cn.ewsd.repository.model.MCheck">
+        UPDATE m_check
+        <set>
+            <if test="checkStep!=null">check_step=#{checkStep}</if>
+        </set>
+        WHERE check_no=#{checkNo}
+    </update>
+
+    <select id="getCheckSet" resultType="cn.ewsd.repository.model.MCheck">
+        SELECT c.check_no, CONCAT(c.check_date, '-', c.check_emp, '-', s.store_name) store_name
+        FROM m_check c
+        LEFT JOIN m_store s ON s.store_no=c.store_no
+        WHERE 1=1
+        <if test="_parameter!=''">
+            AND c.check_step=#{_parameter}
+        </if>
+        ORDER BY c.check_date DESC
+    </select>
+</mapper>

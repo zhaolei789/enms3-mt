@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.repository.mapper.MInMapper">
+	<select id="getCountByMatNo" resultType="java.lang.Integer">
+		SELECT COUNT(mat_no) FROM m_in WHERE mat_no=#{matNo}
+	</select>
+
+	<select id="getCountByStoreNo" resultType="java.lang.Integer">
+		SELECT COUNT(store_no) FROM m_in WHERE store_no=#{storeNo}
+	</select>
+
+	<select id="getEpPlanPageSet" resultType="cn.ewsd.material.model.WzscPlan">
+		SELECT ep.ep_id, ep.mat_code, ep.mat_name, ep.mat_unit, ep.erp_type, ep.mat_amount, ep.mat_price, ep.center_no, ep.type_name, ep.request, ep.remark, ep.creator, (ep.mat_price*ep.mat_amount) mat_bala, ep.purchase_no,
+			   ep.create_date, ep.mat_addr, IFNULL(mi.amount,0) amount, IFNULL(ap.applyed, 0) applyed, ep.item_type, (SELECT center_name FROM t_cost_center WHERE center_no=ep.center_no) as center_name
+		FROM m_ep_plan ep
+		LEFT JOIN (SELECT reserve_no, SUM(bill_amount) amount
+				   FROM m_in
+				   WHERE bill_date&gt;=#{beginDate} AND bill_date&lt;=#{occDate} AND in_step='7201F'
+				   GROUP BY reserve_no) mi ON ep.ep_id=mi.reserve_no
+		LEFT JOIN (SELECT reserve_no, SUM(in_amount) applyed
+				   FROM m_in
+				   WHERE in_date&gt;=#{beginDate} AND in_date&lt;=#{occDate}
+					 AND in_step IN ('72011', '72012')
+				   GROUP BY reserve_no) ap ON ep.ep_id=ap.reserve_no
+		WHERE ep.create_date LIKE CONCAT(#{monthQry}, '%')
+		  AND (ep.mat_amount - IFNULL(mi.amount, 0) - IFNULL(ap.applyed, 0) &gt; 0.0001)
+		<if test="codeQry!=''">
+			AND ep.mat_code LIKE CONCAT(#{codeQry}, '%')
+		</if>
+		<if test="purcQry!=''">
+			AND (ep.purchase_no LIKE CONCAT(#{purcQry}, '%') OR ep.ep_id LIKE CONCAT(#{purcQry}, '%'))
+		</if>
+		<if test="typeQry!=''">
+			AND CONCAT(ep.erp_type, ep.type_name) LIKE CONCAT('%', #{typeQry}, '%')
+		</if>
+		<if test="nameQry!=''">
+			AND ep.mat_name LIKE CONCAT('%', #{nameQry}, '%')
+		</if>
+		<if test="statusQry=='m.supplyFlag.0'">
+			AND IFNULL(mi.amount, 0)=0
+		</if>
+		<if test="statusQry=='m.supplyFlag.2'">
+			AND (ep.mat_amount-IFNULL(mi.amount, 0)) &gt; 0 AND IFNULL(mi.amount, 0)!=0
+		</if>
+		<if test="statusQry=='m.supplyFlag.1'">
+			AND (ep.mat_amount-IFNULL(mi.amount, 0)) &lt;= 0
+		</if>
+	</select>
+
+	<insert id="saveIn" parameterType="cn.ewsd.repository.model.MIn">
+		INSERT INTO m_in (`bill_no`, `in_type`, `plan_src`, `plan_no`, `team_no`, `offer_team`, `store_no`, `reserve_no`, `mat_no`, `apply_amount`, `apply_date`, `apply_emp`, `in_amount`,
+						  `in_date`, `in_emp`, `bill_amount`, `set_price`, `bill_date`, `bill_emp`, `offer_no`, `in_step`, `check_no`, `remark`, `data_src`, `price1`, `price2`, `price3`,
+						  `link_no`, `norm_no`, `out_amount`, `out_team`, `erp_bill`, `if_account`, `check_addr`, `check_type`, `check_info`, `check_remark`, `reserve1`, `reserve2`, `reserve3`, `reserve4`, `reserve5`,
+						  `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{billNo}, #{inType}, #{planSrc}, #{planNo}, #{teamNo}, #{offerTeam}, #{storeNo}, #{reserveNo}, #{matNo}, #{applyAmount}, #{applyDate}, #{applyEmp}, #{inAmount},
+				#{inDate}, #{inEmp}, #{billAmount}, #{setPrice}, #{billDate}, #{billEmp}, #{offerNo}, #{inStep}, #{checkNo}, #{remark}, #{dataSrc}, #{price1}, #{price2}, #{price3},
+				#{linkNo}, #{normNo}, #{outAmount}, #{outTeam}, #{erpBill}, #{ifAccount}, #{checkAddr}, #{checkType}, #{checkInfo}, #{checkRemark}, #{reserve1}, #{reserve2}, #{reserve3}, #{reserve4}, #{reserve5},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+    <select id="getDetail" resultType="cn.ewsd.repository.model.MIn">
+        SELECT ep.center_no, cc.center_name, ap.process_name in_step_name, s.store_name, i.apply_date, i.apply_amount, u.user_name apply_emp_name, i.bill_date, IFNULL(u1.user_name, '') bill_emp, i.reserve_no,
+               i.bill_amount, i.bill_amount*i.set_price bala, o.offer_name, i.bill_no
+        FROM m_in i
+        LEFT JOIN m_ep_plan ep ON ep.ep_id=i.reserve_no
+        LEFT JOIN t_cost_center cc ON ep.center_no=cc.center_no
+        LEFT JOIN m_store s ON s.store_no=i.store_no
+        LEFT JOIN sys_user u ON u.uuid=i.apply_emp
+        LEFT JOIN sys_user u1 ON u1.uuid=i.bill_emp
+        LEFT JOIN m_offer o ON o.offer_no=i.offer_no
+        LEFT JOIN sys_audit_process ap ON ap.process_no=i.in_step
+        WHERE i.in_step NOT IN ('7201F', '7201X', '7201Z') AND i.in_type='r.inBillType.1'
+    </select>
+
+	<select id="getDirectInPageSet" resultType="cn.ewsd.repository.model.MIn">
+		SELECT i.*, u.user_name apply_emp_name, m.mat_code, m.mat_name, m.mat_unit, m.erp_type, m.type_name, ap.process_name in_step_name,
+			   ((CASE WHEN IFNULL(i.bill_amount, 0)=0 THEN i.in_amount ELSE i.bill_amount END)*i.set_price) bala, di.text in_type_name
+		FROM m_in i
+		LEFT JOIN m_material m ON i.mat_no=m.mat_no
+		LEFT JOIN sys_user u ON u.uuid=i.apply_emp
+		LEFT JOIN sys_audit_process ap ON ap.process_no=i.in_step
+		LEFT JOIN sys_dic_item di ON di.value=i.in_type
+		WHERE i.data_src='m.dataSrc.1' AND i.in_type='r.inBillType.2' AND i.in_date&gt;=#{startDateQry} AND i.in_date&lt;=#{endDateQry}
+		  AND EXISTS (SELECT '1' FROM sys_user_store WHERE user_id=#{userId} AND store_no=i.store_no)
+		<if test="matQry!=''">
+			AND m.mat_code+m.mat_name LIKE CONCAT('%', #{matQry}, '%')
+		</if>
+		<if test="storeNoQry!=''">
+			AND i.store_no=#{storeNoQry}
+		</if>
+		ORDER BY i.in_date DESC
+	</select>
+
+	<select id="getCheckIndexPageSet" resultType="cn.ewsd.repository.model.MIn">
+		SELECT COUNT(i.apply_date) count, i.apply_date, i.in_type, i.store_no, i.in_step, s.store_name, ap.process_name in_step_name, di.text in_type_name
+		FROM m_in i
+		LEFT JOIN m_store s ON s.store_no=i.store_no
+		LEFT JOIN sys_audit_process ap ON ap.process_no=i.in_step
+		LEFT JOIN sys_dic_item di ON di.value=i.in_type
+		WHERE in_step IN ('72011', '72012') AND data_src='m.dataSrc.1' AND i.store_no IN (SELECT store_no FROM sys_user_store WHERE user_id=#{userId})
+		GROUP BY i.apply_date, i.in_type, i.store_no, i.in_step, s.store_name, ap.process_name, di.text
+		ORDER BY i.apply_date
+	</select>
+
+	<!--<select id="getCheckIndexPageSet" resultType="cn.ewsd.repository.model.MIn">
+		SELECT COUNT(i.apply_date) count, i.apply_date, i.in_type, i.store_no, i.in_step, s.store_name, ap.process_name in_step_name, di.text in_type_name
+		FROM m_in i
+			LEFT JOIN m_store s ON s.store_no=i.store_no
+			LEFT JOIN sys_audit_process ap ON ap.process_no=i.in_step
+			LEFT JOIN sys_dic_item di ON di.value=i.in_type
+		WHERE in_step IN ('72011', '72012') AND data_src='m.dataSrc.1' AND s.mng_team=#{userTeam}
+		GROUP BY i.apply_date, i.in_type, i.store_no, i.in_step, s.store_name, ap.process_name, di.text
+		ORDER BY i.apply_date
+	</select>-->
+
+	<select id="getInCheckPageSet" resultType="cn.ewsd.repository.model.MIn">
+		SELECT i.*, u.user_name apply_emp_name, m.mat_code, m.mat_name, m.mat_unit, m.erp_type, m.type_name, ap.process_name in_step_name,
+			   i.in_amount*i.set_price bala, CASE WHEN IFNULL(i.reserve2, '')='' THEN s.site_code ELSE i.reserve2 END reserve22, di.text in_type_name
+		FROM m_in i
+		LEFT JOIN m_material m ON i.mat_no=m.mat_no
+		LEFT JOIN sys_user u ON u.uuid=i.apply_emp
+		LEFT JOIN sys_audit_process ap ON ap.process_no=i.in_step
+		LEFT JOIN sys_dic_item di ON di.value=i.in_type
+		LEFT JOIN m_stock s ON s.mat_no=i.mat_no AND s.store_no=i.store_no
+		WHERE i.apply_date=#{applyDate} AND i.in_type=#{inType} AND i.in_step=#{inStep} AND i.store_no=#{storeNo}
+		<if test="matQry!=''">
+			AND m.mat_code+m.mat_name LIKE CONCAT('%', #{matQry}, '%')
+		</if>
+		ORDER BY i.in_date DESC
+	</select>
+
+	<select id="getMInByBillNo" resultType="cn.ewsd.repository.model.MIn">
+		SELECT i.*, m.qa_period
+		FROM m_in i
+		LEFT JOIN m_material m ON i.mat_no=m.mat_no
+		WHERE i.bill_no=#{_parameter}
+	</select>
+
+	<update id="updateMIn" parameterType="cn.ewsd.repository.model.MIn">
+		UPDATE m_in
+		<set>
+			<if test="storeNo!=null">`store_no`=#{storeNo},</if>
+			<if test="setPrice!=null">`set_price`=#{setPrice},</if>
+			<if test="inAmount!=null">`in_amount`=#{inAmount},</if>
+			<if test="inDate!=null">`in_date`=#{inDate},</if>
+			<if test="inEmp!=null">`in_emp`=#{inEmp},</if>
+			<if test="billAmount!=null">`bill_amount`=#{billAmount},</if>
+			<if test="billDate!=null">`bill_date`=#{billDate},</if>
+			<if test="billEmp!=null">`bill_emp`=#{billEmp},</if>
+			<if test="inStep!=null">`in_step`=#{inStep},</if>
+			<if test="reserve2!=null">`reserve2`=#{reserve2},</if>
+			<if test="reserve4!=null">`reserve4`=#{reserve4},</if>
+			<if test="checkInfo!=null">`check_info`=#{checkInfo},</if>
+			<if test="reserve1!=null">`reserve1`=#{reserve1},</if>
+			<if test="remark!=null">`remark`=#{remark},</if>
+			<if test="outTeam!=null">`out_team`=#{outTeam}</if>
+		</set>
+		WHERE bill_no=#{billNo}
+	</update>
+
+	<select id="getBcDrawQry" resultType="cn.ewsd.repository.model.MIn">
+		SELECT i.*, m.mat_code, m.mat_name, m.erp_type, m.type_name, ap.process_name in_step_name,
+			   (i.bill_amount*i.set_price) bala, di.text in_type_name, m.qa_period,
+			   (SELECT user_name FROM sys_user WHERE i.apply_emp=uuid) AS apply_emp_name,
+			   (SELECT user_name FROM sys_user WHERE i.in_emp=uuid) AS in_name, m.mat_unit,
+			   (SELECT offer_name FROM m_offer WHERE i.offer_no=offer_no) AS supplier,
+			   (SELECT store_name FROM m_store WHERE i.store_no=store_no) AS store_name,
+			   (SELECT user_name FROM sys_user WHERE i.bill_emp=uuid) AS check_ename, ep.wbs, ep.center_no,
+			   (SELECT center_name FROM t_cost_center WHERE ep.center_no=center_no) AS center_name
+		FROM m_in i
+		LEFT JOIN m_material m ON i.mat_no=m.mat_no
+		LEFT JOIN m_ep_plan ep ON i.reserve_no=ep.ep_id
+		LEFT JOIN sys_audit_process ap ON ap.process_no=i.in_step
+		LEFT JOIN sys_dic_item di ON di.value=i.in_type
+		WHERE i.apply_date&gt;=#{date1Qry} AND i.apply_date&lt;=#{date2Qry}
+		  AND i.data_src IN ('m.dataSrc.1')
+		  AND NOT EXISTS (SELECT '1' FROM m_in_back WHERE init_bill=i.bill_no)  AND i.in_type!='r.inBillType.3'
+		<if test="userDeptIds!=''">
+			AND i.team_no IN
+			<foreach collection="userDeptIds.split(',')" item="deptId" open="(" separator="," close=")">
+				#{deptId}
+			</foreach>
+		</if>
+		<if test="!ifAllQry">
+			AND EXISTS (SELECT '1' FROM sys_user_store WHERE store_no=i.store_no AND user_id=#{userId})
+		</if>
+		<if test="matQry!=''">
+			AND CONCAT(m.mat_code, m.mat_name) LIKE CONCAT('%', #{matQry}, '%')
+		</if>
+		<if test="storeNoQry!=''">
+			AND i.store_no=#{storeNoQry}
+		</if>
+		<if test="inTypeQry!=''">
+			AND i.in_type=#{inTypeQry}
+		</if>
+		<if test="wbsQry!=''">
+			AND ep.wbs LIKE CONCAT('%', wbsQry, '%')
+		</if>
+		<if test="inStepQry!=''">
+			AND i.in_step=#{inStepQry}
+		</if>
+		<if test="accountQry!=''">
+			AND i.reserve1=#{accountQry}
+		</if>
+		<if test="centerQry!=''">
+			AND ep.center_no=#{centerQry}
+		</if>
+		<if test='periodQry!="0"'>
+			AND (IFNULL(m.qa_period, 0)>0 AND (i.bill_amount - IFNULL(i.out_amount,0))>0
+			AND DATE_FORMAT(DATE_SUB(STR_TO_DATE(i.reserve4, '%Y%m%d'), INTERVAL -IFNULL(m.qa_period, 0) day), '%Y%m%d') &lt;= #{periodDay})
+		</if>
+		ORDER BY i.apply_date DESC
+	</select>
+
+	<select id="getInList" resultType="cn.ewsd.repository.model.MIn">
+		SELECT a.bill_no, a.set_price, a.store_no, (a.bill_amount + IFNULL(mb.bill_amount, 0) - IFNULL(a.out_amount,0)) bill_amount
+		FROM m_in a
+		LEFT JOIN m_in mb ON a.bill_no=mb.link_no
+		WHERE a.in_step='7201F'
+	      AND (a.bill_amount + IFNULL(mb.bill_amount,0) - IFNULL(a.out_amount,0)) &gt; 0
+          AND a.mat_no = #{matNo}
+          AND a.store_no = #{storeNo}
+          AND a.data_src = 'm.dataSrc.1'
+        ORDER BY a.bill_no ASC
+	</select>
+
+	<update id="updateMIn1">
+		UPDATE m_in SET out_amount=IFNULL(out_amount, 0)+#{outAmount} WHERE bill_no=#{billNo}
+	</update>
+
+	<select id="getBillAmount"  resultType="java.lang.Double">
+		SELECT IFNULL(SUM(bill_amount), 0) bill_amount FROM m_in WHERE plan_no=#{_parameter} AND in_step='7701F'
+	</select>
+
+	<select id="getTurnRegList" resultType="cn.ewsd.repository.model.MIn">
+		SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, st.store_name, ap.process_name in_step_name, o.text offer_team_name,
+			   ((CASE WHEN a.bill_amount=0 THEN a.in_amount ELSE a.bill_amount END) * a.set_price) mat_bala,
+			   ((CASE WHEN a.bill_amount=0 THEN a.in_amount ELSE a.bill_amount END) * a.price1) fix_bala
+		FROM m_in a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN sys_audit_process ap ON ap.process_no=a.in_step
+		LEFT JOIN sys_organization o ON o.id=a.offer_team
+		LEFT JOIN m_store st ON a.store_no=st.store_no
+		WHERE a.team_no=#{userTeam} AND a.data_src='m.dataSrc.A'
+		  AND a.apply_date&gt;=#{date1Qry} AND a.apply_date&lt;=#{date2Qry}
+		  AND a.in_type = 'r.inBillType.A'
+		<if test="stepQry!=''">
+			AND a.in_step=#{stepQry}
+		</if>
+		<if test="matQry!=''">
+			AND (b.mat_code LIKE CONCAT('%', #{matQry}, '%') OR b.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+		ORDER BY a.bill_no DESC
+	</select>
+
+	<delete id="deleteMIn">
+		DELETE FROM m_in WHERE bill_no=#{_parameter}
+	</delete>
+
+	<select id="getTurnCheckList" resultType="cn.ewsd.repository.model.MIn">
+		SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, st.store_name, p.process_name in_step_name, o.text team_name,
+		       ((CASE WHEN a.bill_amount=0 THEN a.in_amount ELSE a.bill_amount END) * a.set_price) mat_bala,
+			   ((CASE WHEN a.bill_amount=0 THEN a.in_amount ELSE a.bill_amount END) * a.price1) fix_bala
+		FROM m_in a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN sys_audit_process p ON p.process_no=a.in_step
+		LEFT JOIN sys_organization o ON o.id=a.team_no
+		LEFT JOIN m_store st ON a.store_no=st.store_no
+		WHERE a.apply_date&gt;=#{date1Qry} AND a.apply_date&lt;=#{date2Qry}
+		  AND a.in_step IN ('77013', '77017')
+		  AND a.in_type = 'r.inBillType.A'
+		  AND EXISTS (SELECT '1' FROM sys_user_step us
+		   			  LEFT JOIN sys_audit_process ap ON ap.uuid=us.step_uuid
+		   			  WHERE ap.process_no=a.in_step AND us.user_id=#{userId})
+		  AND (
+			a.in_step='77013' AND a.offer_team=#{userTeam}
+			OR
+			a.in_step='77017'
+			)
+		<if test="matQry!=''">
+			AND (b.mat_code LIKE CONCAT('%', #{matQry}, '%') OR b.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+		ORDER BY a.bill_no ASC
+	</select>
+
+	<select id="getTurnConfList" resultType="cn.ewsd.repository.model.MIn">
+		SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, st.store_name, p.process_name in_step_name, o.text team_name, o1.text offer_team_name,
+			   ((CASE WHEN a.bill_amount=0 THEN a.in_amount ELSE a.bill_amount END) * a.set_price) mat_bala,
+			   ((CASE WHEN a.bill_amount=0 THEN a.in_amount ELSE a.bill_amount END) * a.price1) fix_bala
+		FROM m_in a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN m_store st ON a.store_no=st.store_no
+		LEFT JOIN sys_audit_process p ON p.process_no=a.in_step
+		LEFT JOIN sys_organization o ON o.id=a.team_no
+		LEFT JOIN sys_organization o1 ON o1.id=a.offer_team
+		WHERE a.out_team=#{userTeam}
+		  AND a.apply_date&gt;=#{date1Qry} AND a.apply_date&lt;=#{date2Qry}
+		  AND a.in_step='77015'
+		<if test="matQry!=''">
+			AND (b.mat_code LIKE CONCAT('%', #{matQry}, '%') OR b.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+		ORDER BY a.bill_no ASC
+	</select>
+
+	<update id="updMIn">
+		UPDATE m_in SET bill_amount=in_amount, in_step=#{inStep}, bill_date=#{billDate}, bill_emp=#{billEmp}, check_addr=#{checkAddr} WHERE bill_no=#{billNo}
+	</update>
+
+	<select id="getReturnMatList" resultType="cn.ewsd.repository.model.MIn">
+		SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, (SELECT store_name FROM m_store WHERE store_no=a.store_no) store_name, p.process_name in_step_name
+		FROM m_in a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN sys_audit_process p ON p.process_no=a.in_step
+		WHERE a.data_src='m.dataSrc.A'
+		  AND a.offer_no=#{userTeam}
+		  AND a.in_type='r.inBillType.B'
+		  AND a.in_date&gt;=#{date1Qry} AND a.in_date&lt;=#{date2Qry}
+		<if test="matQry!=''">
+			AND CONCAT(b.mat_code, b.mat_name) LIKE CONCAT('%', #{matQry}, '%')
+		</if>
+		ORDER BY a.in_date DESC
+	</select>
+
+	<select id="getReturnChkList" resultType="cn.ewsd.repository.model.MIn">
+		SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, (SELECT store_name FROM m_store WHERE store_no=a.store_no) store_name,
+			   (SELECT prj_name FROM m_prj WHERE prj_no=a.norm_no) prj_name, di.text plan_src_name, o.text offer_team_name
+		FROM m_in a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN sys_dic_item di ON di.value=a.plan_src
+		LEFT JOIN sys_organization o ON o.id=a.offer_team
+		WHERE a.data_src='m.dataSrc.A'
+		  AND a.in_step NOT IN ('77010', '7701F', '7701X')
+		  AND a.in_type='r.inBillType.B'
+		  AND EXISTS (SELECT '1' FROM sys_user_step us
+		   			  LEFT JOIN sys_audit_process ap ON ap.uuid=us.step_uuid
+		   			  WHERE ap.process_no=a.in_step AND us.user_id=#{userNo})
+		  AND (
+			a.in_step='77013' AND a.offer_team=#{userTeam}
+			OR
+			a.in_step='77015' AND EXISTS (SELECT '1' FROM sys_user_store WHERE store_no=a.store_no AND user_id=#{userNo})
+			OR
+			a.in_step='77017'
+		  )
+		<if test="matQry!=''">
+			AND CONCAT(b.mat_code, b.mat_name) LIKE CONCAT('%', #{matQry}, '%')
+		</if>
+		<if test="storeQry!=''">
+			AND a.store_no=#{storeQry}
+		</if>
+		ORDER BY a.in_date DESC
+	</select>
+
+	<select id="getReturnQryList" resultType="cn.ewsd.repository.model.MIn">
+		SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, (SELECT store_name FROM m_store WHERE store_no=a.store_no) store_name, p.process_name in_step_name, di.text in_type_name,
+			   di1.text plan_src_name, o.text teamName, o1.text offer_team_name, IFNULL(o2.text, '') offer_name
+		FROM m_in a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN sys_audit_process p ON p.process_no=a.in_step
+		LEFT JOIN sys_dic_item di ON di.value=a.in_type
+		LEFT JOIN sys_dic_item di1 ON di1.value=a.plan_src
+		LEFT JOIN sys_organization o ON o.id=a.team_no
+		LEFT JOIN sys_organization o1 ON o1.id=a.offer_team
+		LEFT JOIN sys_organization o2 ON o2.id=a.offer_no
+		WHERE a.data_src='m.dataSrc.A' AND a.apply_amount!=0
+		  AND a.in_date&gt;=#{date1Qry} AND a.in_date&lt;=#{date2Qry}
+		  AND (a.team_no IN
+		<foreach collection="userDeptIds.split(',')" item="deptId" open="(" separator="," close=")">
+			#{deptId}
+		</foreach>
+			OR a.offer_team IN
+		<foreach collection="userDeptIds.split(',')" item="deptId" open="(" separator="," close=")">
+			#{deptId}
+		</foreach>)
+		<if test="typeQry!=''">
+			AND a.in_type=#{typeQry}
+		</if>
+		<if test="matQry!=''">
+			AND CONCAT(b.mat_code, b.mat_name) LIKE CONCAT('%', #{matQry}, '%')
+		</if>
+		ORDER BY a.in_date DESC
+	</select>
+	
+	<select id="getInStkChkList" resultType="cn.ewsd.repository.model.MIn">
+		SELECT a.*, c.mat_code, c.mat_name, c.mat_unit, (SELECT store_name FROM m_store WHERE store_no=a.store_no) store_name,
+			   p.process_name in_step_name, o.text offer_team_name, o1.text team_name, di.text in_type_name
+		FROM m_in a
+		INNER JOIN m_material c ON a.mat_no = c.mat_no
+		LEFT JOIN sys_audit_process p ON p.process_no=a.in_step
+		LEFT JOIN sys_organization o ON o.id=a.offer_team
+		LEFT JOIN sys_organization o1 ON o1.id=a.team_no
+		LEFT JOIN sys_dic_item di ON di.value=a.in_type
+		WHERE a.in_step IN ('77013', '77015')
+		  AND a.data_src='m.dataSrc.B'
+		  AND a.apply_date &gt;= #{date1Qry} AND a.apply_date &lt;= #{date2Qry}
+		  AND EXISTS (SELECT '1' FROM sys_user_step us
+		   			  LEFT JOIN sys_audit_process ap ON ap.uuid=us.step_uuid
+		   			  WHERE ap.process_no=a.in_step AND us.user_id=#{userNo})
+		  AND
+			((a.in_step='77013' AND c.fix_content=#{userTeam})
+			 OR
+			 a.in_step='77015' AND EXISTS (SELECT '1' FROM sys_user_store WHERE user_id=#{userNo} AND store_no=a.store_no)
+			)
+	</select>
+
+	<select id="getStockInDetail" resultType="cn.ewsd.repository.model.MIn">
+		SELECT a.*, (a.set_price*a.bill_amount) bala, (SELECT store_name FROM m_store WHERE store_no=a.store_no) store_name,
+			   (SELECT user_name FROM sys_user WHERE uuid=a.in_emp) in_emp_name
+		FROM m_in a
+		WHERE a.mat_no=#{matNo} AND a.bill_date&gt;=#{date1Qry} AND a.bill_date&lt;=#{date2Qry}
+		<if test="storeNoQry!=''">
+			AND a.store_no=#{storeNoQry}
+		</if>
+		<if test="!ifPower">
+			AND a.store_no!='1S'
+		</if>
+	</select>
+
+	<select id="getTeamStockInDetail" resultType="cn.ewsd.repository.model.MIn">
+		SELECT ti.*, (SELECT store_name FROM m_store WHERE store_no=ti.store_no) store_name
+		FROM (SELECT a.bill_no, a.plan_no, a.team_no, a.store_no, a.mat_no, a.in_date, a.bill_amount amount, a.set_price price,
+		      		 (SELECT process_name FROM sys_audit_process WHERE process_no=a.in_step) status, 'ERP领料' in_type
+		   	  FROM m_in a
+			  WHERE a.mat_no=#{matNo} AND a.store_no=#{storeNo} AND a.in_step='7201F'
+		  		AND a.in_date &gt;= #{bDateQry} AND a.in_date &lt;= #{eDateQry}
+			  UNION
+			  SELECT a.bill_no, '' plan_no, a.team_no, a.store_no, a.mat_no, a.occ_date in_date, a.occ_amount amount, a.mat_price price,
+					 '定稿' status, '现场入库' in_type
+			  FROM m_team_bill a
+			  WHERE a.mat_no=#{matNo} AND a.data_src='m.dataSrc.1'
+		<if test="storeNo!=''">
+				AND a.store_no=#{storeNo}
+		</if>
+				AND a.occ_date &gt;= #{bDateQry} AND a.occ_date &lt;= #{eDateQry}
+			  UNION
+			  SELECT a.draw_no bill_no, a.plan_no, a.team_no, a.store_no, a.mat_no,
+					 CASE WHEN IFNULL(a.out_date,'')='' THEN a.apply_date ELSE a.out_date END in_date,
+					 CASE WHEN IFNULL(a.out_amount,0)=0 THEN a.chk_amount ELSE a.out_amount END amount, a.mat_price price,
+					 (SELECT process_name FROM sys_audit_process WHERE process_no=a.draw_step) status, '领料' in_type
+			  FROM m_out a
+			  WHERE a.mat_no=#{matNo} AND a.team_no=#{teamNoQry} AND a.data_src='m.dataSrc.3'
+				AND a.apply_date &gt;= #{bDateQry} AND a.apply_date &lt;= #{eDateQry} AND a.draw_step='7202F'
+		) ti
+		ORDER BY ti.in_type
+	</select>
+
+	<select id="getInstockQryList" resultType="cn.ewsd.repository.model.MIn">
+		SELECT a.*, b.mat_code, b.mat_unit, b.mat_name, a.set_price AS mat_price, (a.set_price*a.in_amount) AS mat_bala,
+			   (SELECT store_name FROM m_store WHERE store_no=a.store_no) as store_name,
+			   (SELECT process_name FROM sys_audit_process WHERE process_no=a.in_step) in_step_name,
+			   (SELECT text FROM sys_organization WHERE id=a.offer_team) offer_team_name,
+			   (SELECT text FROM sys_organization WHERE id=a.team_no) team_name
+		FROM m_in a
+		LEFT JOIN m_material b ON a.mat_no = b.mat_no
+		WHERE a.offer_team IN
+		<foreach collection="userDeptIds.split(',')" item="userDept" open="(" separator="," close=")">
+			#{userDept}
+		</foreach>
+		  AND a.data_src='m.dataSrc.B'
+		<if test="teamNoQry!=''">
+		  AND a.offer_team=#{teamNoQry}
+		</if>
+		<if test="statusQry!=''">
+		  AND a.in_step=#{statusQry}
+		</if>
+		<if test="date1Qry!=''">
+		  AND a.in_date &gt;= #{date1Qry}
+		</if>
+		<if test="date2Qry!=''">
+		  AND a.in_date &lt;= #{date2Qry}
+		</if>
+		<if test="matQry!=''">
+		  AND (b.mat_code LIKE CONCAT(#{matQry}, '%') OR b.mat_code LIKE CONCAT('_', #{matQry}, '%') OR b.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+		ORDER BY a.offer_team
+	</select>
+</mapper>

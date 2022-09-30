@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false,height:'50%'">
+        <input type="hidden" id="curIndex">
+        <table id="indexDg"></table>
+    </div>
+    <form id="inCheckForm">
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,width:'335px'">
+            <table id="inCheckDg"></table>
+        </div>
+    </form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="inCheckDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'inCheckDg'
+       }" style="display:none">
+
+    <label class="topjui-form-label" style="width:110px;float:none;display:inline-block">物料编码/描述：</label>
+    <input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'" value="">
+
+    <a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+    </a>
+
+    <a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">审核通过</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+    </a>
+
+    <a href="javascript:void(0)" id="backBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">驳回申请</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+    </a>
+
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        $(document).ready(function(){
+            $('#indexDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                url: '/repository/inCheck/getIndexPageSet',
+                childGrid:{
+                    param:'applyDate,inType,storeNo,inStep',
+                    grid:[
+                        {type:'datagrid',id:'inCheckDg'}
+                    ]
+                },
+                columns:[ [
+                    {
+                        field:'applyDate', sortable:false, title:'申请日期'
+                    },{
+                        field:'inTypeName', sortable:false, title:'入库类型'
+                    },{
+                        field:'storeName', sortable:false, title:'仓库'
+                    },{
+                        field:'inStepName', sortable:false, title:'步骤'
+                    },{
+                        field:'count', sortable:false, title:'记录数'
+                    }
+                ] ],
+                onSelect:function(index, row){
+                    $('#curIndex').val(row.applyDate+row.inType+row.storeNo+row.inStep);
+                },
+                onLoadSuccess:function(data){
+                    var curIndex = $('#curIndex').val();
+                    if(curIndex != ''){
+                        for(var i=0; i<data.rows.length; i++){
+                            var row = data.rows[i];
+                            if(curIndex == row.applyDate+row.inType+row.storeNo+row.inStep){
+                                $('#indexDg').iDatagrid('selectRow', i);
+                                $('#inCheckDg').iDatagrid('reload')
+                            }
+                        }
+                    }
+                }
+            });
+
+            $('#searchBtn').click(function(){
+                reloadInCheck();
+            });
+
+            $('#submitBtn').click(function(){
+                $('#inCheckForm').iForm('submit', {
+                    url:'/repository/inCheck/submit',
+                    success:function(data){
+                        data = $.parseJSON(data);
+                        if(data.statusCode == 200){
+                            $.iMessager.show({
+                                title:data.title,
+                                msg:data.message
+                            })
+                            reloadIndex();
+                        } else {
+                            $.iMessager.alert({
+                                icon:'messager-error',
+                                title:data.title,
+                                msg:data.message
+                            });
+                        }
+                    }
+                });
+            });
+
+            $('#backBtn').click(function(){
+                $('#inCheckForm').iForm('submit', {
+                    url:'/repository/inCheck/back',
+                    success:function(data){
+                        data = $.parseJSON(data);
+                        if(data.statusCode == 200){
+                            $.iMessager.show({
+                                title:data.title,
+                                msg:data.message
+                            })
+                            reloadIndex();
+                        } else {
+                            $.iMessager.alert({
+                                icon:'messager-error',
+                                title:data.title,
+                                msg:data.message
+                            });
+                        }
+                    }
+                });
+            });
+
+            $('#inCheckDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                url: '/repository/inCheck/getInCheckPageSet',
+                queryParams:{
+                    matQry:$('#matQry').iTextbox("getValue")
+                },
+                columns:[ [
+                    {
+                        field:'billNo', sortable:false, title:'', checkbox:true
+                    },{
+                        field:'erpType', sortable:false, title:'物料组'
+                    },{
+                        field:'matCode', sortable:false, title:'物料编码'
+                    },{
+                        field:'matName', sortable:false, title:'物料描述'
+                    },{
+                        field:'matUnit', sortable:false, title:'单位'
+                    },{
+                        field:'setPrice', sortable:false, title:'价格', formatter:function(value, row, index){
+                            return '<span class="textbox"><input disabled class="textbox-text" type="number" id="price_'+ row.billNo +'" name="price_'+ row.billNo +'" value="'+ value +'" /></span>'
+                        }
+                    },{
+                        field:'applyAmount', sortable:false, title:'到货数'
+                    },{
+                        field:'bala', sortable:false, title:'到货金额'
+                    },{
+                        field:'inAmount', sortable:false, title:'账入数量', formatter:function(value, row, index){
+                            return '<span class="textbox"><input disabled class="textbox-text" type="number" id="amount_'+ row.billNo +'" name="amount_'+ row.billNo +'" value="'+ value +'" /></span>'
+                        }
+                    },{
+                        field:'storeNo', sortable:false, title:'入库仓库', formatter:function(value, row, index){
+                            return '<input id="store_'+ row.billNo +'" name="store_'+ row.billNo +'" value="'+ value +'">'
+                        }
+                    },{
+                        field:'reserve22', sortable:false, title:'上架货位', formatter:function(value, row, index){
+                            return '<span class="textbox"><input disabled class="textbox-text" type="text" id="site_'+ row.billNo +'" name="site_'+ row.billNo +'" value="'+ value +'" /></span>'
+                        }
+                    },{
+                        field:'reserve4', sortable:false, title:'生产日期', formatter:function(value, row, index){
+                            return '<span class="textbox"><input disabled class="textbox-text" type="text" id="prod_'+ row.billNo +'" name="prod_'+ row.billNo +'" value="'+ value +'" /></span>'
+                        }
+                    },{
+                        field:'applyEmpName', sortable:false, title:'申请人'
+                    },{
+                        field:'remark', sortable:false, title:'备注'
+                    }
+                ] ],
+                onLoadSuccess:function(data){
+                    $('[name^="store_"]').each(function(){
+                        $(this).iCombobox({
+                            valueField:'storeNo',
+                            textField:'storeName',
+                            url:'/repository/mStore/getStoreList?mngTeam=0&storeLevel=r.storeLevel.1,r.storeLevel.0',
+                            disabled:true
+                        });
+                    })
+                },
+                onCheck:function(index, row){
+                    var billNo = row.billNo;
+                    $('#price_'+billNo+', #amount_'+billNo+', #site_'+billNo+', #prod_'+billNo).removeAttr('disabled');
+                    $('#store_'+billNo).iCombobox('enable');
+                },
+                onUncheck:function(index, row){
+                    var billNo = row.billNo;
+                    $('#price_'+billNo+', #amount_'+billNo+', #site_'+billNo+', #prod_'+billNo).removeAttr('disabled');
+                    $('#store_'+billNo).iCombobox('disable');
+                },
+                onCheckAll:function(rows){
+                    $('[name^="price_"], [name^="amount_"], [name^="site_"], [name^="prod_"]').removeAttr("disabled");
+                    $('[id^="store_"]').iCombobox('enable');
+                },
+                onUncheckAll:function(rows){
+                    $('[name^="price_"], [name^="amount_"], [name^="site_"], [name^="prod_"]').attr("disabled", 'disabled');
+                    $('[id^="store_"]').iCombobox('disable');
+                }
+            });
+        });
+
+        function reloadInCheck(){
+            $('#inCheckDg').iDatagrid('reload',{
+                matQry:$('#matQry').iTextbox("getValue")
+            });
+        }
+
+        function reloadIndex(){
+            $('#indexDg').iDatagrid('reload');
+        }
+    </script>
+</th:block>
+</body>
+</html>

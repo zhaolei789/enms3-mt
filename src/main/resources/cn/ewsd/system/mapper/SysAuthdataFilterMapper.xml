@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.SysAuthdataFilterMapper">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.system.model.SysAuthdataFilter" id="sysAuthdataFilterMap">
+        <result property="uuid" column="uuid"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator" column="creator"/>
+        <result property="create_time" column="create_time"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="type" column="type"/>
+        <result property="join_type" column="join_type"/>
+        <result property="lb" column="lb"/>
+        <result property="field" column="field"/>
+        <result property="op" column="op"/>
+        <result property="value" column="value"/>
+        <result property="rb" column="rb"/>
+        <result property="sort" column="sort"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+  	  	     			 uuid
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator
+		  ,  	  	     			 create_time
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 type
+		  ,  	  	     			 join_type
+		  ,  	  	     			 lb
+		  ,  	  	     			 field
+		  ,  	  	     			 op
+		  ,  	  	     			 value
+		  ,  	  	     			 rb
+		  ,  	  	     			 sort
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.SysAuthdataFilter">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_authdata_filter
+        <where>
+            <if test="filterSort != null">
+                ${filterSort}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryObject" resultType="cn.ewsd.system.model.SysAuthdataFilter">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_authdata_filter where uuid = #{value}
+    </select>
+
+    <select id="queryList" resultType="cn.ewsd.system.model.SysAuthdataFilter">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_authdata_filter
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by uuid desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+		select count(*) from sys_authdata_filter 
+	</select>
+    <select id="getListByApiUuid" resultType="cn.ewsd.system.model.SysAuthdataFilter">
+		select * from sys_authdata_filter where api_uuid = #{args0,jdbcType=VARCHAR}
+	</select>
+
+    <insert id="executeSave" parameterType="cn.ewsd.system.model.SysAuthdataFilter">
+		insert into sys_authdata_filter
+		(
+			`uuid`, 
+			`creator_id`, 
+			`creator`, 
+			`create_time`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`, 
+			`creator_org_id`, 
+			`type`, 
+			`join_type`,
+			`lb`, 
+			`field`, 
+			`op`, 
+			`value`, 
+			`rb`
+		)
+		values
+		(
+			#{uuid}, 
+			#{creator_id}, 
+			#{creator}, 
+			#{create_time}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time}, 
+			#{creator_org_id}, 
+			#{type}, 
+			#{join_type},
+			#{lb}, 
+			#{field}, 
+			#{op}, 
+			#{value}, 
+			#{rb}
+		)
+	</insert>
+
+    <update id="executeUpdate" parameterType="cn.ewsd.system.model.SysAuthdataFilter">
+        update sys_authdata_filter
+        <set>
+            <if test="creator_id != null">`creator_id` = #{creator_id},</if>
+            <if test="creator != null">`creator` = #{creator},</if>
+            <if test="create_time != null">`create_time` = #{create_time},</if>
+            <if test="modifier_id != null">`modifier_id` = #{modifier_id},</if>
+            <if test="modifier != null">`modifier` = #{modifier},</if>
+            <if test="modify_time != null">`modify_time` = #{modify_time},</if>
+            <if test="creator_org_id != null">`creator_org_id` = #{creator_org_id},</if>
+            <if test="type != null">`type` = #{type},</if>
+            <if test="join_type != null">`join_type` = #{join_type},</if>
+            <if test="lb != null">`lb` = #{lb},</if>
+            <if test="field != null">`field` = #{field},</if>
+            <if test="op != null">`op` = #{op},</if>
+            <if test="value != null">`value` = #{value},</if>
+            <if test="rb != null">`rb` = #{rb}</if>
+        </set>
+        where uuid = #{uuid}
+    </update>
+
+    <delete id="executeDelete">
+		delete from sys_authdata_filter where uuid = #{value}
+	</delete>
+
+    <delete id="executeDeleteBatch">
+        delete from sys_authdata_filter where uuid in
+        <foreach item="uuid" collection="array" open="(" separator="," close=")">
+            #{uuid}
+        </foreach>
+    </delete>
+
+</mapper>

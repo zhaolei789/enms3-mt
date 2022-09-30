@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <table data-toggle="topjui-datagrid"
+                   data-options="id:'sysUserMessageDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/system/sysUserMessage/getPageSet'">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+                    <th data-options="field:'createTime',title:'发布时间',sortable:true"></th>
+                    <th data-options="field:'creator',title:'发布者',sortable:true"></th>
+                    <th data-options="field:'isRead',title:'消息状态',sortable:true,
+					formatter:function(value,row,index){
+                        if (value == '0') {
+                            return '未读';
+                        }else if (value == '1') {
+                            return '已读';
+                        }
+                    }"></th>
+                    <th data-options="field:'userNameId',title:'用户账号',sortable:true"></th>
+                    <th data-options="field:'msgType',title:'类型',sortable:true,
+					formatter:function(value,row,index){
+                        if (value == '1') {
+                            return '通知消息';
+                        }else if (value == '2') {
+                            return '待办消息';
+                        }
+                    }"></th>
+                    <th data-options="field:'msgText',title:'消息描述',sortable:true"></th>
+                    <th data-options="field:'msgUrl',title:'跳转业务',sortable:true,
+					formatter:function(value,row,index){
+                        if (row.msgType == '2') {
+                            return value;
+                        }else {
+                            return '无';
+                        }
+                    }"></th>
+                   <!-- <th data-options="field:'businessId',title:'关联业务ID',sortable:true"></th>-->
+                    <th data-options="field:'note',title:'备注',sortable:true"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- 表格工具栏 -->
+    <div id="sysUserMessageDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'sysUserMessageDg'
+       }" style="display:none">
+        <ewsd:rbac str="/system/sysUserMessage/deleteBatch">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'doAjax',
+           extend:'#sysUserMessageDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的数据',param:'uuid:uuid'},
+	       url:'/system/sysUserMessage/deleteBatch'">删除</a>
+        </ewsd:rbac>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#sysUserMessageDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#sysUserMessageDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

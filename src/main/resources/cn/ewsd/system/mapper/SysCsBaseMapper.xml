@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.SysCsBaseMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.system.model.SysCsBase" id="sysCsBaseMap">
+        <result property="uuid" column="uuid"/>
+        <result property="creatorId" column="creatorId"/>
+        <result property="creator" column="creator"/>
+        <result property="createTime" column="createTime"/>
+        <result property="modifierId" column="modifierId"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modifyTime" column="modifyTime"/>
+        <result property="creatorOrgId" column="creatorOrgId"/>
+        <result property="userName" column="userName"/>
+        <result property="sex" column="sex"/>
+        <result property="age" column="age"/>
+        <result property="address" column="address"/>
+        <result property="phone" column="phone"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 creatorId
+		  ,  	  	     			 creator
+		  ,  	  	     			 createTime
+		  ,  	  	     			 modifierId
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modifyTime
+		  ,  	  	     			 creatorOrgId
+		  ,  	  	     			 userName
+		  ,  	  	     			 sex
+		  ,  	  	     			 age
+		  ,  	  	     			 address
+		  ,  	  	     			 phone
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.SysCsBase">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_cs_base
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.system.model.SysCsBase">
+		select  <include refid="Base_Column_List" />  from sys_cs_base where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.system.model.SysCsBase">
+		select  <include refid="Base_Column_List" />  from sys_cs_base
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_cs_base 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.system.model.SysCsBase">
+		insert into sys_cs_base
+		(
+			`uuid`, 
+			`creatorId`, 
+			`creator`, 
+			`createTime`, 
+			`modifierId`, 
+			`modifier`, 
+			`modifyTime`, 
+			`creatorOrgId`, 
+			`userName`, 
+			`sex`, 
+			`age`, 
+			`address`, 
+			`phone`
+		)
+		values
+		(
+			#{uuid}, 
+			#{creatorId}, 
+			#{creator}, 
+			#{createTime}, 
+			#{modifierId}, 
+			#{modifier}, 
+			#{modifyTime}, 
+			#{creatorOrgId}, 
+			#{userName}, 
+			#{sex}, 
+			#{age}, 
+			#{address}, 
+			#{phone}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.system.model.SysCsBase">
+		update sys_cs_base 
+		<set>
+			<if test="creatorId != null">`creatorId` = #{creatorId}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="createTime != null">`createTime` = #{createTime}, </if>
+			<if test="modifierId != null">`modifierId` = #{modifierId}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modifyTime != null">`modifyTime` = #{modifyTime}, </if>
+			<if test="creatorOrgId != null">`creatorOrgId` = #{creatorOrgId}, </if>
+			<if test="userName != null">`userName` = #{userName}, </if>
+			<if test="sex != null">`sex` = #{sex}, </if>
+			<if test="age != null">`age` = #{age}, </if>
+			<if test="address != null">`address` = #{address}, </if>
+			<if test="phone != null">`phone` = #{phone}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from sys_cs_base where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from sys_cs_base where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.SysAuthdataGroupMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.system.model.SysAuthdataGroup" id="sysAuthdataGroupMap">
+        <result property="uuid" column="uuid"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="creator" column="creator"/>
+        <result property="createTime" column="create_time"/>
+        <result property="modifierId" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modifyTime" column="modify_time"/>
+        <result property="creatorOrgId" column="creator_org_id"/>
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="sort" column="sort"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator
+		  ,  	  	     			 create_time
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 id
+		  ,  	  	     			 name
+		  ,  	  	     			 sort
+		  ,  	  	     			 remark
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.SysAuthdataGroup">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_authdata_group
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.system.model.SysAuthdataGroup">
+		select  <include refid="Base_Column_List" />  from sys_authdata_group where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.system.model.SysAuthdataGroup">
+		select  <include refid="Base_Column_List" />  from sys_authdata_group
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_authdata_group 
+	</select>
+
+
+	<select id="getGroupUuidsByIds" resultType="cn.ewsd.system.model.SysAuthdataGroup">
+		SELECT uuid FROM sys_authdata_group WHERE id in (${ids})
+	</select>
+	<select id="getMaxById" resultType="java.lang.Integer">
+		SELECT MAX(t.id) FROM sys_authdata_group t ;
+	</select>
+
+	<insert id="executeSave" parameterType="cn.ewsd.system.model.SysAuthdataGroup">
+		insert into sys_authdata_group
+		(
+			`uuid`, 
+			`creator_id`, 
+			`creator`, 
+			`create_time`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`, 
+			`creator_org_id`, 
+			`id`, 
+			`name`, 
+			`remark`
+		)
+		values
+		(
+			#{uuid}, 
+			#{creator_id}, 
+			#{creator}, 
+			#{create_time}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time}, 
+			#{creator_org_id}, 
+			#{id}, 
+			#{name}, 
+			#{remark}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.system.model.SysAuthdataGroup">
+		update sys_authdata_group 
+		<set>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="id != null">`id` = #{id}, </if>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="remark != null">`remark` = #{remark}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from sys_authdata_group where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from sys_authdata_group where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

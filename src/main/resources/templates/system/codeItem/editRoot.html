@@ -1,0 +1,84 @@
+
+<input type="hidden" id="uuid" name="uuid">
+<input type="hidden" name="id">
+<input type="hidden" name="levelId">
+<input type="hidden" name="pid" value="23DB879B877C3C44E055000000000001">
+<input type="hidden" name="creatorOrgId">
+<div class="topjui-fluid">
+    <div class="topjui-row" style="margin-top: 10px">
+        <div class="topjui-col-sm6" >
+            <label class="topjui-form-label">体系代码</label>
+            <div class="topjui-input-block">
+                <input type="text" data-toggle="topjui-textbox" data-options="required:true" name="codeSetId">
+            </div>
+        </div>
+
+        <div class="topjui-col-sm6"><label class="topjui-form-label">指标名称</label>
+            <div class="topjui-input-block">
+                <input type="text" data-toggle="topjui-textbox" data-options="required:true" name="text">
+            </div>
+        </div>
+        <!--<%&#45;&#45;<div class="topjui-col-sm6">-->
+            <!--<label class="topjui-form-label">指标层级</label>-->
+            <!--<div class="topjui-input-block">-->
+                <!--<input type="text" name="levelId"-->
+                       <!--data-toggle="topjui-combobox"-->
+                       <!--data-options="required:true,-->
+                   <!--textField:'text',-->
+                   <!--valueField:'code',-->
+                   <!--url:'/system/codeItem/getListByCodeSetIdAndLevelId?codeSetId=ACDA&levelId=4'">-->
+            <!--</div>-->
+        <!--</div>&#45;&#45;%>-->
+    </div>
+    <div class="topjui-row">
+        <!--<%&#45;&#45;<div class="topjui-col-sm6"><label class="topjui-form-label">所属指标</label>&#45;&#45;%>-->
+            <!--<%&#45;&#45;<div class="topjui-input-block">&#45;&#45;%>-->
+                <!--<%&#45;&#45;<input type="text" name="pid"&#45;&#45;%>-->
+                       <!--<%&#45;&#45;data-toggle="topjui-combotree"&#45;&#45;%>-->
+                       <!--<%&#45;&#45;data-options="required:true,&#45;&#45;%>-->
+                   <!--<%&#45;&#45;panelHeight:250,&#45;&#45;%>-->
+                   <!--<%&#45;&#45;expandAll:false,&#45;&#45;%>-->
+                   <!--<%&#45;&#45;url:'/system/codeItem/getListByCodeSetIdAndLevelId?codeSetId=0&levelId=0',&#45;&#45;%>-->
+                   <!--<%&#45;&#45;expandUrl:'/system/codeItem/getListByPid?pid={id}',&#45;&#45;%>-->
+                   <!--<%&#45;&#45;getFatherIdsUrl:'/system/codeItem/getFatherIds?id={id}'">&#45;&#45;%>-->
+            <!--<%&#45;&#45;</div>&#45;&#45;%>-->
+        <!--<%&#45;&#45;</div>&#45;&#45;%>-->
+
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6"><label class="topjui-form-label">指标代码</label>
+            <div class="topjui-input-block">
+                <input type="text" data-toggle="topjui-textbox" data-options="" name="code">
+            </div>
+        </div>
+        <div class="topjui-col-sm6"><label class="topjui-form-label">是否可展开</label>
+            <div class="topjui-input-block">
+                <input type="text" name="state"
+                       data-toggle="topjui-combobox"
+                       data-options="required:true,
+                       panelHeight:63,
+                   url:'/system/dicSet/getDicItemByCode?code=nodeState'">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6"><label class="topjui-form-label">显示图标</label>
+            <div class="topjui-input-block">
+                <input type="text" data-toggle="topjui-textbox" data-options="" name="icon_cls">
+            </div>
+        </div>
+        <div class="topjui-col-sm6"><label class="topjui-form-label">指标排序</label>
+            <div class="topjui-input-block">
+                <input type="text" data-toggle="topjui-numberspinner" data-options="required:true" name="sort">
+            </div>
+        </div>
+    </div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm12"><label class="topjui-form-label">备注</label>
+            <div class="topjui-input-block">
+                <input type="text" data-toggle="topjui-textarea" data-options="" name="remark">
+            </div>
+        </div>
+    </div>
+</div>
+

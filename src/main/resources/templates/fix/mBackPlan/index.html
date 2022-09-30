@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'40%'">
+		<table id="mBackQuotaDg"></table>
+    </div>
+	<form id="planForm">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+			<table id="mBackPlanDg"></table>
+		</div>
+	</form>
+</div>
+
+
+<!-- 表格工具栏 -->
+	<div id="mBackQuotaDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'mBackQuotaDg'
+       }" style="display:none">
+
+		<label class="topjui-form-label" style="width:60px">月份：</label>
+		<select id="yearQry" data-toggle="topjui-combobox" name="yearQry" data-options="width:80" >
+			<option th:each="i:${#numbers.sequence(2015, endYear)}" th:value="${i}" th:text="${i}" th:selected="${i==currentYear}"></option>
+		</select>
+		<select id="monQry" data-toggle="topjui-combobox" name="monQry" data-options="width:80" >
+			<option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}" th:selected="${i==currentMonth}"></option>
+		</select>
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">回收单位：</label>
+		<input data-toggle="topjui-combobox" id="teamNoQry" name="teamNoQry" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',width:'150px'">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">工程：</label>
+		<input data-toggle="topjui-combobox" id="prjQry" name="prjQry" data-options="valueField:'prjNo',textField:'prjName',url:'/material/mPrj/getPrjList1',width:'150px'">
+
+		<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+			<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+				<span class="l-btn-text">查询</span>
+				<span class="l-btn-icon fa fa-search">&nbsp;</span>
+			</span>
+		</a>
+
+	</div>
+
+	<div id="mBackPlanDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'mBackPlanDg'
+       }" style="display:none">
+
+		<label class="topjui-form-label" style="width:100px;float:none;display:inline-block">计划生产：</label>
+		<input id="planValue" data-toggle="topjui-textbox" name="planValue" data-options="width:'100px'" value="">米
+
+		<input type="hidden" name="month" id="month" />
+		<input type="hidden" name="teamNo" id="teamNo" />
+		<input type="hidden" name="prjNo" id="prjNo" />
+
+		<a href="javascript:void(0)" id="calcBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+			<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+				<span class="l-btn-text">计算</span>
+				<span class="l-btn-icon fa fa-calculator">&nbsp;</span>
+			</span>
+		</a>
+
+		<a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+			<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+				<span class="l-btn-text">保存</span>
+				<span class="l-btn-icon fa fa-save">&nbsp;</span>
+			</span>
+		</a>
+
+		<a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-purple l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+			<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+				<span class="l-btn-text">提交</span>
+				<span class="l-btn-icon fa fa-check">&nbsp;</span>
+			</span>
+		</a>
+
+	</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#teamNoQry').iCombobox({
+				onLoadSuccess:function(){
+					var data = $('#teamNoQry').iCombobox('getData');
+					if(data.length > 0){
+						$('#teamNoQry').iCombobox('select', data[0].id)
+						$('#prjQry').iCombobox('reload', '/material/mPrj/getPrjList1?teamNo='+data[0].id)
+					}
+				},
+				onChange:function(newValue, oldValue){
+					$('#prjQry').iCombobox('reload', '/material/mPrj/getPrjList1?teamNo='+newValue)
+				}
+			});
+
+			$('#prjQry').iCombobox({
+				onLoadSuccess:function(){
+					var data = $('#prjQry').iCombobox('getData');
+					if(data.length > 0){
+						$('#prjQry').iCombobox('select', data[0].prjNo)
+					}else{
+						$('#prjQry').iCombobox('setValue', '')
+					}
+				}
+			})
+
+			$('#mBackQuotaDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/fix/mBackPlan/getBackQuota',
+				pagination:false,
+				queryParams:{
+					yearQry:$('#yearQry').iCombobox('getValue'),
+					monQry:$('#monQry').iCombobox('getValue'),
+					prjQry:$('#prjQry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'matCode', sortable:false, title:'物料编码'
+					},{
+						field:'matName', sortable:false, title:'物料描述'
+					},{
+						field:'matUnit', sortable:false, title:'计量单位'
+					},{
+						field:'measure', sortable:false, title:'推进计量'
+					},{
+						field:'amount', sortable:false, title:'定额数'
+					},{
+						field:'matPrice', sortable:false, title:'单价', align:'right'
+					}
+				] ]
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+				reloadPlan();
+			});
+
+			$('#mBackPlanDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/fix/mBackPlan/getBackPlan',
+				pagination:false,
+				queryParams:{
+					yearQry:$('#yearQry').iCombobox('getValue'),
+					monQry:$('#monQry').iCombobox('getValue'),
+					prjQry:$('#prjQry').iCombobox('getValue'),
+					teamNoQry:$('#teamNoQry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'planNo', sortable:false, title:'删除', formatter:function(value, row, index){
+							if(row.planStep=='77000'){
+								return '<a style="font-weight: bold; color: #00b7ee" deleteBtn="'+value+'">删除</a><input type="hidden" name="planNo" value="'+value+'" />'
+							}else{
+								return '---'
+							}
+						}
+					},{
+						field:'matCode', sortable:false, title:'物料编码'
+					},{
+						field:'matName', sortable:false, title:'物料描述'
+					},{
+						field:'matUnit', sortable:false, title:'计量单位'
+					},{
+						field:'measure', sortable:false, title:'推进计量'
+					},{
+						field:'amount', sortable:false, title:'定额数'
+					},{
+						field:'planAmount', sortable:false, title:'计划回收', width:'90px', formatter:function(value, row, index){
+							return '<span class="textbox" style="width: 80px;"><input class="textbox-text"  style="width: 85px;" type="text" id="amount_'+ row.matNo +'" name="amount_'+ row.matNo +'" value="'+ value +'" '+ (row.planStep=='77000' || row.planStep=='' ? '' : 'disabled') +' /></span><input type="hidden" name="matNo" value="'+ row.matNo +'" />'
+						}
+					},{
+						field:'matPrice', sortable:false, title:'单价', align:'right'
+					},{
+						field:'remark', sortable:false, title:'备注', formatter:function(value, row, index){
+							return '<span class="textbox"><input class="textbox-text" type="text" id="remark_'+ row.matNo +'" name="remark_'+ row.matNo +'" value="'+ value +'" '+ (row.planStep=='77000' || row.planStep=='' ? '' : 'disabled') +' /></span>'
+						}
+					}
+				] ],
+				onLoadSuccess:function(data){
+					if(data.rows.length >0){
+						var planValue = data.rows[0].planValue;
+						if(planValue!=null){
+							$('#planValue').iTextbox('setValue', planValue)
+						}else{
+							$('#planValue').iTextbox('setValue', '')
+						}
+					}else {
+						$('#planValue').iTextbox('setValue', '')
+					}
+
+					$('[deleteBtn]').click(function(){
+						$.iMessager.confirm('确认对话框', '您确定删除当前计划吗？', function (r) {
+							if (r) {
+								var planNo = $(this).attr('deleteBtn');
+								var postData = { planNo:planNo};
+								var url = '/fix/mBackPlan/delete';
+								$.post(url,postData,function (res) {
+									if(res.statusCode == 200){
+										$.iMessager.show({title: '我的消息', msg: res.message, timeout: 5000, showType: 'slide'});// '消息窗口'组件
+										reloadPlan()
+									}else {
+										$.iMessager.alert('操作提示', res.message, 'messager-error');
+									}
+								},"JSON")
+							}
+						});
+					})
+				}
+			});
+
+			$('#calcBtn').click(function(){
+				var yearQry = $('#yearQry').iCombobox('getValue')
+				var monQry = $('#monQry').iCombobox('getValue')
+				var prjQry = $('#prjQry').iCombobox('getValue')
+				var teamNoQry = $('#teamNoQry').iCombobox('getValue')
+				var planValue = $('#planValue').val()
+				var postData = { yearQry: yearQry, monQry: monQry, prjQry: prjQry, teamNoQry:teamNoQry, planValue:planValue};
+				var url = '/fix/mBackPlan/insertBackPlan';
+				$.post(url,postData,function (res) {
+					if(res.statusCode == 200){
+						$.iMessager.show({title: '我的消息', msg: res.message, timeout: 5000, showType: 'slide'});// '消息窗口'组件
+						reloadPlan()
+					}else {
+						$.iMessager.alert('操作提示', res.message, 'messager-error');
+					}
+				},"JSON")
+			})
+
+			$('#saveBtn').click(function(){
+				$('#month').val($('#yearQry').iCombobox('getValue')+$('#monQry').iCombobox('getValue'))
+				$('#teamNo').val($('#teamNoQry').iCombobox('getValue'))
+				$('#prjNo').val($('#prjQry').iCombobox('getValue'))
+				$('#planForm').iForm('submit', {
+					url:'/fix/mBackPlan/save',
+					success:function(data){
+						data = $.parseJSON(data);
+						if(data.statusCode == 200){
+							$.iMessager.show({
+								title:data.title,
+								msg:data.message
+							})
+							reloadPlan()
+						} else {
+							$.iMessager.alert({
+								icon:'messager-error',
+								title:data.title,
+								msg:data.message
+							});
+						}
+					}
+				});
+			});
+
+			$('#submitBtn').click(function(){
+
+				$.iMessager.confirm('确认对话框', '您确定提交当前计划吗？', function (r) {
+					if (r) {
+						$('#planForm').iForm('submit', {
+							url:'/fix/mBackPlan/submit',
+							success:function(data){
+								data = $.parseJSON(data);
+								if(data.statusCode == 200){
+									$.iMessager.show({
+										title:data.title,
+										msg:data.message
+									})
+									reloadPlan()
+								} else {
+									$.iMessager.alert({
+										icon:'messager-error',
+										title:data.title,
+										msg:data.message
+									});
+								}
+							}
+						});
+					}
+				});
+			});
+		});
+
+		function reloadData(){
+			$('#mBackQuotaDg').iDatagrid('reload',{
+				yearQry:$('#yearQry').iCombobox('getValue'),
+				monQry:$('#monQry').iCombobox('getValue'),
+				prjQry:$('#prjQry').iCombobox('getValue')
+			});
+		}
+
+		function reloadPlan(){
+			$('#mBackPlanDg').iDatagrid('reload',{
+				yearQry:$('#yearQry').iCombobox('getValue'),
+				monQry:$('#monQry').iCombobox('getValue'),
+				prjQry:$('#prjQry').iCombobox('getValue'),
+				teamNoQry:$('#teamNoQry').iCombobox('getValue')
+			});
+		}
+	</script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.SysLoggerInfoMapper">
+
+    <!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.system.model.SysLoggerInfo" id="sysLoggerInfoMap">
+        <result property="uuid" column="uuid"/>
+        <result property="aliClientIp" column="ali_client_ip"/>
+        <result property="aliUri" column="ali_uri"/>
+        <result property="aliType" column="ali_type"/>
+        <result property="aliMethod" column="ali_method"/>
+        <result property="aliParamData" column="ali_param_data"/>
+        <result property="aliSessionId" column="ali_session_id"/>
+        <result property="aliTime" column="ali_time"/>
+        <result property="aliReturnTime" column="ali_return_time"/>
+        <result property="aliHttpStatusCode" column="ali_http_status_code"/>
+        <result property="aliTimeConsuming" column="ali_time_consuming"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+                                    uuid
+          ,                         create_time
+          ,                         creator
+          ,                        creator_id
+          ,                           creator_org_id
+          ,                          modifier_id
+          ,                         modifier
+          ,                          modify_time
+		  ,  	  	     			 ali_client_ip
+		  ,  	  	     			 ali_uri
+		  ,  	  	     			 ali_type
+		  ,  	  	     			 ali_method
+		  ,  	  	     			 ali_param_data
+		  ,							 ali_session_id
+		  ,                          ali_time
+		  ,                          ali_return_time
+		  ,                          ali_http_status_code
+		  ,                          ali_time_consuming
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.SysLoggerInfo">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_logger_info
+        <where>
+            <if test="filterSort != null">
+                ${filterSort}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryObject" resultType="cn.ewsd.system.model.SysLoggerInfo">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_logger_info where uuid = #{value}
+    </select>
+
+    <select id="queryList" resultType="cn.ewsd.system.model.SysLoggerInfo">
+        select
+        <include refid="Base_Column_List"/>
+        from sys_logger_info
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+            <otherwise>
+                order by uuid desc
+            </otherwise>
+        </choose>
+        <if test="offset != null and limit != null">
+            limit #{offset}, #{limit}
+        </if>
+    </select>
+
+    <select id="queryTotal" resultType="int">
+		select count(*) from sys_logger_info
+	</select>
+
+    <insert id="executeSave" parameterType="cn.ewsd.system.model.SysLoggerInfo">
+		insert into sys_logger_info
+		(
+			`creator_id`, 
+			`creator`, 
+			`create_time`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`, 
+			`creator_org_id`,
+			`ali_client_ip`, 
+			`ali_uri`, 
+			`ali_type`, 
+			`ali_method`, 
+			`ali_session_id`,
+			`ali_time`,
+			`ali_param_data`,
+			`ali_return_time`,
+			`ali_http_status_code`,
+			`ali_time_consuming`
+
+		)
+		values
+		(
+			#{creator_id}, 
+			#{creator}, 
+			#{create_time}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time}, 
+			#{creator_org_id},
+            #{ali_client_ip},
+            #{ali_uri},
+            #{ali_type},
+            #{ali_method},
+            #{ali_session_id},
+            #{ali_time},
+            #{ali_param_data},
+            #{ali_return_time},
+            #{ali_http_status_code},
+            #{ali_time_consuming}
+		)
+	</insert>
+
+    <update id="executeUpdate" parameterType="cn.ewsd.system.model.SysLoggerInfo">
+        update sys_logger_info
+        <set>
+            <if test="ali_client_ip != null">`ali_client_ip` = #{ali_client_ip},</if>
+            <if test="ali_uri != null">`ali_uri` = #{ali_uri},</if>
+            <if test="ali_type != null">`ali_type` = #{ali_type},</if>
+            <if test="ali_method != null">`ali_method` = #{ali_method},</if>
+            <if test="aliParamData != null">`aliParamData` = #{aliParamData},</if>
+            <if test="ali_session_id != null">`ali_session_id` = #{ali_session_id}</if>
+            <if test="ali_time != null">`ali_time` = #{ali_time}</if>
+            <if test="ali_return_time != null">`ali_return_time` = #{ali_return_time}</if>
+            <if test="ali_http_status_code != null">`ali_http_status_code` = #{ali_http_status_code}</if>
+            <if test="ali_time_consuming != null">`ali_time_consuming` = #{ali_time_consuming}</if>
+            <if test="creator != null">`creator` = #{creator},</if>
+            <if test="create_time != null">`create_time` = #{create_time},</if>
+        </set>
+        where uuid = #{uuid}
+    </update>
+
+    <delete id="executeDelete">
+		delete from sys_logger_info where uuid = #{value}
+	</delete>
+
+    <delete id="executeDeleteBatch">
+        delete from sys_logger_info where uuid in
+        <foreach item="uuid" collection="array" open="(" separator="," close=")">
+            #{uuid}
+        </foreach>
+    </delete>
+
+</mapper>

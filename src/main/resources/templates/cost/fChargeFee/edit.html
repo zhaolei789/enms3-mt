@@ -1,0 +1,239 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<div class="topjui-fluid">
+    <div class="topjui-row">
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">年份</label>
+			<div class="topjui-input-block">
+				<input type="text" name="fMonth"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'年份',
+					   	required:true,
+                   		panelHeight:150,
+                   		url:'/system/dicSet/getDicItemByCode?code=sys.year',
+                   		valueField:'value',
+    					textField:'text'"
+				>
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">分管领导</label>
+			<div class="topjui-input-block">
+				<input type="text" name="leader"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'分管领导',
+					   required:true,
+                        panelHeight:190,
+                        url:'/cost/barMaster/getLeaderList',
+                        valueField:'uuid',
+    				    textField:'user_name'">
+			</div>
+		</div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">费用项目</label>
+            <div class="topjui-input-block">
+				<input type="text" name="itemId"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'费用项目',
+					   required:true,
+                        panelHeight:190,
+                        url:'/cost/fItem/getItemList',
+                        valueField:'uuid',
+    				    textField:'item_name'">
+            </div>
+        </div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">责任部门</label>
+			<div class="topjui-input-block">
+				<input type="text" name="teamNo"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'责任部门',
+					required:true,
+					valueField:'id',
+                    textField:'text',
+                    panelHeight:'200',
+                      icons:[{
+                          iconCls:'fa fa-remove',
+                          handler: function(e){
+                              $(e.data.target).combobox('clear');
+                          }
+                      }],
+                    url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department'">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">是否科室</label>
+			<div class="topjui-input-block">
+				<input type="text" name="ifOffice"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'是否科室',
+					    required:true,
+                        panelHeight:190,
+                        url:'/system/dicSet/getDicItemByCode?code=yesOrNo',
+                        valueField:'value',
+    				    textField:'text'">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">上报部门</label>
+			<div class="topjui-input-block">
+				<input type="text" name="reportTeam"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'上报部门',
+					required:true,
+					valueField:'id',
+                    textField:'text',
+                    panelHeight:'200',
+                      icons:[{
+                          iconCls:'fa fa-remove',
+                          handler: function(e){
+                              $(e.data.target).combobox('clear');
+                          }
+                      }],
+                    url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department'">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">测算依据</label>
+			<div class="topjui-input-block">
+				<input type="text" name="calcWay"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'测算依据',
+					   required:true,
+						prompt:'必填',
+                   panelHeight:190,
+                   url:'/system/dicSet/getDicItemByCode?code=f.calcWay',
+                   valueField:'value',
+    				textField:'text'">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">年度指标</label>
+			<div class="topjui-input-block">
+				<input type="text" name="yearBud"
+					   data-toggle="topjui-numberbox"
+					   data-options="prompt:'年度指标(万元)',min:0,precision:4">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">单价定额</label>
+			<div class="topjui-input-block">
+				<input type="text" name="normPrice"
+					   data-toggle="topjui-numberbox"
+					   data-options="prompt:'单价定额',min:0,precision:4">
+			</div>
+		</div>
+
+
+
+        <!--<div class="topjui-col-sm6">
+            <label class="topjui-form-label">科目ID</label>
+            <div class="topjui-input-block">
+                <input type="text" name="itemId"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'科目ID'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">科目名称</label>
+            <div class="topjui-input-block">
+                <input type="text" name="itemName"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'科目名称'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">财务月份;年预算、月发生</label>
+            <div class="topjui-input-block">
+                <input type="text" name="fMonth"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'财务月份;年预算、月发生'">
+            </div>
+        </div>
+
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">月度定额</label>
+            <div class="topjui-input-block">
+                <input type="text" name="monthBud"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'月度定额'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">上期结余</label>
+            <div class="topjui-input-block">
+                <input type="text" name="lastBala"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'上期结余'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">月度费用</label>
+            <div class="topjui-input-block">
+                <input type="text" name="monthBala"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'月度费用'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">财务统计额</label>
+            <div class="topjui-input-block">
+                <input type="text" name="financeBala"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'财务统计额'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">月度考核;根据科目的测算方式，非时间的均按月考核；季度，半年，年度根据周期来；</label>
+            <div class="topjui-input-block">
+                <input type="text" name="monthAssess"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'月度考核;根据科目的测算方式，非时间的均按月考核；季度，半年，年度根据周期来；'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">节超金额</label>
+            <div class="topjui-input-block">
+                <input type="text" name="diffBala"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'节超金额'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">节超比例</label>
+            <div class="topjui-input-block">
+                <input type="text" name="diffScale"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'节超比例'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">累计金额</label>
+            <div class="topjui-input-block">
+                <input type="text" name="sumBala"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'累计金额'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">剩余金额</label>
+            <div class="topjui-input-block">
+                <input type="text" name="surplusBala"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'剩余金额'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">备注</label>
+            <div class="topjui-input-block">
+                <input type="text" name="remark"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'备注'">
+            </div>
+        </div>-->
+    </div>
+</div>

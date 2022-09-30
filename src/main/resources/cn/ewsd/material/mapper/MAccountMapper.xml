@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MAccountMapper">
+    <select id="getAccountList" resultType="cn.ewsd.material.model.MAccount">
+        SELECT * FROM m_account WHERE occ_month IN (#{month}, #{lastMonth}) AND team_no=#{teamQry}
+    </select>
+    
+    <update id="updateAccount" parameterType="cn.ewsd.material.model.MAccount">
+        UPDATE m_account
+        <set>
+            <if test="awardBala!=null">`award_bala`=#{awardBala},</if>
+            <if test="keepBala!=null">`keep_bala`=#{keepBala},</if>
+            <if test="delayBala!=null">`delay_bala`=#{delayBala},</if>
+            <if test="monthBala!=null">`month_bala`=#{monthBala},</if>
+            <if test="remark!=null">`remark`=#{remark}</if>
+        </set>
+        WHERE 1=1
+        <if test="occMonth!=null">
+          AND occ_month=#{occMonth}
+        </if>
+        <if test="teamNo!=null">
+          AND team_no=#{teamNo}
+        </if>
+    </update>
+
+    <insert id="insertAccount" parameterType="cn.ewsd.material.model.MAccount">
+        INSERT INTO m_account (`occ_month`, `team_no`, `award_bala`, `keep_bala`, `delay_bala`, `month_bala`, `remark`,
+                               `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+        VALUES (#{occMonth}, #{teamNo}, #{awardBala}, #{keepBala}, #{delayBala}, #{monthBala}, #{remark},
+                #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+    </insert>
+
+    <delete id="deleteAccount">
+        DELETE FROM m_account WHERE occ_month=#{occMonth} AND team_no=#{teamNo}
+    </delete>
+
+    <select id="getMatAssTyResultList" resultType="cn.ewsd.material.model.MAccount">
+        SELECT * FROM m_account WHERE occ_month=#{_parameter}
+    </select>
+</mapper>

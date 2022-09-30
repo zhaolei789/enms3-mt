@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<!--井下周转登记-->
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="instockQryForm" style="height: 100%">
+		<div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%',width:'60%'">
+			<table data-toggle="topjui-datagrid" data-options="id:'instockQryDg',
+				singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url: '/fix/instockQry/getPageSet',
+				queryParams:{
+					date1Qry:$('#date1Qry').iCombobox('getValue'),
+					date2Qry:$('#date2Qry').iCombobox('getValue'),
+					teamNoQry:$('#teamNoQry').iCombobox('getValue'),
+					statusQry:$('#statusQry').iCombobox('getValue'),
+					matQry:$('#matQry').iTextbox('getValue')
+				}" >
+				<thead>
+					<tr>
+						<th data-options="field: 'inStepName', sortable: false, title: '状态'"></th>
+						<th data-options="field: 'inDate', sortable: false, title: '申请日期', formatter:function(value, row, index){
+							if(value!=null && value!=undefined && value!=''){
+								return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+							}else{
+								return value
+							}
+						}"></th>
+						<th data-options="field: 'matCode', sortable: false, title: '物料编码'"></th>
+						<th data-options="field: 'matName', sortable: false, title: '物料描述'"></th>
+						<th data-options="field: 'matUnit', sortable: false, title: '单位'"></th>
+						<th data-options="field: 'inAmount', sortable: false, title: '数量', align:'right'"></th>
+						<th data-options="field: 'matPrice', sortable: false, title: '原值单价', align:'right'"></th>
+						<th data-options="field: 'matBala', sortable: false, title: '原值金额', align:'right'"></th>
+						<th data-options="field: 'price1', sortable: false, title: '修复单价', align:'right'"></th>
+						<th data-options="field: 'fixBala', sortable: false, title: '修复金额', align:'right'"></th>
+						<th data-options="field: 'offerTeamName', sortable: false, title: '申请单位'"></th>
+						<th data-options="field: 'teamName', sortable: false, title: '审核部门'"></th>
+						<th data-options="field: 'storeName', sortable: false, title: '仓库'"></th>
+						<th data-options="field: 'checkType', sortable: false, title: '修复地点'"></th>
+						<th data-options="field: 'checkInfo', sortable: false, title: '维修人'"></th>
+						<th data-options="field: 'checkRemark', sortable: false, title: '验收人'"></th>
+					</tr>
+				</thead>
+			</table>
+		</div>
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+			<div data-toggle="topjui-tabs"
+				 data-options="id:'southTabs',
+                     fit:true,
+                     border:false,
+                     parentGrid:{
+                         type:'datagrid',
+                         id:'instockQryDg',
+                         param:'puuid:billNo'
+                     }">
+				<div title="附件信息" data-options="id:'southTab0',iconCls:'fa fa-table'">
+					<!-- datagrid表格 -->
+					<table data-toggle="topjui-datagrid"
+						   data-options="id:'attachmentDg',
+                               initCreate: false,
+                               fitColumns:true,
+                               rownumbers:false,
+						       url:'/system/attachment/getListByPuuid'">
+						<thead>
+						<tr>
+							<th data-options="field:'fileName',title:'文件名称',width:150,
+                                        formatter: function(value,row,index){
+                                        return '<a href=\'/system/attachment/download?uuid='+row.uuid+'\' target=\'_blank\'>'+value+'</a>';
+                                        }"></th>
+							<th data-options="field:'fileSize',title:'文件大小',
+                                        formatter: function(value,row,index){
+                                            return bytesToSize(value);
+                                        }"></th>
+							<th data-options="field:'creator',title:'上传人'"></th>
+							<th data-options="field:'createTime',title:'上传时间',width:100"></th>
+							<th data-options="field:'creatorId',title:'预览',formatter: picFormatter"></th>
+							<!--<th data-options="field:'creatorId',title:'下载',
+                                    formatter: function(value,row,index){
+                                    return '<a href=\'/system/attachment/download?uuid='+row.uuid+'\' target=\'_blank\'>下载</a>';
+                                    }"></th>-->
+						</tr>
+						</thead>
+					</table>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="instockQryDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'instockQryDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">申请单位：</label>
+	<input data-toggle="topjui-combobox" id="teamNoQry" name="teamNoQry" value="" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',width:'150px',loadFilter:function(data){
+		data.unshift({id:'', text:'--全部--'});
+		return data
+	}">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">日期：</label>
+	<input id="date1Qry" name="date1Qry" th:value="${date1Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+	<label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+	<input id="date2Qry" name="date2Qry" th:value="${date2Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+	<label class="topjui-form-label" style="width:70px;float:none;display:inline-block">状态：</label>
+	<input data-toggle="topjui-combobox" name="statusQry" id="statusQry" value="7201F" data-options="valueField:'processNo',textField:'processName',url:'/system/sysAuditProcess/getListByFuuid?fuuid=AA5C95C6F96E4B17BBF839930F6552CC',width:'150px',loadFilter:function(data){
+		data.unshift({processNo:'', processName:'--全部--'});
+		return data
+	}">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">编码描述：</label>
+	<input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'" value="">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+	</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#instockQryDg').iDatagrid({
+				onSelect:function(index, row){
+					reloadFile(row.billNo)
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#downloadBtn').click(function(){
+				$('#instockQryForm').iForm('submit', {
+					url:'/fix/instockQry/download',
+					success:function(data){
+
+					}
+				});
+			});
+		})
+
+		function reloadData(){
+			$('#instockQryDg').iDatagrid('reload',{
+				date1Qry:$('#date1Qry').iCombobox('getValue'),
+				date2Qry:$('#date2Qry').iCombobox('getValue'),
+				teamNoQry:$('#teamNoQry').iCombobox('getValue'),
+				statusQry:$('#statusQry').iCombobox('getValue'),
+				matQry:$('#matQry').iTextbox('getValue')
+			});
+		}
+
+		function reloadFile(billNo){
+			$('#attachmentDg').iDatagrid('reload',{
+				puuid:billNo
+			});
+		}
+		function picFormatter(value, row, index) {
+			var html = ""
+			if (row.filePath) {
+				html = "<div class=\"box\" style='text-align: center;padding: 3px' data-toggle=\"topjui-viewer\">" +
+						"<img style='width: 100px;' src='/system/attachment/showPic?path=" +
+						row.filePath + "' title='点击预览' alt='" + value + "'>" +
+						"</div>"
+			}
+			return html
+		}
+
+		function pictureUrlOnChange(value) {
+			$("#imgBox").show();
+			$("#imgBox img").attr('src', "/system/attachment/showPic?path=" + value);
+			$.parser.parse('.imgBox');
+		}
+
+	</script>
+
+</th:block>
+</body>
+</html>

@@ -1,0 +1,48 @@
+package ${package1}.mapper;
+import ${basepackage1}.common.mapper.BaseMapper;
+import ${package1}.model.${className1};
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * ${comments1}
+ * 
+ * @Author ${author1}
+ * @Email ${email1}
+ * @Date ${datetime1}
+ */
+public interface ${className1}Mapper extends tk.mybatis.mapper.common.Mapper<${className1}> {
+
+    //获取分页集
+    List<${className1}> getPageSet(@Param("filterSort") String filterSort);
+
+    int executeSave(${className1} var1);
+
+    int executeSave(Map<String, Object> var1);
+
+    //void executeSaveBatch(List<${className1}> var1);
+
+    int executeUpdate(${className1} var1);
+
+    int executeUpdate(Map<String, Object> var1);
+
+    int executeDelete(Object var1);
+
+    int executeDelete(Map<String, Object> var1);
+
+    int executeDeleteBatch(Object[] var1);
+
+    ${className1} queryObject(Object var1);
+
+    List<${className1}> queryList(Map<String, Object> var1);
+
+    List<${className1}> queryList(Object var1);
+
+    int queryTotal(Map<String, Object> var1);
+
+    int queryTotal();
+
+}

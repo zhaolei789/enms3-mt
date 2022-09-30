@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.mdata.mapper.SysEmployeesMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.mdata.model.SysEmployees" id="sysEmployeesMap">
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+        <result property="emp_no" column="emp_no"/>
+        <result property="emp_hat_no" column="emp_hat_no"/>
+        <result property="emp_name" column="emp_name"/>
+        <result property="emp_name_jp" column="emp_name_jp"/>
+        <result property="emp_sex" column="emp_sex"/>
+        <result property="emp_status" column="emp_status"/>
+        <result property="emp_org_id" column="emp_org_id"/>
+        <result property="emp_org_name" column="emp_org_name"/>
+		<result property="emp_post" column="emp_post"/>
+        <result property="emp_post_lb" column="emp_post_lb"/>
+        <result property="emp_post_gj" column="emp_post_gj"/>
+        <result property="emp_phone_num" column="emp_phone_num"/>
+        <result property="emp_remark" column="emp_remark"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 emp_no
+		  ,  	  	     			 emp_hat_no
+		  ,  	  	     			 emp_name
+		  ,  	  	     			 emp_name_jp
+		  ,  	  	     			 emp_sex
+		  ,  	  	     			 emp_status
+		  ,  	  	     			 emp_org_id
+		  ,  	  	     			 emp_org_name
+		  ,  	  	     			 emp_post
+		  ,  	  	     			 emp_post_lb
+		  ,  	  	     			 emp_post_gj
+		  ,  	  	     			 emp_phone_num
+		  ,  	  	     			 emp_remark
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.mdata.model.SysEmployees">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_employees
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.mdata.model.SysEmployees">
+		select  <include refid="Base_Column_List" />  from sys_employees where uuid = #{value}
+	</select>
+
+	<select id="getByEmpNo" resultType="cn.ewsd.mdata.model.SysEmployees">
+		select  <include refid="Base_Column_List" />  from sys_employees where emp_no = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.mdata.model.SysEmployees">
+		select  <include refid="Base_Column_List" />  from sys_employees
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_employees 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.mdata.model.SysEmployees">
+		insert into sys_employees
+		(
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`, 
+			`emp_no`, 
+			`emp_hat_no`, 
+			`emp_name`, 
+			`emp_name_jp`, 
+			`emp_sex`, 
+			`emp_status`, 
+			`emp_org_id`, 
+			`emp_org_name`,
+			`emp_post`,
+			`emp_post_lb`, 
+			`emp_post_gj`, 
+			`emp_phone_num`, 
+			`emp_remark`
+		)
+		values
+		(
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time}, 
+			#{emp_no}, 
+			#{emp_hat_no}, 
+			#{emp_name}, 
+			#{emp_name_jp}, 
+			#{emp_sex}, 
+			#{emp_status}, 
+			#{emp_org_id}, 
+			#{emp_org_name},
+			#{emp_post},
+			#{emp_post_lb}, 
+			#{emp_post_gj}, 
+			#{emp_phone_num}, 
+			#{emp_remark}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.mdata.model.SysEmployees">
+		update sys_employees 
+		<set>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}, </if>
+			<if test="emp_no != null">`emp_no` = #{emp_no}, </if>
+			<if test="emp_hat_no != null">`emp_hat_no` = #{emp_hat_no}, </if>
+			<if test="emp_name != null">`emp_name` = #{emp_name}, </if>
+			<if test="emp_name_jp != null">`emp_name_jp` = #{emp_name_jp}, </if>
+			<if test="emp_sex != null">`emp_sex` = #{emp_sex}, </if>
+			<if test="emp_status != null">`emp_status` = #{emp_status}, </if>
+			<if test="emp_org_id != null">`emp_org_id` = #{emp_org_id}, </if>
+			<if test="emp_org_name != null">`emp_org_name` = #{emp_org_name}, </if>
+			<if test="emp_post != null">`emp_post` = #{emp_post}, </if>
+			<if test="emp_post_lb != null">`emp_post_lb` = #{emp_post_lb}, </if>
+			<if test="emp_post_gj != null">`emp_post_gj` = #{emp_post_gj}, </if>
+			<if test="emp_phone_num != null">`emp_phone_num` = #{emp_phone_num}, </if>
+			<if test="emp_remark != null">`emp_remark` = #{emp_remark}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from sys_employees where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from sys_employees where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+	<select id="selectAllList" resultType="cn.ewsd.mdata.model.SysEmployees">
+		SELECT * FROM sys_employees  WHERE 1 = 1
+	</select>
+
+	<select id="getLimitedListByQ" resultType="cn.ewsd.mdata.model.SysEmployees">
+		SELECT * FROM sys_employees WHERE (
+			emp_name LIKE concat(concat('%',#{arg0}),'%') OR
+			emp_name_jp LIKE concat(concat('%',#{arg0}),'%') OR
+			emp_no LIKE concat(concat('%',#{arg0}),'%'))
+	</select>
+</mapper>

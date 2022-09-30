@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <table data-toggle="topjui-datagrid"
+                   data-options="id:'sysAuthdataApiDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/system/sysAuthdataApi/getPageSet'">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'UUID',sortable:true,checkbox:true"></th>
+                    <th data-options="field:'creatorId',title:'创建人ID',sortable:true"></th>
+                    <th data-options="field:'creator',title:'创建人',sortable:true"></th>
+                    <th data-options="field:'createTime',title:'创建时间',sortable:true"></th>
+                    <th data-options="field:'modifierId',title:'修改人ID',sortable:true"></th>
+                    <th data-options="field:'modifier',title:'修改人',sortable:true"></th>
+                    <th data-options="field:'modifyTime',title:'修改时间',sortable:true"></th>
+                    <th data-options="field:'creatorOrgId',title:'创建人机构ID',sortable:true"></th>
+                    <th data-options="field:'name',title:'接口名称',sortable:true"></th>
+                    <th data-options="field:'url',title:'接口地址',sortable:true"></th>
+                    <th data-options="field:'remark',title:'备注',sortable:true"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- 表格工具栏 -->
+    <div id="sysAuthdataApiDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'sysAuthdataApiDg'
+       }" style="display:none">
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#sysAuthdataApiDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'sysAuthdataApiAddDg',
+               href:'/system/sysAuthdataApi/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/system/sysAuthdataApi/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#sysAuthdataApiDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'sysAuthdataApiEditDg',
+               href:'/system/sysAuthdataApi/edit',
+               url:'/system/sysAuthdataApi/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/system/sysAuthdataApi/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'sysAuthdataApiDg'}]}
+               ]
+           }">编辑</a>
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#sysAuthdataApiDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/system/sysAuthdataApi/deleteBatch'">删除</a>
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#sysAuthdataApiDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#sysAuthdataApiDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

@@ -1,0 +1,259 @@
+server:
+  ip: 127.0.0.1
+  #port: 80
+  port: 9090
+  database-host: 127.0.0.1
+  redis-host: 127.0.0.1
+  rabbitmq-host: 127.0.0.1
+  #servlet:
+    #context-path: /zxr
+spring:
+  application:
+    name: emis-springboot
+  profiles:
+    active: sv191
+  datasource:
+    # 使用druid数据源
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${server.database-host}:3306/krmis_mt?characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    #password: root
+#    password: Krmis2022Mt!
+    password: krmis2022@
+#    password: 123456
+    filters: stat
+    maxActive: 200
+    initialSize: 1
+    maxWait: 60000
+    minIdle: 1
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: select 'x'
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxOpenPreparedStatements: 20
+    default:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://${server.database-host}:3306/krmis_mt?characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+      username: root
+      #password: root
+      password: Krmis2022Mt!
+      #password: krmis2022@
+    activiti:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://${server.database-host}:3306/krmis_mt?characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+      username: root
+      password: Krmis2022Mt!
+    #druid:
+      #filters: stat,wall
+      #web-stat-filter:
+        #enabled: true
+      #stat-view-servlet:
+        #enabled: true
+        #login-username: krmis
+        #login-password: krmis
+        #allow:
+        #deny:
+      #connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=500
+      #use-global-data-source-stat: true
+  main:
+    allow-bean-definition-overriding: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+        #naming:
+        #取消驼峰转下划线
+      #physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      show-sql: true
+      open-in-view: false
+    thymeleaf:
+      prefix: classpath:/templates/
+      check-template-location: true
+      suffix: .html
+      encoding: UTF-8
+      #content-type: text/html
+      mode: HTML
+      cache: false
+    cache:
+      type: redis
+      redis:
+        #use-key-prefix: true
+        #key-prefix: dev
+        time-to-live: 30000 #缓存超时时间ms
+        cache-null-values: false #是否缓存空值
+  redis:
+    database: 0
+    host: ${server.redis-host}
+    port: 6379
+    password: root
+  rabbitmq:
+    host: ${server.rabbitmq-host}
+    port: 5672
+    username: admin
+    password: 123456
+    virtual-host: /
+    connection-timeout: 15000
+    template:
+      mandatory: true
+    publisher-confirms: true
+    publisher-returns: true
+    listener:
+      simple:
+        acknowledge-mode: manual # 手工签收
+        concurrency: 5
+        max-concurrency: 10
+  servlet:
+    multipart:
+      max-file-size: 50MB # Max file size. Values can use the suffixes "MB" or "KB".
+      max-request-size: 50MB # Max request size. Values can use the suffixes "MB" or "KB".
+  oss:
+    access-key: LTAIx3BpUb5a59
+    access-key-secret: GQGsscUuv9OH6y9FhVIY
+  messages:
+    basename: i18n/message
+    encoding: UTF-8
+logging:
+  config: classpath:logback-krmis.xml
+  #隐藏数字输出错误
+  level:
+    io.swagger.models.parameters.AbstractSerializableParameter: error
+    #org.springframework.boot.autoconfigure: error
+
+flowable:
+  database-schema-update: false
+  check-process-definitions: false
+  #关闭定时任务JOB
+  async-executor-activate: false
+
+mybatis:
+  type-aliases-package: cn.ewsd.**.model
+  mapper-locations:
+    - classpath:cn/ewsd/**/mapper/*.xml
+    - classpath:/META-INF/modeler-mybatis-mappings/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+  configuration-properties:
+    blobType: BLOB
+    boolValue: TRUE
+    prefix:
+mapper:
+  mappers:
+    - cn.ewsd.base.bean.CommonMapper
+  not-empty: false
+  identity: MYSQL
+  style: camelhump
+
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+my:
+  host: localhost
+  gateway-port: 9770
+  template: system
+  configDic: sysConfig,siteConfig
+  upload-dir: D:\zysd
+  #upload-dir: /home
+
+env:
+  dev
+#jwt配置
+jwt:
+  audience:
+    clientId: 098f6bcd4621d373cade4e832627b4f9
+    base64Secret: MDk4ZjZiY2Q0NjIxZDM3M2NhZGU0ZTgzMjYyN2I0ZjY=
+    name: systemJwt
+    expiresSecond: 172800
+
+#代码生成配置
+generator:
+  map:
+    #\u5305\u540D
+    systemName: material
+    basepackage: cn.ewsd
+    package: cn.ewsd.material
+    author: zxrmine
+    email: zxrmine@163.cn
+    #\u8868\u524D\u7F00(\u7C7B\u540D\u4E0D\u4F1A\u5305\u542B\u8868\u524D\u7F00)   user_
+    tablePrefix:
+    #\u7C7B\u578B\u8F6C\u6362\uFF0C\u914D\u7F6E\u4FE1\u606F
+    tinyint: Integer
+    smallint: Integer
+    mediumint: Integer
+    int: Integer
+    integer: Integer
+    bigint: Long
+    float: Float
+    double: Double
+    decimal: BigDecimal
+    char: String
+    varchar: String
+    nvarchar: String
+    tinytext: String
+    text: String
+    mediumtext: String
+    longtext: String
+    date: Date
+    datetime: Date
+    timestamp: Date
+    #oracle
+    VARCHAR2: String
+    NUMBER: Integer
+    DATE: Date
+    BLOB: String
+topjui:
+  right-accordion:
+    fit: true
+
+#xxl-job配置
+xxl.job:
+  i18n: zh_CN
+  triggerpool:
+    fast:
+      max: 200
+    slow:
+      max: 100
+  logretentiondays: 30
+#  admin:
+#    addresses: http://localhost:9092/xxl-job-admin
+  executor:
+    appname: xxl-job-executor-enms3-mt
+    ip:
+    port: 9999
+    logpath: D:/zysd/logs/xxl-job/jobhandler
+    logretentiondays: 30
+  accessToken:
+
+#钉钉小程序配置
+dingding:
+  app1:
+    AgentId: 111
+    MiniAppId: 111
+    AppKey: 111
+    AppSecret: 1111
+
+#文件服务地址
+files:
+  server-url-prefix: http://localhost:9095/
+
+#forest配置
+forest:
+  variables:
+    mtServerUrl: http://10.255.9.60
+    #http://221.239.114.20:10080
+  backend: okhttp3 # 后端HTTP框架（默认为 okhttp3）
+  max-connections: 1000 # 连接池最大连接数（默认为 500）
+  max-route-connections: 500 # 每个路由的最大连接数（默认为 500）
+  timeout: 3000 # 请求超时时间，单位为毫秒（默认为 3000）
+  connect-timeout: 3000 # 连接超时时间，单位为毫秒（默认为 timeout）
+  read-timeout: 5000 # 数据读取超时时间，单位为毫秒（默认为 timeout）
+  max-retry-count: 0 # 请求失败后重试次数（默认为 0 次不重试）
+  ssl-protocol: TLS # 单向验证的HTTPS的默认TLS协议（默认为 TLS）
+  logEnabled: true # 打开或关闭日志（默认为 true）
+  log-request: true # 打开/关闭Forest请求日志（默认为 true）
+  log-response-status: true # 打开/关闭Forest响应状态日志（默认为 true）
+  log-response-content: false # 打开/关闭Forest响应内容日志（默认为 false）

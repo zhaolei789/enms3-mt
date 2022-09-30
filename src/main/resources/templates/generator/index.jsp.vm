@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'${pathName}Dg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/${systemName}/${pathName}/getPageSet'">
+            <thead>
+            <tr>
+                #foreach($column in $columns)
+				#if($column.columnName == "uuid")
+				<th data-options="field:'${column.columnNameCamelCase}',title:'${column.comments}',sortable:true,checkbox:true"></th>
+				#else
+				<th data-options="field:'${column.columnNameCamelCase}',title:'${column.comments}',sortable:true"></th>
+				#end
+		    	#end
+            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="${pathName}Dg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'${pathName}Dg'
+       }" style="display:none">
+		<ewsd:rbac str="${pathName}AddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#${pathName}Dg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'${pathName}AddDg',
+               href:'/${systemName}/${pathName}/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/${systemName}/${pathName}/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="${pathName}EditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#${pathName}Dg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'${pathName}EditDg',
+               href:'/${systemName}/${pathName}/edit',
+               url:'/${systemName}/${pathName}/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/${systemName}/${pathName}/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'${pathName}Dg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/${systemName}/${pathName}/deleteBatch">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#${pathName}Dg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的数据',param:'uuid:uuid'},
+	       url:'/${systemName}/${pathName}/deleteBatch'">删除</a>
+		</ewsd:rbac>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#${pathName}Dg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#${pathName}Dg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

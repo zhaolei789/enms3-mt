@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+		<div data-options="region:'west',iconCls:'icon-reload',title:'组织机构',split:true,border:false,bodyCls:'border_right',width:'65%'">
+			<table data-toggle="topjui-treegrid"
+				   data-options="id:'organizationTreegrid',
+               idField:'id',
+			   treeField:'text',
+			   childGrid:{
+                    param:'orgId:id',
+                    grid:[
+                    {type:'datagrid',id:'sysOrganizationMasterDg'}
+                    ]
+                },
+               url:'/mdata/organization/getListByLevelId?levelId=0',
+               expandUrl:'/mdata/organization/getListByPid?pid={id}'
+              ">
+				<thead>
+				<tr>
+					<th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+					<th data-options="field:'code',title:'编码'"></th>
+					<th data-options="field:'text',title:'名称'"></th>
+					<th data-options="field:'orgType',title:'类型'"></th>
+					<!--<%&#45;&#45;<th data-options="field:'codeSetId',title:'体系代码',width:100"></th>-->
+					<!--<th data-options="field:'id',title:'编号',width:100"></th>-->
+					<!--<th data-options="field:'pid',title:'父级编号',width:100"></th>&#45;&#45;%>-->
+					<th data-options="field:'levelId',title:'层级'"></th>
+					<th data-options="field:'id',title:'ID'"></th>
+					<!--<th data-options="field:'deptCode',title:'标准编号'"></th>-->
+					<th data-options="field:'sort',title:'排序'"></th>
+					<th data-options="field:'status',title:'状态',
+                    formatter: function(value,row,index){
+						if (value == '1'){
+							return '<span style=\'color:green\'>启用</span>';
+						} else if (value == '0') {
+							return '<span style=\'color:red\'>禁用</span>';
+						} else {
+						    return '';
+						}
+                    }"></th>
+				</tr>
+				</thead>
+			</table>
+		</div>
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <table data-toggle="topjui-datagrid"
+                   data-options="id:'sysOrganizationMasterDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/mdata/sysOrganizationMaster/getPageSet'">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+                    <!--<th data-options="field:'createTime',title:'',sortable:true"></th>
+                    <th data-options="field:'creator',title:'',sortable:true"></th>
+                    <th data-options="field:'creatorId',title:'',sortable:true"></th>
+                    <th data-options="field:'creatorOrgId',title:'',sortable:true"></th>
+                    <th data-options="field:'modifierId',title:'',sortable:true"></th>
+                    <th data-options="field:'modifier',title:'',sortable:true"></th>
+                    <th data-options="field:'modifyTime',title:'',sortable:true"></th>
+                    <th data-options="field:'isDel',title:'',sortable:true"></th>
+                    <th data-options="field:'orgUuid',title:'',sortable:true"></th>
+                    <th data-options="field:'orgId',title:'',sortable:true"></th>
+                    <th data-options="field:'orgLevel',title:'',sortable:true"></th>
+                    <th data-options="field:'masterUuid',title:'领导ID',sortable:true"></th>-->
+					<th data-options="field:'masterPositionName',title:'领导职务',sortable:true"></th>
+                    <th data-options="field:'masterName',title:'领导名称',sortable:true"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- 表格工具栏 -->
+    <div id="sysOrganizationMasterDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'sysOrganizationMasterDg'
+       }" style="display:none">
+        <ewsd:rbac str="sysOrganizationMasterAddDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#sysOrganizationMasterDg-toolbar',
+           btnCls:'topjui-btn-green',
+           parentGrid:{
+               type:'treegrid',
+               id:'organizationTreegrid',
+               param:'orgId:id',
+               unselectedMsg:'请先选择左侧组织机构'
+           },
+           dialog:{
+               id:'sysOrganizationMasterAddDg',
+               href:'/mdata/sysOrganizationMaster/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/mdata/sysOrganizationMaster/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+        </ewsd:rbac>
+
+        <!--<ewsd:rbac str="sysOrganizationMasterEditDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#sysOrganizationMasterDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'sysOrganizationMasterEditDg',
+               href:'/mdata/sysOrganizationMaster/edit',
+               url:'/mdata/sysOrganizationMaster/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/mdata/sysOrganizationMaster/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'sysOrganizationMasterDg'}]}
+               ]
+           }">编辑</a>
+        </ewsd:rbac>-->
+
+        <ewsd:rbac str="/mdata/sysOrganizationMaster/deleteBatch">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'doAjax',
+           extend:'#sysOrganizationMasterDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/mdata/sysOrganizationMaster/deleteBatch'">删除</a>
+        </ewsd:rbac>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#sysOrganizationMasterDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#sysOrganizationMasterDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

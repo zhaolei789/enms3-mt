@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MErpMatMapper">
+	<select id="getRealTimePurchaseCircle" resultType="java.util.HashMap">
+        SELECT SUM(CASE WHEN mat_amount&lt;0 THEN -TIMESTAMPDIFF(DAY, a.purchase_date, a.occ_date) ELSE TIMESTAMPDIFF(DAY, a.purchase_date, a.occ_date) END) sumTime, COUNT(*) cnt
+        FROM m_erp_mat a
+        WHERE IFNULL(a.purchase_date,'')!='' AND a.mat_code=#{matCode}
+    </select>
+</mapper>

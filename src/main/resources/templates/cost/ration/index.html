@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="rationForm">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,">
+			<table id="rationDg"></table>
+		</div>
+		<div data-options="region:'east',iconCls:'icon-reload',title:'',split:true,border:false,width:'50%'">
+			<table id="matDg"></table>
+		</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="rationDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'rationDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">单耗：</label>
+	<input id="rationQry" data-toggle="topjui-textbox" name="rationQry" data-options="width:'150px'" value="">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<a href="javascript:void(0)"
+	   data-toggle="topjui-menubutton"
+	   data-options="method:'openDialog',
+			extend:'#rationDg-toolbar',
+			btnCls:'topjui-btn-green',
+			dialog:{
+			id:'rationAddDg',
+			href:'/cost/ration/edit',
+			height:450,
+			width:800,
+			buttonsGroup:[
+			{text:'保存',url:'/cost/ration/insert',iconCls:'fa fa-plus',handler:'ajaxForm'}
+			]
+			}">新增</a>
+
+	<a href="javascript:void(0)"
+	   data-toggle="topjui-menubutton"
+	   data-options="method:'openDialog',
+           extend:'#rationDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'rationEditDg',
+               href:'/cost/ration/edit',
+               url:'/cost/ration/getRationByNo?rationNo={rationNo}',
+               height:450,
+               width:800,
+               buttonsGroup:[
+                   {text:'更新',url:'/cost/ration/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'rationDg'}]}
+               ]
+           }">编辑</a>
+
+	<a href="javascript:void(0)"
+	   data-toggle="topjui-menubutton"
+	   data-options="method:'doAjax',
+           extend:'#rationDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的项目',param:'rationNo:rationNo'},
+	       url:'/cost/ration/delete'">删除</a>
+</div>
+
+	<div id="matDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'matDg'
+       }" style="display:none">
+
+		<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">物料：</label>
+		<input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'" value="">
+		<input type="hidden" id="rationNo" name="rationNo1" value="" />
+
+		<a href="javascript:void(0)" id="searchBtn1" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+		</a>
+
+		<br />
+
+		<label class="topjui-form-label" style="width:75px;float:none;display:inline-block">选择物料：</label>
+		<select id="matNo1" name="matNo1"></select>
+
+		<a href="javascript:void(0)" id="addMatBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">新增</span>
+			<span class="l-btn-icon fa fa-plus">&nbsp;</span>
+		</span>
+		</a>
+
+		<a href="javascript:void(0)" id="delMatBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">删除</span>
+			<span class="l-btn-icon fa fa-trash">&nbsp;</span>
+		</span>
+		</a>
+
+	</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#matNo1').iCombogrid({
+				width:'150px',
+				panelWidth:'400px',
+				idField:'matNo',
+				textField:'matCode',
+				mode:'remote',
+				url:'/cost/ration/getMatForSelect',
+				columns:[ [
+					{field:'matCode', title:'材料编码'},
+					{field:'matName', title:'材料名称'},
+					{field:'erpType', title:'分类'},
+					{field:'typeName', title:'分类描述'},
+					{field:'matUnit', title:'单位'}
+				] ]
+			});
+
+			$('#rationDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/cost/ration/getPageSet',
+				queryParams:{
+					rationQry:$('#rationQry').iTextbox('getValue')
+				},
+				columns:[ [
+					{
+						field:'rationNo', sortable:false, title:'', checkbox:true
+					},{
+						field:'rationName', sortable:false, title:'单耗名称'
+					},{
+						field:'rationUnit', sortable:false, title:'单位'
+					},{
+						field:'isUsing', sortable:false, title:'是否在用', formatter: function (value, row, index) {
+							if("1"==value){
+								return '是'
+							}else{
+								return '否'
+							}
+						}
+					},{
+						field:'denomName', sortable:false, title:'分母'
+					},{
+						field:'orderNo', sortable:false, title:'排序号'
+					}
+				] ],
+				onSelect: function(index, row){
+					var rationNo = row.rationNo;
+					$('#rationNo').val(rationNo);
+					reloadMatData(rationNo);
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#matDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/cost/ration/getMatPageSet',
+				columns:[ [
+					{
+						field:'matNo', sortable:false, title:'', checkbox:true
+					},{
+						field:'typeName', sortable:false, title:'物料组'
+					},{
+						field:'matCode', sortable:false, title:'物料编码'
+					},{
+						field:'matName', sortable:false, title:'物料描述'
+					},{
+						field:'matUnit', sortable:false, title:'计量单位'
+					},{
+						field:'matPrice', sortable:false, title:'单价', align:'right'
+					}
+				] ]
+			});
+
+			$('#searchBtn1').click(function(){
+				reloadMatData($('#rationNo').val());
+			});
+
+			$('#addMatBtn').click(function(){
+				var rationNo = $('#rationNo').val();
+				var matNo = $('#matNo1').iCombogrid('getValue');
+				if(rationNo==''){
+					$.iMessager.alert({
+						icon:'messager-error',
+						title:'提示消息',
+						msg:'请先选中要添加物料的项目！'
+					});
+					return
+				}
+				if(matNo==''){
+					$.iMessager.alert({
+						icon:'messager-error',
+						title:'提示消息',
+						msg:'请先选则要添加的物料！'
+					});
+					return
+				}
+				$('#rationForm').iForm('submit', {
+					url: '/cost/ration/insertMat',
+					success: function (data) {
+						data = $.parseJSON(data);
+						if (data.statusCode == 200) {
+							$.iMessager.show({
+								title: data.title,
+								msg: data.message
+							})
+							reloadMatData(rationNo)
+						} else {
+							$.iMessager.alert({
+								icon: 'messager-error',
+								title: data.title,
+								msg: data.message
+							});
+						}
+					}
+				});
+			});
+
+			$('#delMatBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '确定删除材料吗？', function (r) {
+					if (r) {
+						$('#rationForm').iForm('submit', {
+							url: '/cost/ration/deleteMat',
+							success: function (data) {
+								data = $.parseJSON(data);
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadMatData($('#rationNo').val())
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				});
+			});
+		});
+
+		function reloadData(){
+			$('#rationDg').iDatagrid('reload',{
+				rationQry:$('#rationQry').iTextbox('getValue')
+			});
+		}
+
+		function reloadMatData(rationNo){
+			$('#matDg').iDatagrid('reload',{
+				matQry:$('#matQry').iTextbox('getValue'),
+				rationNo: rationNo
+			});
+		}
+	</script>
+</th:block>
+</body>
+</html>

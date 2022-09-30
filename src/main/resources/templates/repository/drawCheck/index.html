@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false,height:'50%'">
+		<div data-toggle="topjui-layout" data-options="fit:true">
+			<div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'50%'">
+				<table id="drawCheckIndexDg"></table>
+			</div>
+			<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+				<div id="logTabs">
+					<div title="汇总信息" data-options="id:'tab0',iconCls:'fa fa-th'">
+						<table data-toggle="topjui-datagrid"
+							   data-options="id:'hzLogDg',
+										     singleSelect:true,
+										     selectOnCheck:false,
+										     checkOnSelect:false,
+										     pagination:false,
+										     url:'/repository/drawCheck/hzLog'">
+							<thead>
+								<tr>
+									<th data-options="field:'item',title:'项目',sortable:false"></th>
+									<th data-options="field:'content',title:'内容',sortable:false"></th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+					<div title="领料记录" data-options="id:'tab1',iconCls:'fa fa-th'">
+						<table data-toggle="topjui-datagrid"
+							   data-options="id:'llLogDg',
+										     singleSelect:true,
+										     selectOnCheck:false,
+										     checkOnSelect:false,
+										     pagination:false,
+										     url:'/repository/drawCheck/llLog'">
+							<thead>
+							<tr>
+								<th data-options="field:'occDate',title:'日期',sortable:false, formatter:function(value, row, index){
+									return value.substring(0, 4)+'-'+value.substring(4, 6)+'-'+value.substring(6, 8)
+								}"></th>
+								<th data-options="field:'drawStepName',title:'领料步骤',sortable:false"></th>
+								<th data-options="field:'amount',title:'数量',sortable:false, align:'right'"></th>
+								<th data-options="field:'matPrice',title:'单价',sortable:false, align:'right'"></th>
+								<th data-options="field:'bala',title:'金额',sortable:false, align:'right'"></th>
+								<th data-options="field:'prjName',title:'工程',sortable:false"></th>
+								<th data-options="field:'itemName',title:'费用来源',sortable:false"></th>
+							</tr>
+							</thead>
+						</table>
+					</div>
+					<div title="消耗记录" data-options="id:'tab2',iconCls:'fa fa-th'">
+						<table data-toggle="topjui-datagrid"
+							   data-options="id:'xhLogDg',
+										     singleSelect:true,
+										     selectOnCheck:false,
+										     checkOnSelect:false,
+										     pagination:false,
+										     url:'/repository/drawCheck/xhLog'">
+							<thead>
+							<tr>
+								<th data-options="field:'occDate',title:'日期',sortable:false, formatter:function(value, row, index){
+									return value.substring(0, 4)+'-'+value.substring(4, 6)+'-'+value.substring(6, 8)
+								}"></th>
+								<th data-options="field:'deptName',title:'班组',sortable:false"></th>
+								<th data-options="field:'occAmount',title:'数量',sortable:false, align:'right'"></th>
+								<th data-options="field:'matPrice',title:'价格',sortable:false, align:'right'"></th>
+								<th data-options="field:'bala',title:'金额',sortable:false, align:'right'"></th>
+								<th data-options="field:'newOld',title:'新旧',sortable:false, formatter:function(value, row, index){
+									return value=='X' ? '新料' : '旧料'
+								}"></th>
+							</tr>
+							</thead>
+						</table>
+					</div>
+					<div title="库存明细" data-options="id:'tab3',iconCls:'fa fa-th'">
+						<table data-toggle="topjui-datagrid"
+							   data-options="id:'kcLogDg',
+										     singleSelect:true,
+										     selectOnCheck:false,
+										     checkOnSelect:false,
+										     pagination:false,
+										     url:'/repository/drawCheck/kcLog'">
+							<thead>
+							<tr>
+								<th data-options="field:'teamName',title:'区队名称',sortable:false"></th>
+								<th data-options="field:'matAmount',title:'数量',sortable:false, align:'right'"></th>
+								<th data-options="field:'matUnitName',title:'单位',sortable:false"></th>
+							</tr>
+							</thead>
+						</table>
+					</div>
+					<div title="审批日志" data-options="id:'tab4',iconCls:'fa fa-th'">
+						<table data-toggle="topjui-datagrid"
+							   data-options="id:'checkLogDg',
+										     singleSelect:true,
+										     selectOnCheck:false,
+										     checkOnSelect:false,
+										     pagination:false,
+										     url:'/system/tCheck/getCheck'">
+							<thead>
+							<tr>
+								<th data-options="field:'stepCodeName',title:'步骤',sortable:false"></th>
+								<th data-options="field:'userName',title:'审批人员',sortable:false"></th>
+								<th data-options="field:'occDate',title:'审批时间',sortable:false, formatter:function(value, row, index){
+									var date = value.substring(0, 4)+'-'+value.substring(4, 6)+'-'+value.substring(6, 8)
+									var time = row.occTime.substring(0, 2)+':'+row.occTime.substring(2, 4)+':'+row.occTime.substring(4, 6)
+									return date + ' ' + time
+								}"></th>
+								<th data-options="field:'direct',title:'审批方向',sortable:false, formatter:function(value, row, index){
+									if('sys.checkDirect.0'==row.direct){
+										return '---'
+									}else{
+										return '退稿'
+									}
+								}"></th>
+								<th data-options="field:'idea',title:'审批意见',sortable:false"></th>
+								<th data-options="field:'logInfo',title:'备注',sortable:false"></th>
+							</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<form id="drawCheckForm">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+			<table id="drawCheckListDg"></table>
+		</div>
+	</form>
+
+	<div id="drawCheckListDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'drawCheckListDg'
+       }" style="display:none">
+
+		<input type="hidden" name="teamNo" id="teamNo" />
+		<input type="hidden" name="drawStep" id="drawStep" />
+		<input type="hidden" name="month" id="month" />
+		<input type="hidden" name="drawNo1" id="drawNo" />
+		<input type="hidden" name="checkNo" id="checkNo" />
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">申请日期：</label>
+		<input id="date1Qry" name="date1Qry" th:value="${date1Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+		<label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+		<input id="date2Qry" name="date2Qry" th:value="${date2Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">仓库：</label>
+		<input name="storeNoQry" id="storeNoQry" value="">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">领料单号：</label>
+		<input id="drawNoQry" data-toggle="topjui-textbox" name="drawNoQry" data-options="width:'150px'" value="">
+
+		<label class="topjui-form-label" style="width:90px;float:none;display:inline-block">编码/描述：</label>
+		<input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'" value="">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料分类：</label>
+		<input id="typeQry" data-toggle="topjui-textbox" name="typeQry" data-options="width:'150px'" value="">
+
+		<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+			<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+				<span class="l-btn-text">查询</span>
+				<span class="l-btn-icon fa fa-search">&nbsp;</span>
+			</span>
+		</a>
+
+		<a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+			<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+				<span class="l-btn-text">审批通过</span>
+				<span class="l-btn-icon fa fa-save">&nbsp;</span>
+			</span>
+		</a>
+
+		<a href="javascript:void(0)" id="backBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+			<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+				<span class="l-btn-text">拒绝退回</span>
+				<span class="l-btn-icon fa fa-reply">&nbsp;</span>
+			</span>
+		</a>
+	</div>
+</div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			var startDate = [[${date1Qry}]];
+			var endDate = [[${date2Qry}]];
+			$('#storeNoQry').iCombobox({
+				valueField:'storeNo',
+				textField:'storeName',
+				url:'/repository/mStore/getOutStoreList?startDate=' + startDate + '&endDate=' + endDate,
+				width:'150px',
+				loadFilter:function(data){
+					data.unshift({storeNo:'', storeName:'--全部--'});
+					return data
+				}
+			});
+
+			$('#drawCheckIndexDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				pagination:false,
+				url:'/repository/drawCheck/getIndexData',
+				columns:[ [
+					{
+						field:'drawStepName',title:'审批步骤',sortable:false
+					},{
+						field:'planTeamName',title:'领料单位',sortable:false
+					},{
+						field:'applyMonth',title:'申请月份',sortable:false, formatter:function(value, row, index){
+							return value!='' && value!=null ? value.substring(0, 4)+'年'+value.substring(4, 6)+'月' : ''
+ 						}
+					},{
+						field:'cnt',title:'记录数',sortable:false
+					},{
+						field:'bala',title:'待审总金额',sortable:false, align:'right'
+					}
+				] ],
+				onSelect:function(index, row){
+					$('#teamNo').val(row.planTeam);
+					$('#drawStep').val(row.drawStep);
+					$('#month').val(row.applyMonth);
+					reloadList(row.planTeam, row.drawStep, row.applyMonth);
+				},
+				onLoadSuccess:function(data){
+					if(data.rows!==null && data.rows.length>0){
+						$('#drawCheckIndexDg').iDatagrid('selectRow', 0)
+					}else{
+						reloadList();
+					}
+				}
+			});
+
+			$('#drawCheckListDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/repository/drawCheck/getPageSet',
+				columns:[ [
+					{
+						field:'drawNo',title:'',sortable:false, checkbox:true
+					},{
+						field:'cnt',title:'领料单号',sortable:false, formatter:function(value, row, index){
+							return row.reserve2
+						}
+					},{
+						field:'applyDate',title:'申请时间',sortable:false, formatter:function(value, row, index){
+							var time = row.applyTime.substring(0, 2)+':'+row.applyTime.substring(2, 4)+':'+row.applyTime.substring(4, 6)
+							return value.substring(0, 6)+'-'+value.substring(6, 8)+' '+time
+						}
+					},{
+						field:'erpType',title:'物料分类',sortable:false
+					},{
+						field:'matCode',title:'物料编码',sortable:false
+					},{
+						field:'matName',title:'物料描述',sortable:false
+					},{
+						field:'matUnit',title:'单位',sortable:false
+					},{
+						field:'stockAmount',title:'超市库存',sortable:false, align:'right', formatter:function(value, row, index){
+							return '<span id="stockAmount_'+ row.drawNo +'"></span><input type="hidden" id="mat_'+row.drawNo+'" value="'+row.matNo+'" /><input type="hidden" name="step_'+row.drawNo+'" value="'+row.drawStep+'" />'
+						}
+					},{
+						field:'teamAmount',title:'队库存',sortable:false, align:'right'
+					},{
+						field:'avgAmount',title:'月均消耗',sortable:false, align:'right'
+					},{
+						field:'applyAmount',title:'申请数',sortable:false, align:'right'
+					},{
+						field:'chkAmount',title:'审批数',sortable:false, formatter:function(value, row, index){
+							var amount = value==0 ? row.matAmount : value
+							return '<span class="textbox"><input class="textbox-text" type="number" id="amount_'+ row.drawNo +'" name="amount_'+ row.drawNo +'" value="'+ amount +'" disabled /></span>'
+						}
+					},{
+						field:'matPrice',title:'价格',sortable:false, align:'right'
+					},{
+						field:'matBala',title:'金额',sortable:false, align:'right'
+					},{
+						field:'planTeamName',title:'申请单位',sortable:false
+					},{
+						field:'storeNo',title:'领料仓库',sortable:false, formatter:function(value, row, index){
+							var drawNo = row.drawNo
+							return '<input name="store_'+ drawNo +'" id="store_'+ drawNo +'" value="'+ value +'">'
+						}
+					},{
+						field:'siteCode',title:'存放货位',sortable:false
+					},{
+						field:'reserve1',title:'审批理由',sortable:false, formatter:function(value, row, index){
+							return '<span class="textbox"><input class="textbox-text" type="text" id="idea_'+ row.drawNo +'" name="idea_'+ row.drawNo +'" value="" disabled /></span>'
+						}
+					},{
+						field:'typeName',title:'分类描述',sortable:false
+					},{
+						field:'reserveNo',title:'提报单号',sortable:false
+					},{
+						field:'applyInfo',title:'申请备注',sortable:false
+					},{
+						field:'prjName',title:'工程项目',sortable:false
+					}
+				] ],
+				onLoadSuccess:function(data){
+					for(var i=0; i<data.rows.length; i++){
+						var row = data.rows[i];
+						var drawNo = row.drawNo;
+						$('#store_'+drawNo).iCombobox({
+							valueField:'storeNo',
+							textField:'storeName',
+							url:'/repository/mStore/getStoreList?storeType=r.storeType2.11&storeLevel=r.storeLevel.1,r.storeLevel.0',
+							disabled:true,
+							onChange:function(newValue, oldValue){
+								var dNo = $(this).attr('id').split('_')[1];
+								var matNo = $('#mat_'+dNo).val();
+								getCSKC(dNo, matNo, newValue)
+							}
+						})
+						var matNo = $('#mat_'+drawNo).val();
+						var storeNo = $('#store_'+drawNo).iCombobox('getValue');
+						getCSKC(drawNo, matNo, storeNo)
+					}
+
+					if(data.rows!==null && data.rows.length>0){
+						$('#drawCheckListDg').iDatagrid('selectRow', 0)
+					}
+				},
+				onCheck:function(index, row){
+					var drawNo = row.drawNo;
+					$('#amount_' + drawNo +', #idea_'+ drawNo).removeAttr('disabled');
+					$('#store_'+drawNo).iCombobox('enable');
+				},
+				onUncheck:function(index, row){
+					var drawNo = row.drawNo;
+					$('#amount_' + drawNo +', #idea_'+ drawNo).attr('disabled', 'disabled');
+					$('#store_'+drawNo).iCombobox('disable');
+				},
+				onCheckAll:function(rows){
+					$('[name^="amount_"], [name^="idea_"]').removeAttr("disabled");
+					for(var i=0; i<rows.length; i++){
+						var row = rows[i];
+						var drawNo = row.drawNo;
+						$('#store_'+drawNo).iCombobox('enable');
+					}
+				},
+				onUncheckAll:function(rows){
+					$('[name^="amount_"], [name^="idea_"]').attr("disabled", 'disabled');
+					for(var i=0; i<rows.length; i++){
+						var row = rows[i];
+						var drawNo = row.drawNo;
+						$('#store_'+drawNo).iCombobox('disable');
+					}
+				},
+				onSelect:function(index, row){
+					$('#drawNo').val(row.drawNo);
+					$('#checkNo').val(row.checkNo);
+					reloadHz(row.drawNo);
+					reloadLl(row.drawNo);
+					reloadXh(row.drawNo);
+					reloadKc(row.drawNo);
+					reloadCheck(row.checkNo);
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadList();
+			});
+
+			$('#submitBtn').click(function(){
+				$('#drawCheckForm').iForm('submit', {
+					url:'/repository/drawCheck/submit',
+					success:function(data){
+						data = $.parseJSON(data);
+						if(data.statusCode == 200){
+							$.iMessager.show({
+								title:data.title,
+								msg:data.message
+							})
+							$('#drawCheckIndexDg').iDatagrid('reload');
+						} else {
+							$.iMessager.alert({
+								icon:'messager-error',
+								title:data.title,
+								msg:data.message
+							});
+						}
+					}
+				});
+			});
+
+			$('#backBtn').click(function(){
+				$('#drawCheckForm').iForm('submit', {
+					url:'/repository/drawCheck/back',
+					success:function(data){
+						data = $.parseJSON(data);
+						if(data.statusCode == 200){
+							$.iMessager.show({
+								title:data.title,
+								msg:data.message
+							})
+							$('#drawCheckIndexDg').iDatagrid('reload');
+						} else {
+							$.iMessager.alert({
+								icon:'messager-error',
+								title:data.title,
+								msg:data.message
+							});
+						}
+					}
+				});
+			});
+
+			$('#logTabs').iTabs({
+				fit:true,
+				border:false
+			})
+
+			$('#hzLogDg').iDatagrid({
+				onLoadSuccess:function(data){
+					$('#hzLogDg').iDatagrid('mergeCells', {
+						index:2,
+						field:'item',
+						rowspan:2
+					})
+					$('#hzLogDg').iDatagrid('mergeCells', {
+						index:4,
+						field:'item',
+						rowspan:2
+					})
+				}
+			});
+		});
+
+		function getCSKC(dNo, matNo, newValue){
+			$.ajax({
+				url:'/repository/drawCheck/getCSKC',
+				type:'POST',
+				data:{matNo:matNo, storeNo:newValue},
+				dataType:'json',
+				success: function (res) {
+					$('#stockAmount_'+dNo).text(res)
+				}
+			})
+		}
+
+		function reloadList(teamNo, drawStep, month){
+			$('#drawCheckListDg').iDatagrid('reload',{
+				date1Qry:$('#date1Qry').iDatebox('getValue'),
+				date2Qry:$('#date2Qry').iDatebox('getValue'),
+				storeNoQry:$('#storeNoQry').iCombobox('getValue'),
+				drawNoQry:$('#drawNoQry').iTextbox('getValue'),
+				matQry:$('#matQry').iTextbox('getValue'),
+				typeQry:$('#typeQry').iTextbox('getValue'),
+				teamNo: teamNo == null ? $('#teamNo').val() : teamNo,
+				month: month==null ? $('#month').val() : month,
+				drawStep: drawStep==null ? $('#drawStep').val() : drawStep,
+			});
+		}
+
+		function reloadHz(drawNo){
+			$('#hzLogDg').iDatagrid('reload', {
+				drawNo:drawNo==null ? $('#drawNo').val() : drawNo
+			})
+		}
+
+		function reloadLl(drawNo){
+			$('#llLogDg').iDatagrid('reload', {
+				drawNo:drawNo==null ? $('#drawNo').val():drawNo
+			})
+		}
+
+		function reloadXh(drawNo){
+			$('#xhLogDg').iDatagrid('reload', {
+				drawNo:drawNo==null ? $('#drawNo').val():drawNo
+			})
+		}
+
+		function reloadKc(drawNo){
+			$('#kcLogDg').iDatagrid('reload', {
+				drawNo:drawNo==null ? $('#drawNo').val():drawNo
+			})
+		}
+
+		function reloadCheck(checkNo){
+			$('#checkLogDg').iDatagrid('reload', {
+				checkNo:checkNo==null ? $('#checkNo').val():checkNo
+			})
+		}
+	</script>
+</th:block>
+</body>
+</html>

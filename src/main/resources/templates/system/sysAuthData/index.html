@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'west',title:'权限组',split:true,border:false,width:'30%',iconCls:'fa fa-book',headerCls:'border_right',bodyCls:'border_right'">
+            <!-- datagrid表格 -->
+            <table data-toggle="topjui-edatagrid"
+                   data-options="id:'groupDg',
+                    idField:'uuid',
+                    reloadAfterSave:true,
+                    url:'/system/sysAuthdataGroup/getPageSet',
+                    saveUrl:'/system/sysAuthdataGroup/save',
+                    updateUrl:'/system/sysAuthdataGroup/update',
+                    destroyUrl:'/system/sysAuthdataGroup/deleteBatch',
+                    childGrid:{
+                        param:'groupUuid:uuid',
+                        grid:[
+                            {type:'datagrid',id:'apiDg'}
+                        ]
+                    }">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                    <th data-options="field:'id',title:'分组ID',sortable:true"></th>
+                    <th data-options="field:'name',title:'分组名',sortable:true,editor:{type:'textbox',options:{required:true,height:30}}"></th>
+                    <th data-options="field:'sort',title:'排序',sortable:true,editor:{type:'textbox',options:{height:30}}"></th>
+                    <th data-options="field:'remark',title:'备注',sortable:true,editor:{type:'textbox',options:{height:30}}"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+        <div data-options="region:'center',iconCls:'fa fa-book',title:'数据接口',split:true,border:true,headerCls:'border_top_none'">
+            <div data-toggle="topjui-layout" data-options="fit:true">
+                <div data-options="region:'center',title:'',fit:false,split:true,border:false,bodyCls:'border_bottom'">
+                <!-- datagrid表格 -->
+                <table data-toggle="topjui-edatagrid"
+                       data-options="id:'apiDg',
+                    idField:'uuid',
+                    reloadAfterSave:true,
+                    selectOnCheck:true,
+			         checkOnSelect:true,
+			         reloadAfterSave:true,
+                    url:'/system/sysAuthdataApi/getPageSet',
+                    saveUrl:'/system/sysAuthdataApi/save?groupUuid={parent.uuid}',
+                    updateUrl:'/system/sysAuthdataApi/update',
+                    destroyUrl:'/system/sysAuthdataApi/deleteBatch',
+                    childGrid:{
+                        param:'apiUuid:uuid',
+                        grid:[
+                            {type:'datagrid',id:'filterDg'}
+                        ]
+                    }">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                        <th data-options="field:'name',title:'接口名称',sortable:true,editor:{type:'textbox',options:{required:true,height:30}}"></th>
+                        <th data-options="field:'priority',title:'优先级',sortable:true,editor:{type:'numberbox',options:{groupSeparator:'',min:0}}"></th>
+                        <th data-options="field:'url',title:'接口地址',sortable:true,editor:{type:'textbox',options:{required:true,height:30}}"></th>
+                        <th data-options="field:'sqlStr',title:'SQL语句',sortable:true,editor:{type:'textbox',options:{required:true,height:30}}"></th>
+                        <th data-options="field:'sort',title:'排序',sortable:true,editor:{type:'textbox',options:{height:30}}"></th>
+                        <th data-options="field:'remark',title:'备注',sortable:true,editor:{type:'textbox',options:{height:30}}"></th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+            <div data-options="region:'south',iconCls:'fa fa-book',title:'SQL变量',split:true,border:false,height:'40%',headerCls:'border_top'">
+                <!-- datagrid表格 -->
+                <table data-toggle="topjui-datagrid"
+                       data-options="id:'filterDg',
+                    idField:'uuid',
+                    reloadAfterSave:true,
+                    selectOnCheck:true,
+			         checkOnSelect:true,
+                    url:'/system/sysAuthdataFilter/getPageSet'">
+                    <thead>
+                    <tr>
+                        <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                        <th data-options="field:'field',title:'字段名',sortable:true"></th>
+                        <!--<th data-options="field:'type',title:'字段值类型',sortable:true"></th>-->
+                        <th data-options="field:'value',title:'字段值',sortable:true"></th>
+                        <!--<th data-options="field:'sort',title:'排序',sortable:true"></th>-->
+                        <!--<th data-options="field:'remark',title:'备注',sortable:true"></th>-->
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 字典集 表格工具栏 -->
+    <div id="groupDg-toolbar" class="topjui-toolbar" data-options="
+       grid:{
+           type:'edatagrid',
+           id:'groupDg'
+       }" style="display:none">
+        <ewsd:rbac str="sysAuthDataAdd">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'edatagrid',
+           extend:'#groupDg-toolbar',
+           btnCls:'topjui-btn-green',
+           type:'addRow',
+           iconCls:'fa fa-plus'">新增</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="sysAuthDataSave">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'edatagrid',
+       extend:'#groupDg-toolbar',
+       btnCls:'topjui-btn-blue',
+       type:'saveRow',
+       iconCls:'fa fa-save'">保存</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="sysAuthDataCansel">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'edatagrid',
+       extend:'#groupDg-toolbar',
+       btnCls:'topjui-btn-black',
+       type:'cancelRow',
+       iconCls:'fa fa-close'">取消</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="/system/sysAuthData/deleteBatch">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'edatagrid',
+           extend:'#groupDg-toolbar',
+           btnCls:'topjui-btn-red',type:'destroyRow'">删除</a>
+        </ewsd:rbac>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#groupDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#groupDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+    </div>
+
+    <!-- 字典项 表格工具栏 -->
+    <div id="apiDg-toolbar" class="topjui-toolbar" data-options="
+       grid:{
+           type:'edatagrid',
+           id:'apiDg'
+       },parentGrid:{
+           type:'edatagrid',
+           id:'groupDg'
+       }" style="display:none">
+        <ewsd:rbac str="sysAuthDataAdd">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'edatagrid',
+           extend:'#apiDg-toolbar',
+           btnCls:'topjui-btn-green',
+           type:'addRow',
+           iconCls:'fa fa-plus'">新增</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="sysAuthDataSave">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'edatagrid',
+       extend:'#apiDg-toolbar',
+       btnCls:'topjui-btn-blue',
+       type:'saveRow',
+       iconCls:'fa fa-save'">保存</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="sysAuthDataCansel">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'edatagrid',
+           extend:'#apiDg-toolbar',
+           btnCls:'topjui-btn-black',
+           type:'cancelRow',
+           iconCls:'fa fa-close'">取消</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="/system/sysAuthData/deleteBatch">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'edatagrid',
+           extend:'#apiDg-toolbar',
+           btnCls:'topjui-btn-red',
+           type:'destroyRow',
+           iconCls:'fa fa-trash'">删除</a>
+        </ewsd:rbac>
+        <!--<a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+           extend:'#apiDg-toolbar',
+           btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+           extend:'#apiDg-toolbar',
+           btnCls:'topjui-btn-purple'">查询</a>-->
+    </div>
+
+    <!-- 表格工具栏 -->
+    <div id="filterDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'filterDg'
+       }" style="display:none">
+        <ewsd:rbac str="sysAuthDataAdd">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#filterDg-toolbar',
+           btnCls:'topjui-btn-green',
+           parentGrid:{
+               type:'edatagrid',
+               id:'apiDg',
+               param:'apiUuid:uuid',
+               unselectedMsg:'请选择上方数据接口！'
+           },
+           dialog:{
+               id:'sysAuthdataFilterAddDialog',
+               href:'/system/sysAuthdataFilter/add',
+               width:550,
+               height:200,
+               buttonsGroup:[
+                   {text:'保存',url:'/system/sysAuthdataFilter/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="sysAuthDataEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#filterDg-toolbar',
+           iconCls:'fa fa-pencil',
+           btnCls:'topjui-btn-blue',
+           dialog:{
+               id:'sysAuthdataFilterEditDialog',
+               href:'/system/sysAuthdataFilter/edit?uuid={uuid}',
+               url:'/system/sysAuthdataFilter/getDetailByUuid?uuid={uuid}',
+               width:450,
+               height:200,
+               buttonsGroup:[
+                   {text:'更新',url:'/system/sysAuthdataFilter/update',iconCls:'fa fa-save',handler:'ajaxForm'},
+               ]
+           }">编辑</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="/system/sysAuthData/deleteBatch">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#filterDg-toolbar',
+           btnCls:'topjui-btn-red',
+           url:'/system/sysAuthdataFilter/deleteBatch'">删除</a>
+        </ewsd:rbac>
+        <!--<a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#filterDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#filterDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>-->
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

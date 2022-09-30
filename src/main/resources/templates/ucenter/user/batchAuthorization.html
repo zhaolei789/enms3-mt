@@ -1,0 +1,111 @@
+<input type="hidden" id="uuid" name="uuid">
+<input type="hidden" name="password">
+<style>
+    .textbox-icon{
+        width: 26px !important;
+        text-align: center;
+        text-decoration: none;
+        color: gray;
+        line-height: 29px;
+    }
+    a:hover{
+        text-decoration: none;
+    }
+</style>
+<div class="topjui-fluid">
+    <fieldset>
+        <legend>授权信息</legend>
+    </fieldset>
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">角色授权</label>
+            <div class="topjui-input-block">
+                <input type="text" name="userGroup" id="userGroup"
+                       data-toggle="topjui-combotree"
+                       data-options="
+                       <!--required:true,-->
+                       prompt:'必填',
+                       id:'userGroup',
+                       multiple:true,
+                       url:'/system/authGroup/getListByLevelId?levelId=0',
+                       expandUrl:'/system/authGroup/getListByPid?pid={id}',
+                       expandAll:true,
+                       onBeforeSelect: function (node) {
+                         var opts = $(this).iTree('options');
+                         if (opts.onlyLeafCheck) {
+                            // 判断是否是叶子节点
+                             var isLeaf = $(this).iTree('isLeaf', node.target);
+                            if (!isLeaf) {
+                                // 返回false表示取消本次选择操作
+                                return false;
+                            }
+                         }
+                       },
+                       icons:[{
+                            iconCls:'fa fa-remove',
+                            handler: function(e){
+                                $(e.data.target).iCombotree('clear');
+                            }
+                        }],
+                        iconWidth:22,
+                       onlyLeafCheck:true">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">数据授权</label>
+            <div class="topjui-input-block">
+                <input type="text" name="dataAuth" id="dataAuth"
+                       data-toggle="topjui-combobox"
+                       data-options="
+                       <!--required:true,-->
+                       prompt:'必填',
+                       multiple:true,
+                       valueField:'id',
+                       textField:'name',
+                       panelHeight:'auto',
+                        icons:[{
+                            iconCls:'fa fa-remove',
+                            handler: function(e){
+                                $(e.data.target).combobox('clear');
+                            }
+                        }],
+                       url:'/system/sysAuthdataGroup/getAllList'
+                      ">
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+    $.extend($.fn.textbox.methods, {
+        addClearBtn: function(jq, iconCls){
+            return jq.each(function(){
+                var t = $(this);
+                var opts = t.combotree('options');
+                opts.icons = opts.icons || [];
+                opts.icons.unshift({
+                    iconCls: iconCls,
+                    handler: function(e){
+                        $(e.data.target).combotree('clear').combotree('textbox').focus();
+                        $(this).css('visibility','hidden');
+                    }
+                });
+                t.textbox();
+                if (!t.combotree('getText')){
+                    t.combotree('getIcon',0).css('visibility','hidden');
+                }
+                t.combotree('textbox').bind('keyup', function(){
+                    var icon = t.combotree('getIcon',0);
+                    if ($(this).val()){
+                        icon.css('visibility','visible');
+                    } else {
+                        icon.css('visibility','hidden');
+                    }
+                });
+            });
+        }
+    });
+    $(function(){
+        $('#userGroup').combotree().textbox('addClearBtn', 'icon-clear');
+    });
+</script>

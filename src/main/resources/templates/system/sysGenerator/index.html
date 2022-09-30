@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <table data-toggle="topjui-datagrid"
+                   data-options="id:'sysGeneratorDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/system/sysGenerator/getPageSet'">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'UUID',sortable:true,checkbox:true"></th>
+                    <th data-options="field:'creator',title:'创建人',sortable:true"></th>
+                    <th data-options="field:'createTime',title:'创建时间',sortable:true"></th>
+                    <th data-options="field:'systemName',title:'系统名称',sortable:true"></th>
+                    <th data-options="field:'basePackage',title:'基本包',sortable:true"></th>
+                    <th data-options="field:'package',title:'包',sortable:true"></th>
+                    <th data-options="field:'author',title:'作者',sortable:true"></th>
+                    <th data-options="field:'email',title:'邮件',sortable:true"></th>
+                    <th data-options="field:'tableprefix',title:'表前缀',sortable:true"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- 表格工具栏 -->
+    <div id="sysGeneratorDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'sysGeneratorDg'
+       }" style="display:none">
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#sysGeneratorDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'sysGeneratorAddDg',
+               href:'/system/sysGenerator/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/system/sysGenerator/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#sysGeneratorDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'sysGeneratorEditDg',
+               href:'/system/sysGenerator/edit',
+               url:'/system/sysGenerator/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/system/sysGenerator/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'sysGeneratorDg'}]}
+               ]
+           }">编辑</a>
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#sysGeneratorDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/system/sysGenerator/deleteBatch'">删除</a>
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#sysGeneratorDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#sysGeneratorDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

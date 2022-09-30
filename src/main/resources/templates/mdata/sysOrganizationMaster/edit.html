@@ -1,0 +1,74 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="orgId" name="orgId">
+<div class="topjui-fluid">
+    <div class="topjui-row">
+        <!--<div class="topjui-col-sm6">
+            <label class="topjui-form-label"></label>
+            <div class="topjui-input-block">
+                <input type="text" name="isDel"
+                       data-toggle="topjui-numberbox"
+                       data-options="prompt:''">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label"></label>
+            <div class="topjui-input-block">
+                <input type="text" name="orgUuid"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:''">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label"></label>
+            <div class="topjui-input-block">
+                <input type="text" name="orgId"
+                       data-toggle="topjui-numberbox"
+                       data-options="prompt:''">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label"></label>
+            <div class="topjui-input-block">
+                <input type="text" name="orgLevel"
+                       data-toggle="topjui-numberbox"
+                       data-options="prompt:''">
+            </div>
+        </div>-->
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">分管领导</label>
+            <div class="topjui-input-block">
+				<input type="hidden" name="masterName">
+				<input type="hidden" name="masterPositionName">
+				<input type="text" name="masterUuid"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'分管领导',
+					   required:true,
+                        panelHeight:190,
+                        url:'/cost/barMaster/getLeaderList',
+                        valueField:'uuid',
+    				    textField:'user_name',
+						param:'masterName:user_name,masterPositionName:position_name'">
+            </div>
+        </div>
+       <!-- <div class="topjui-col-sm6">
+            <label class="topjui-form-label">领导名称</label>
+            <div class="topjui-input-block">
+                <input type="text" name="masterName"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'领导名称'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">领导职务</label>
+            <div class="topjui-input-block">
+                <input type="text" name="masterPositionName"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'领导职务'">
+            </div>
+        </div>-->
+    </div>
+</div>

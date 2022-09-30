@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+
+<th:block layout:fragment="content">
+
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="ssForm" method="post">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <table id="mStoreSafeDg">
+            <thead>
+				<tr>
+					<th data-options="field:'erpType',title:'ERP分类',sortable:false"></th>
+					<th data-options="field:'typeName',title:'分类描述',sortable:false"></th>
+					<th data-options="field:'matCode',title:'物料编号',sortable:false,formatter:function(value, row, index){
+						if(value.substring(0, 1) == 'X'){
+							return value.substring(1);
+						}else{
+							return value;
+						}
+					}"></th>
+					<th data-options="field:'matName',title:'物料描述',sortable:false"></th>
+					<th data-options="field:'matUnitName',title:'单位',sortable:false"></th>
+					<th data-options="field:'storeName',title:'仓库',sortable:false"></th>
+					<th data-options="field:'stockAmount',title:'当前库存',sortable:false,align:'right'"></th>
+					<th data-options="field:'maxAmount',title:'最高数',sortable:false,formatter:function(value, row, index){
+						return '<span class=&quot;textbox&quot;><input type=&quot;hidden&quot; name=&quot;matNo&quot; value=&quot;'+row.matNo+'_'+row.storeNo+'&quot; /><input style=&quot;text-align:right&quot; class=&quot;textbox-text&quot; type=&quot;number&quot; name=&quot;'+row.matNo+'_'+row.storeNo+'_max&quot; value=&quot;'+(value==0 ? '' : value)+'&quot; /></span>'
+					}"></th>
+					<th data-options="field:'yellowWarn',title:'黄色数',sortable:false,formatter:function(value, row, index){
+						return '<span class=&quot;textbox&quot;><input style=&quot;text-align:right&quot; class=&quot;textbox-text&quot; type=&quot;number&quot; name=&quot;'+row.matNo+'_'+row.storeNo+'_yellow&quot; value=&quot;'+(value==0 ? '' : value)+'&quot; /></span>'
+					}"></th>
+					<th data-options="field:'redWarn',title:'红色数',sortable:false,formatter:function(value, row, index){
+						return '<span class=&quot;textbox&quot;><input style=&quot;text-align:right&quot; class=&quot;textbox-text&quot; type=&quot;number&quot; name=&quot;'+row.matNo+'_'+row.storeNo+'_red&quot; value=&quot;'+(value==0 ? '' : value)+'&quot; /></span>'
+					}"></th>
+				</tr>
+            </thead>
+        </table>
+    </div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="mStoreSafeDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'mStoreSafeDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:60px">仓库：</label>
+	<input data-toggle="topjui-combobox" name="storeNoQry" id="storeNoQry" th:value="${storeNoQry}" >
+
+	<label class="topjui-form-label" style="width:70px;float:none;display:inline-block">物料：</label>
+	<input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'" value="">
+
+	<!--
+	<ewsd:rbac str="/repository/mStoreSafe/calc">
+	<a href="javascript:void(0)" id="calcBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">数据推算</span>
+			<span class="l-btn-icon fa fa-edit">&nbsp;</span>
+		</span>
+	</a>
+	</ewsd:rbac>
+	-->
+
+	<a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">保存数据</span>
+			<span class="l-btn-icon fa fa-save">&nbsp;</span>
+		</span>
+	</a>
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+	</a>
+</div>
+
+</th:block>
+
+
+<th:block layout:fragment="js">
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#storeNoQry').iCombobox({
+			url:'/repository/mStoreSafe/getStoreForSelect',
+			valueField:'storeNo',
+			textField:'storeName',
+			width:'150px',
+			onChange:function(){
+				$('#mStoreSafeDg').iDatagrid('reload',{
+					storeNoQry:$('#storeNoQry').val(),
+					matQry:$('#matQry').val()
+				})
+			},
+			loadFilter:function(data){
+				data.unshift({storeNo:'', storeName:'--全部--'});
+				return data
+			}
+		});
+
+		$('#mStoreSafeDg').iDatagrid({
+			queryParams:{
+				storeNoQry:$('#storeNoQry').val(),
+				matQry:$('#matQry').val()
+			},
+			singleSelect:true,
+			selectOnCheck:false,
+			checkOnSelect:false,
+			idField:'matNo',
+			url:'/repository/mStoreSafe/getPageSet'
+		});
+
+		$('#saveBtn').click(function(){
+			$('#ssForm').iForm('submit', {
+				url:'/repository/mStoreSafe/save',
+				success:function(data){
+					data = $.parseJSON(data);
+					if(data.statusCode == 200){
+						$.iMessager.show({
+							title:data.title,
+							msg:data.message
+						})
+						$('#mStoreSafeDg').iDatagrid('reload',{
+							storeNoQry:$('#storeNoQry').val(),
+							matQry:$('#matQry').val()
+						})
+					} else {
+						$.iMessager.alert({
+							icon:'messager-error',
+							title:data.title,
+							msg:data.message
+						});
+					}
+				}
+			});
+		});
+
+		// $('#calcBtn').click(function(){
+		// 	$('#ssForm').iForm('submit', {
+		// 		url:'/repository/mStoreSafe/calc',
+		// 		success:function(data){
+		// 			data = $.parseJSON(data);
+		// 			if(data.statusCode == 200){
+		// 				$.iMessager.show({
+		// 					title:data.title,
+		// 					msg:data.message
+		// 				})
+		// 				$('#mStoreSafeDg').iDatagrid('reload',{
+		// 					storeNoQry:$('#storeNoQry').val(),
+		// 					matQry:$('#matQry').val()
+		// 				})
+		// 			} else {
+		// 				$.iMessager.alert({
+		// 					icon:'messager-error',
+		// 					title:data.title,
+		// 					msg:data.message
+		// 				});
+		// 			}
+		// 		}
+		// 	});
+		// });
+
+		$('#searchBtn').click(function(){
+			$('#mStoreSafeDg').iDatagrid('reload',{
+				storeNoQry:$('#storeNoQry').val(),
+				matQry:$('#matQry').val()
+			})
+		});
+	});
+</script>
+</th:block>
+</body>
+</html>

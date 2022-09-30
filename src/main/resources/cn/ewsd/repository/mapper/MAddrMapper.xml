@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.repository.mapper.MAddrMapper">
+	<select id="getAddr" resultType="cn.ewsd.repository.model.MAddr">
+		SELECT DISTINCT mat_addr
+		FROM m_addr
+		WHERE 1=1
+		<if test="teamNo!=null">
+			AND team_no=#{teamNo}
+		</if>
+	</select>
+
+	<insert id="insertAddr" parameterType="cn.ewsd.repository.model.MAddr">
+		INSERT INTO m_addr (`mat_addr`, `team_no`, `up_down`, `if_using`,
+							`uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES(#{matAddr}, #{teamNo}, #{upDown}, #{ifUsing},
+			   #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+</mapper>

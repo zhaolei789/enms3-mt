@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="stockSumForm" style="height:50%">
+		<div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+			<table id="stockSumDg"></table>
+		</div>
+	</form>
+	<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+		<table id="detailDg"></table>
+	</div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="stockSumDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'stockSumDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:100px;float:none;display:inline-block">物料编码：</label>
+	<input id="matCodeQry" data-toggle="topjui-textbox" name="matCodeQry" data-options="width:'150px'" value="">
+
+	<label class="topjui-form-label" style="width:100px;float:none;display:inline-block">物料名称：</label>
+	<input id="matNameQry" data-toggle="topjui-textbox" name="matNameQry" data-options="width:'150px'" value="">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">新旧：</label>
+	<input data-toggle="topjui-combobox" id="xjFlagQry" name="xjFlagQry" value="" data-options="valueField:'val',textField:'text',width:'150px',data:[{
+		val:'', text:'--全部--'
+	},{
+		val:'X', text:'新料'
+	},{
+		val:'J', text:'旧料'
+	}]">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+	</a>
+</div>
+
+	<div id="detailDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'detailDg'
+       }" style="display:none">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">仓库：</label>
+		<input data-toggle="topjui-combobox" id="storeNoQry" name="storeNoQry" th:value="${storeNoQry}" data-options="valueField:'storeNo',textField:'storeName',url:'/repository/mStore/getStockSumStore',width:'150px'">
+
+		<a href="javascript:void(0)" id="searchBtn1" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+		</a>
+	</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			var storeStr = [[${storeStr}]];
+			var storeArr = storeStr.split(',');
+
+			var col1 = [
+				{field:'mat_code', title:'物资编码', sortable:false, rowspan:2},
+				{field:'mat_name', title:'物资描述', sortable:false, rowspan:2},
+				{field:'mat_unit', title:'单位', sortable:false, rowspan:2},
+				{field:'mat_price', title:'单价', sortable:false, rowspan:2, align:'right'},
+				{field:'', title:'合计', sortable:false, colspan:2}
+			];
+			var col2 = [
+				{field:'sumAmount', title:'数量', sortable:false, width:'120px', align:'right', styler:function(value, row, index){
+					return 'background-color:lightBlue'
+				}},
+				{field:'sumBala', title:'金额', sortable:false, width:'120px', align:'right', styler:function(value, row, index){
+					return 'background-color:lightBlue'
+				}}
+			];
+
+			for(var i=0; i<storeArr.length; i++){
+				var store = storeArr[i];
+				var storeNo = store.split('_')[0];
+				var storeName = store.split('_')[1];
+				col1.push({field:'', title:storeName, sortable:false, colspan:2});
+				col2.push({ field:storeNo+'Amt', title:'数量', sortable:false, align:'right' , width:'120px', formatter: function(value, row, index){
+					if(value==0){
+						return ''
+					}else{
+						return value
+					}
+				}})
+				col2.push({ field:storeNo+'Bala', title:'金额', sortable:false, align:'right' , width:'120px', formatter: function(value, row, index){
+					if(value==0){
+						return ''
+					}else{
+						return value
+					}
+				}})
+			}
+
+			var columns = [ col1, col2 ]
+
+			$('#stockSumDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/repository/stockSum/getPageSet',
+				queryParams:{
+					matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+					matNameQry:$('#matNameQry').iTextbox('getValue'),
+					xjFlagQry:$('#xjFlagQry').iCombobox('getValue')
+				},
+				columns:columns,
+				rowStyler: function(index, row){
+					if(index == 20){
+						return 'background-color:lightBlue'
+					}
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#downloadBtn').click(function(){
+				$('#stockSumForm').iForm('submit', {
+					url:'/repository/stockSum/download',
+					success:function(data){
+
+					}
+				});
+			});
+
+			$('#detailDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/repository/stockSum/detail',
+				queryParams:{
+					matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+					matNameQry:$('#matNameQry').iTextbox('getValue'),
+					xjFlagQry:$('#xjFlagQry').iCombobox('getValue'),
+					storeNoQry:$('#storeNoQry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'erpType', sortable:false, title:'物料分类', formatter:function(value, row, index){
+							return value + ' ' + row.typeName
+						}
+					},{
+						field:'matCode', sortable:false, title:'材料编码', formatter:function(value, row, index){
+							if(value!=null && value!=undefined && value!=''){
+								return value.substring(0, 1) == 'X' ? value.substring(1) : value;
+							}else{
+								return ''
+							}
+						}
+					},{
+						field:'matName', sortable:false, title:'材料描述'
+					},{
+						field:'matUnit', sortable:false, title:'单位'
+					},{
+						field:'matPrice', sortable:false, title:'单价', align:'right'
+					},{
+						field:'stockAmount', sortable:false, title:'数量', align:'right'
+					},{
+						field:'matBala', sortable:false, title:'金额'
+					}
+				] ]
+			});
+
+			$('#searchBtn1').click(function(){
+				reloadDetail();
+			});
+		})
+
+		function reloadData(){
+			$('#stockSumDg').iDatagrid('reload',{
+				matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+				matNameQry:$('#matNameQry').iTextbox('getValue'),
+				xjFlagQry:$('#xjFlagQry').iCombobox('getValue')
+			});
+		}
+
+		function reloadDetail(){
+			$('#detailDg').iDatagrid('reload', {
+				matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+				matNameQry:$('#matNameQry').iTextbox('getValue'),
+				xjFlagQry:$('#xjFlagQry').iCombobox('getValue'),
+				storeNoQry:$('#storeNoQry').iCombobox('getValue')
+			})
+		}
+	</script>
+
+</th:block>
+</body>
+</html>

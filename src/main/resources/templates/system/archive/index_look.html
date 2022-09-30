@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+        <!-- layui框架样式 -->
+        <link type="text/css" href="/plugins/layui/css/layui.css" rel="stylesheet"/>
+        <link type="text/css" rel="stylesheet" href="/plugins/webuploader/css/webuploader.css">
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'west',title:'',fit:false,split:true,border:false,width:'20%',iconCls:'fa fa-sitemap',headerCls:'border_right',bodyCls:'border_right'">
+            <!-- treegrid表格 -->
+            <table data-toggle="topjui-treegrid"
+                   data-options="id:'categoryTreegrid',
+			   idField:'id',
+			   treeField:'text',
+			   fitColumns:true,
+			   singleSelect:true,
+			   url:'/system/channel/getChannelsById?id=12',
+			   expandUrl:'/system/channel/getChannelsByPid?pid={id}',
+			   childGrid:{
+                   param:'categoryId:id',
+                   grid:[
+                       {type:'datagrid',id:'archiveDg'}
+                   ]
+               }">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                    <th data-options="field:'text',title:'资源类别',width:100"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',fit:false,split:true,border:false">
+            <div id="layout2" data-toggle="topjui-layout" data-options="fit:true">
+                <div data-options="region:'center',fit:false,split:true,border:true,bodyCls:'border_top_none'">
+                    <div data-toggle="topjui-tabs" data-options="id:'centerTabs',fit:true,border:false">
+                        <div title="文档列表" data-options="iconCls:'fa fa-table'">
+                            <!-- datagrid表格 -->
+                            <table data-toggle="topjui-datagrid"
+                                   data-options="id:'archiveDg',
+                                   fitColumns:true,
+                                   url:'/system/archive/getPageSetData',
+                                   childTab: [
+                                        {id:'eastTabs'},
+                                        {id:'southTabs'}
+                                   ]">
+                                <thead>
+                                <tr>
+                                    <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                                    <th data-options="field:'title',title:'资源名称',sortable:true,width:100"></th>
+                                    <th data-options="field:'creator',title:'创建人',sortable:true"></th>
+                                    <th data-options="field:'createTime',title:'创建时间',sortable:true"></th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div data-options="region:'south',fit:false,split:true,border:true,height:'40%',bodyCls:'border_bottom_none'">
+                    <div data-toggle="topjui-tabs"
+                         data-options="id:'southTabs',
+                     fit:true,
+                     border:false,
+                     parentGrid:{
+                         type:'datagrid',
+                         id:'archiveDg',
+                         param:'puuid:uuid'
+                     }">
+                        <div title="附件信息" data-options="id:'southTab0',iconCls:'fa fa-table'">
+                            <!-- datagrid表格 -->
+                            <table data-toggle="topjui-datagrid"
+                                   data-options="id:'attachmentDg',
+                               initCreate: false,
+                               fitColumns:true,
+						       url:'/system/attachment/getListByPuuid2'">
+                                <thead>
+                                <tr>
+                                    <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                                    <th data-options="field:'fileName',title:'文件名称',width:150,
+                                        formatter: function(value,row,index){
+                                        return '<a href=\'/system/attachment/download?uuid='+row.uuid+'\' target=\'_blank\'>'+value+'</a>';
+                                        }"></th>
+                                    <th data-options="field:'fileSize',title:'文件大小',
+                                        formatter: function(value,row,index){
+                                            return bytesToSize(value);
+                                        }"></th>
+                                    <th data-options="field:'creator',title:'上传人'"></th>
+                                    <th data-options="field:'createTime',title:'上传时间',width:100"></th>
+<!--                                    <th data-options="field:'modifierId',title:'预览',formatter: pageOffice"></th>-->
+                                    <th data-options="field:'creatorId',title:'下载',
+                                        formatter: function(value,row,index){
+                                        return '<a href=\'/system/attachment/download?uuid='+row.uuid+'\' target=\'_blank\'>下载</a>';
+                                        }"></th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div data-options="region:'east',title:'',split:true,border:false,width:'30%',bodyCls:'border_left'">
+            <div data-toggle="topjui-tabs"
+                 data-options="id:'eastTabs',
+             fit:true,
+             border:false,
+             parentGrid:{
+                 type:'datagrid',
+                 id:'archiveDg',
+                 param:'uuid'
+             }">
+                <div title="详细信息"
+                     data-options="id:'eastTab0',
+                 iconCls:'fa fa-table',
+			     href:'/system/archive/detail?uuid={uuid}'"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 表格工具栏 -->
+    <div id="archiveDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'archiveDg'
+       }" style="display:none">
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#archiveDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#archiveDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <!-- layui框架js -->
+    <script type="text/javascript" src="/plugins/layui/layui.js"></script>
+    <script type="text/javascript" src="/plugins/webuploader/js/webuploader.min.js"></script>
+    <script type="text/javascript" src="/plugins/ueditor/ueditor.config.js"></script>
+    <script type="text/javascript" src="/plugins/ueditor/ueditor.all.js"></script>
+
+    <!--<script type="text/javascript" src="/jquery.min.js"></script>-->
+    <script type="text/javascript" src="/pageoffice.js" id="po_js_main"></script>
+
+    <script>
+        function pageOffice(value, row, index) {
+            return '<a href="javascript:POBrowser.openWindowModeless(\'http://localhost:9770/system/pageOffice/word?path=' + row.filePath + '\',\'width=1250px;height=870px;frame=no;\');" target="_blank">预览</a>';
+        }
+
+        // UE.Editor.prototype._bkGetActionUrl = UE.Editor.prototype.getActionUrl;
+        // UE.Editor.prototype.getActionUrl = function(action) {
+        //     if (action == 'uploadimage' || action == 'uploadscrawl' || action == 'uploadimage') {
+        //         return "/system/attachment/imgUpload";
+        //     } else if(action == "uploadfile"){
+        //         return "/system/attachment/fileUpload";
+        //     }else {
+        //         return this._bkGetActionUrl.call(this, action);
+        //     }
+        //
+        // }
+    </script>
+</th:block>
+</body>
+</html>

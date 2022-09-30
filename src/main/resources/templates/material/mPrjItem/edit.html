@@ -1,0 +1,23 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="prjNo" name="prjNo">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+    	<div class="topjui-col-sm12">
+			<label class="topjui-form-label">材料科目</label>
+			<div class="topjui-input-block">
+				<input id="itemNo" name="itemNo">
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+	if($('#uuid').val() != ''){
+		$('#prjName').attr('readonly', 'readOnly');
+	}
+});
+</script>

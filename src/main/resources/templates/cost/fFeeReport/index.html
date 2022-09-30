@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'fFeeReportDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/cost/fFeeReport/getPageSet'">
+            <thead>
+            <tr>
+                								<th data-options="field:'reportId',title:'标识ID',sortable:true"></th>
+						    									<th data-options="field:'teamNo',title:'部门',sortable:true"></th>
+						    									<th data-options="field:'fMonth',title:'费用月份',sortable:true"></th>
+						    									<th data-options="field:'itemId',title:'项目ID',sortable:true"></th>
+						    									<th data-options="field:'itemName',title:'项目名称',sortable:true"></th>
+						    									<th data-options="field:'leader',title:'领导ID',sortable:true"></th>
+						    									<th data-options="field:'feeId',title:'费用ID',sortable:true"></th>
+						    									<th data-options="field:'dataItem',title:'数据项目',sortable:true"></th>
+						    									<th data-options="field:'occBala',title:'上报值',sortable:true"></th>
+						    									<th data-options="field:'modiDate',title:'上报日期',sortable:true"></th>
+						    									<th data-options="field:'modiEmp',title:'上报人员',sortable:true"></th>
+						    									<th data-options="field:'modiTeam',title:'上报部门',sortable:true"></th>
+						    									<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+						    									<th data-options="field:'createTime',title:'',sortable:true"></th>
+						    									<th data-options="field:'creator',title:'',sortable:true"></th>
+						    									<th data-options="field:'creatorId',title:'',sortable:true"></th>
+						    									<th data-options="field:'creatorOrgId',title:'',sortable:true"></th>
+						    									<th data-options="field:'modifierId',title:'',sortable:true"></th>
+						    									<th data-options="field:'modifier',title:'',sortable:true"></th>
+						    									<th data-options="field:'modifyTime',title:'',sortable:true"></th>
+						    	            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="fFeeReportDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'fFeeReportDg'
+       }" style="display:none">
+		<ewsd:rbac str="fFeeReportAddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#fFeeReportDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'fFeeReportAddDg',
+               href:'/cost/fFeeReport/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/cost/fFeeReport/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="fFeeReportEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#fFeeReportDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'fFeeReportEditDg',
+               href:'/cost/fFeeReport/edit',
+               url:'/cost/fFeeReport/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/cost/fFeeReport/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'fFeeReportDg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/cost/fFeeReport/deleteBatch">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#fFeeReportDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/cost/fFeeReport/deleteBatch'">删除</a>
+		</ewsd:rbac>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#fFeeReportDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#fFeeReportDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

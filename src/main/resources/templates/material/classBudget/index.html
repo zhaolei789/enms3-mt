@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'30%'">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'classBudgetDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/material/classBudget/getTableData',
+               queryParams:{
+                    useYearQry:$('#useYearQry').iCombobox('getValue'),
+                    useMonthQry:$('#useMonthQry').iCombobox('getValue')
+                },
+                childGrid:{
+					param:'itemNo:itemNo,occMonth:occMonth',
+					grid:[
+						{id:'deptDg',
+						type:'datagrid'
+					}
+					]
+			   }">
+            <thead>
+            <tr>
+				<th data-options="field:'itemName',title:'科目',sortable:false,width:'150px'"></th>
+				<th data-options="field:'budBala',title:'预算额',sortable:false,width:'150px'"></th>
+				<th data-options="field:'yfjBala',title:'已分解',sortable:false,width:'150px'"></th>
+				<th data-options="field:'occBala',title:'已发生',sortable:false,width:'150px'"></th>
+			</tr>
+            </thead>
+        </table>
+    </div>
+	<div data-options="region:'south',fit:false,split:true,border:false,bodyCls:'border_left'"
+		 style="height:40%">
+			<table data-toggle="topjui-edatagrid"
+				   data-options="id:'deptDg',
+				   singleSelect:true,
+				   selectOnCheck:false,
+				   checkOnSelect:false,
+				   url:'/material/classBudget/getDeptTableData',
+				   updateUrl:'/material/classBudget/update'
+				   ">
+				<thead>
+				<tr>
+					<th data-options="field:'teamName',title:'班组',sortable:false,width:'150px'"></th>
+					<th data-options="field:'budBala',title:'预算额',sortable:false,width:'150px',editor:{
+                            type:'numberbox',
+                            options:{
+                                height:30
+                            }
+                        }"></th>
+				</tr>
+				</thead>
+			</table>
+	</div>
+</div>
+
+	<!-- 表格工具栏 -->
+	<div id="classBudgetDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'classBudgetDg'
+       }" style="display:none">
+
+		<label class="topjui-form-label" style="width:60px">月份：</label>
+		<select id="useYearQry" data-toggle="topjui-combobox" name="useYearQry" data-options="width:80" >
+			<option th:each="i:${#numbers.sequence(2015, endYear)}" th:value="${i}" th:text="${i}" th:selected="${i==currentYear}"></option>
+		</select>
+		<select id="useMonthQry" data-toggle="topjui-combobox" name="useMonthQry" data-options="width:80" >
+			<option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}" th:selected="${i==currentMonth}"></option>
+		</select>
+
+		<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">查询</span>
+                <span class="l-btn-icon fa fa-search">&nbsp;</span>
+            </span>
+		</a>
+	</div>
+
+	<div id="deptDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'deptDg'
+       }" style="display:none">
+
+		<a href="javascript:void(0)"
+		   data-toggle="topjui-menubutton"
+		   data-options="method:'edatagrid',
+            extend:'#deptDg-toolbar',
+            btnCls:'topjui-btn-blue',
+            type:'saveRow',
+            iconCls:'fa fa-save'">保存</a>
+
+		<a href="javascript:void(0)"
+		   data-toggle="topjui-menubutton"
+		   data-options="method:'edatagrid',
+            extend:'#deptDg-toolbar',
+            btnCls:'topjui-btn-black',
+            type:'cancelRow',
+            iconCls:'fa fa-close'">取消</a>
+	</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script>
+		$(document).ready(function(){
+			$('#deptDg').iEdatagrid({
+				onSave: function(index,row){
+					$('#classBudgetDg').iDatagrid('reload');
+				}
+			});
+
+			$('#searchBtn').click(function () {
+				$('#classBudgetDg').iDatagrid('reload',{
+					useYearQry:$('#useYearQry').iCombobox('getValue'),
+					useMonthQry:$('#useMonthQry').iCombobox('getValue')
+				});
+			})
+
+		});
+	</script>
+</th:block>
+</body>
+</html>

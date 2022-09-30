@@ -1,0 +1,37 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">分类编码</label>
+			<div class="topjui-input-block">
+				<input type="text" name="typeCode" data-toggle="topjui-textbox" data-options="prompt:'',required:true">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">分类名称</label>
+			<div class="topjui-input-block">
+				<input type="text" name="typeName" data-toggle="topjui-textbox" data-options="prompt:'',required:true">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">分类解释</label>
+			<div class="topjui-input-block">
+				<input type="text" name="remark" data-toggle="topjui-textbox" data-options="prompt:''">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">是否启用</label>
+			<div class="topjui-input-block">
+				<select id="cc" data-toggle="topjui-combobox" name="useFlag" data-options="">
+					<option value="1">是</option>
+					<option value="0">否</option>
+				</select>
+			</div>
+		</div>
+	</div>
+</div>

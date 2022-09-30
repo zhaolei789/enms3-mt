@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false,height:'40%'">
+        <div data-toggle="topjui-layout" data-options="fit:true">
+            <div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'50%'">
+                <table id="checkIndexDg"></table>
+            </div>
+            <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+                <table id="matFormDg"></table>
+            </div>
+        </div>
+    </div>
+
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <div data-toggle="topjui-layout" data-options="fit:true">
+                <form id="askCodeForm">
+                    <div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'50%'">
+                        <table data-toggle="topjui-datagrid" data-options="id:'askCodeDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url: '/material/matAskCheck/getPageSet',
+                queryParams:{
+                    askTeam:$('#askTeam').val(),
+                    askMonth:$('#askMonth').val(),
+                    askStep:$('#askStep').val()
+                }">
+                            <thead>
+                            <tr>
+                                <th data-options="field: 'askNo', sortable: false, title: '', checkbox: true"></th>
+                                <th data-options="field:'matCode', sortable:false, title:'加工件编码', formatter(value, row, index){
+                            if(value != null && value != undefined) {
+                                return value.substring(0, 1) == 'X' ? value.substring(1) : value;
+                            }else{
+                                return ''
+                            }
+                        }"></th>
+                                <th data-options="field:'askName', sortable:false, title:'加工件名称', formatter(value, row, index){
+                            return value + ' ' + row.askModel;
+                        }"></th>
+                                <th data-options="field:'askDate', sortable:false, title:'申请日期', formatter:function (value, row, index){
+                            if(value != null && value != undefined){
+                                return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+                            }else{
+                                return ''
+                            }
+                        }"></th>
+                                <th data-options="field:'askAmount', sortable:false, title:'申请数量', align:'right'"></th>
+                                <th data-options="field:'checkAmount', sortable:false, title:'审批数', formatter:function(value, row, index){
+                                return '<span class=&quot;textbox&quot;><input style=&quot;text-align:right; width: 54px&quot; class=&quot;textbox-text&quot; type=&quot;number&quot; name=&quot;checkAmount_'+row.askNo+'&quot; id=&quot;checkAmount_'+row.askNo+'&quot; disabled value=&quot;'+value+'&quot; /></span>'
+                        }"></th>
+                                <th data-options="field:'askUnit', sortable:false, title:'单位', formatter:function(value, row, index){
+                                return '<input type=&quot;text&quot; name=&quot;askUnit_'+ row.askNo +'&quot; id=&quot;askUnit_'+ row.askNo +'&quot; value=&quot;'+ value +'&quot; />'
+                        }"></th>
+                                <th data-options="field:'makeTeam', sortable:false, title:'施工单位', formatter:function(value, row, index){
+                                return '<input type=&quot;text&quot; name=&quot;makeTeam_'+ row.askNo +'&quot; id=&quot;makeTeam_'+ row.askNo +'&quot; value=&quot;'+ value +'&quot; />'
+                        }"></th>
+                                <th data-options="field:'applyInfo', sortable:false, title:'审批理由', formatter:function(value, row, index){
+                                return '<span class=&quot;textbox&quot;><input class=&quot;textbox-text&quot; type=&quot;text&quot; name=&quot;applyInfo_'+row.askNo+'&quot; id=&quot;applyInfo_'+row.askNo+'&quot; disabled value=&quot;&quot; /></span>'
+                        }"></th>
+                                <th data-options="field:'matFee', sortable:false, title:'价格', formatter:function(value, row, index){
+                                return '<span class=&quot;textbox&quot;><input style=&quot;text-align:right; width: 64px&quot; class=&quot;textbox-text&quot; type=&quot;text&quot; name=&quot;matFee_'+row.askNo+'&quot; id=&quot;matFee_'+row.askNo+'&quot; disabled value=&quot;'+ value +'&quot; /></span>'
+                        }"></th>
+                                <th data-options="field:'payFee', sortable:false, title:'工时费', formatter:function(value, row, index){
+                                return '<span class=&quot;textbox&quot;><input style=&quot;text-align:right; width: 64px&quot; class=&quot;textbox-text&quot; type=&quot;text&quot; name=&quot;payFee_'+row.askNo+'&quot; id=&quot;payFee_'+row.askNo+'&quot; disabled value=&quot;'+ value +'&quot; /></span>'
+                        }"></th>
+                                <th data-options="field:'otherFee', sortable:false, title:'其他费用', formatter:function(value, row, index){
+                                return '<span class=&quot;textbox&quot;><input style=&quot;text-align:right; width: 64px&quot; class=&quot;textbox-text&quot; type=&quot;text&quot; name=&quot;otherFee_'+row.askNo+'&quot; id=&quot;otherFee_'+row.askNo+'&quot; disabled value=&quot;'+ value +'&quot; /></span>'
+                                }"></th>
+
+                                <th data-options="field:'needDate', sortable:false, title:'回收预期', formatter:function(value, row, index){
+                                    if(row.needType=='0'){
+                                        return '<input type=&quot;text&quot; name=&quot;needDate_'+ row.askNo +'&quot; id=&quot;needDate_'+ row.askNo +'&quot; value=&quot;'+ (value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)) +'&quot; />'
+                                    }else{
+                                        return row.needType=='1' ? '永久使用' : row.needType=='2' ? '一次性投入' : ''
+                                    }
+                                }"></th>
+                                <th data-options="field:'preTeam', sortable:false, title:'预计回收单位', formatter:function(value, row, index){
+                                value = value==null ? '' : value;
+                                return '<input type=&quot;text&quot; name=&quot;preTeam_'+ row.askNo +'&quot; id=&quot;preTeam_'+ row.askNo +'&quot; value=&quot;'+ value +'&quot; />'
+                        }"></th>
+                                <th data-options="field:'useAddr', sortable:false, title:'使用地点'"></th>
+                                <th data-options="field:'remark', sortable:false, title:'备注'"></th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </form>
+                <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+                    <div data-toggle="topjui-tabs"
+                         data-options="id:'southTabs',
+                     fit:true,
+                     border:false,
+                     parentGrid:{
+                         type:'datagrid',
+                         id:'askCodeDg',
+                         param:'puuid:askNo'
+                     }">
+                        <div title="附件信息" data-options="id:'southTab0',iconCls:'fa fa-table'">
+                            <!-- datagrid表格 -->
+                            <table data-toggle="topjui-datagrid"
+                                   data-options="id:'attachmentDg',
+                               initCreate: false,
+                               fitColumns:true,
+                               rownumbers:false,
+						       url:'/system/attachment/getListByPuuid'">
+                                <thead>
+                                <tr>
+                                    <th data-options="field:'fileName',title:'文件名称',width:150,
+                                        formatter: function(value,row,index){
+                                        return '<a href=\'/system/attachment/download?uuid='+row.uuid+'\' target=\'_blank\'>'+value+'</a>';
+                                        }"></th>
+                                    <th data-options="field:'fileSize',title:'文件大小',
+                                        formatter: function(value,row,index){
+                                            return bytesToSize(value);
+                                        }"></th>
+                                    <th data-options="field:'creator',title:'上传人'"></th>
+                                    <th data-options="field:'createTime',title:'上传时间',width:100"></th>
+                                    <th data-options="field:'creatorId',title:'预览',formatter: picFormatter"></th>
+                                    <!--<th data-options="field:'creatorId',title:'下载',
+                                            formatter: function(value,row,index){
+                                            return '<a href=\'/system/attachment/download?uuid='+row.uuid+'\' target=\'_blank\'>下载</a>';
+                                            }"></th>-->
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="askCodeDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'askCodeDg'
+       }" style="display:none">
+
+    <input type="hidden" name="askTeam" id="askTeam" />
+    <input type="hidden" name="askMonth" id="askMonth" />
+    <input type="hidden" name="askStep" id="askStep" />
+    <input type="hidden" name="pAskNo" id="pAskNo" />
+
+    <a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">审批通过</span>
+            <span class="l-btn-icon fa fa-check">&nbsp;</span>
+        </span>
+    </a>
+
+    <a href="javascript:void(0)" id="backBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">退回草稿</span>
+            <span class="l-btn-icon fa fa-reply">&nbsp;</span>
+        </span>
+    </a>
+
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        $(document).ready(function(){
+            $('#checkIndexDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                pagination:false,
+                url: '/material/matAskCheck/getIndex',
+                columns:[ [
+                    {
+                        field:'askTeamName', sortable:false, title:'申请单位'
+                    },{
+                        field:'askMonth', sortable:false, title:'申请月份', formatter:function(value, row, index){
+                            return value.substring(0, 4) + '-' + value.substring(4, 6)
+                        }
+                    },{
+                        field:'askStepName', sortable:false, title:'审批步骤'
+                    },{
+                        field:'askCnt', sortable:false, title:'记录数'
+                    }
+                ] ],
+                onSelect:function(index, row){
+                    $('#askTeam').val(row.askTeam);
+                    $('#askMonth').val(row.askMonth);
+                    $('#askStep').val(row.askStep);
+                    reloadData(row.askTeam, row.askMonth, row.askStep)
+                },
+                onLoadSuccess:function(data){
+                    if(data.rows.length>0){
+                        $('#checkIndexDg').iDatagrid("selectRow", 0)
+                    }
+                }
+            });
+
+            $('#askCodeDg').iDatagrid({
+                onLoadSuccess: function(data){
+                    for(var i=0; i<data.rows.length; i++){
+                        var askNo = data.rows[i].askNo;
+                        $('#needDate_'+askNo).iDatebox({
+                            disabled: true
+                        });
+                        $('#makeTeam_'+askNo).iCombobox({
+                            url:'/mdata/organization/getWorkDeptSet',
+                            valueField:'id',
+                            textField:'text',
+                            disabled:true
+                        });
+                        $('#askUnit_'+askNo).iCombobox({
+                            url:'/system/dicSet/getDicItemByCode?code=m.matUnit',
+                            valueField:'value',
+                            textField:'text',
+                            width:'80px',
+                            disabled:true
+                        })
+                        $('#preTeam_'+askNo).iCombobox({
+                            url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',
+                            valueField:'id',
+                            textField:'text',
+                            disabled:true,
+                            loadFilter:function(data){
+                                data.unshift({id:'', text:'--请选择--'});
+                                return data
+                            }
+                        });
+                    }
+
+                    if(data.rows.length>0){
+                        $('#askCodeDg').iDatagrid("selectRow", 0)
+                    }
+                },
+                onCheck:function(index, row){
+                    var askNo = row.askNo;
+                    $('#checkAmount_'+ askNo +', #applyInfo_'+ askNo).removeAttr('disabled');
+                    if(row.askStep=='73001'){
+                        $('#matFee_'+ askNo +', #payFee_'+ askNo + ', #otherFee_' + askNo).removeAttr('disabled');
+                    }
+                    $('#needDate_'+askNo).iDatebox('enable');
+                    $('#makeTeam_'+askNo).iCombobox('enable');
+                    $('#askUnit_'+askNo).iCombobox('enable');
+                    if(row.askStep=='73001' || row.askStep=='73005'){
+                        $('#preTeam_'+askNo).iCombobox('enable');
+                    }
+                },
+                onUncheck:function(index, row){
+                    var askNo = row.askNo;
+                    $('#checkAmount_'+ askNo +', #applyInfo_'+ askNo + ', #matFee_'+ askNo +', #payFee_'+ askNo + ', #otherFee_' + askNo).attr('disabled', 'disabled');
+                    $('#needDate_'+askNo).iDatebox('disable');
+                    $('#makeTeam_'+askNo).iCombobox('disable');
+                    $('#askUnit_'+askNo).iCombobox('disable');
+                    $('#preTeam_'+askNo).iCombobox('disable');
+                },
+                onCheckAll:function(rows){
+                    for(var i=0; i<rows.length; i++){
+                        var row = rows[i]
+                        var askNo = row.askNo
+                        $('#checkAmount_'+ askNo +', #applyInfo_'+ askNo).removeAttr('disabled');
+                        if(row.askStep=='73001'){
+                            $('#matFee_'+ askNo +', #payFee_'+ askNo + ', #otherFee_' + askNo).removeAttr('disabled');
+                        }
+                        $('#needDate_'+askNo).iDatebox('enable');
+                        $('#makeTeam_'+askNo).iCombobox('enable');
+                        $('#askUnit_'+askNo).iCombobox('enable');
+                        if(row.askStep=='73001' || row.askStep=='73005'){
+                            $('#preTeam_'+askNo).iCombobox('enable');
+                        }
+                    }
+                },
+                onUncheckAll:function(rows){
+                    for(var i=0; i<rows.length; i++){
+                        var row = rows[i]
+                        var askNo = row.askNo
+                        $('#checkAmount_'+ askNo +', #applyInfo_'+ askNo + ', #matFee_'+ askNo +', #payFee_'+ askNo + ', #otherFee_' + askNo).attr('disabled', 'disabled');
+                        $('#needDate_'+askNo).iDatebox('disable');
+                        $('#makeTeam_'+askNo).iCombobox('disable');
+                        $('#askUnit_'+askNo).iCombobox('disable');
+                        $('#preTeam_'+askNo).iCombobox('disable');
+                    }
+                },
+                onSelect:function(index, row){
+                    $('#pAskNo').val(row.askNo);
+                    reloadForm(row.askNo)
+                    reloadFile(row.askNo)
+                }
+            });
+
+            $('#submitBtn').click(function(){
+                $.iMessager.confirm('确认对话框', '您确定审核通过吗？', function (r) {
+                    if (r) {
+                        $('#askCodeForm').iForm('submit', {
+                            url: '/material/matAskCheck/submit',
+                            success: function (data) {
+                                data = $.parseJSON(data);
+                                if (data.statusCode == 200) {
+                                    $.iMessager.show({
+                                        title: data.title,
+                                        msg: data.message
+                                    })
+                                    $('#checkIndexDg').iDatagrid('reload');
+                                    reloadData(null, null, null);
+                                    reloadForm(null)
+                                    reloadFile(null)
+                                } else {
+                                    $.iMessager.alert({
+                                        icon: 'messager-error',
+                                        title: data.title,
+                                        msg: data.message
+                                    });
+                                }
+                            }
+                        });
+                    }
+                })
+            });
+
+            $('#backBtn').click(function(){
+                $.iMessager.confirm('确认对话框', '您确定退回申请吗？', function (r) {
+                    if (r) {
+                        $('#askCodeForm').iForm('submit', {
+                            url: '/material/matAskCheck/back',
+                            success: function (data) {
+                                data = $.parseJSON(data);
+                                if (data.statusCode == 200) {
+                                    $.iMessager.show({
+                                        title: data.title,
+                                        msg: data.message
+                                    })
+                                    $('#checkIndexDg').iDatagrid('reload');
+                                    reloadData(null, null, null);
+                                    reloadForm(null)
+                                    reloadFile(null)
+                                } else {
+                                    $.iMessager.alert({
+                                        icon: 'messager-error',
+                                        title: data.title,
+                                        msg: data.message
+                                    });
+                                }
+                            }
+                        });
+                    }
+                })
+            });
+
+            $('#matFormDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                pagination:false,
+                url: '/material/matAskEdit/getMakeFormList',
+                queryParams:{
+                    matQry:'',
+                    askNo:$('#pAskNo').val()
+                },
+                columns:[ [
+                    {
+                        field:'matCode', sortable:false, title:'物料编码', formatter:function(value, row, index){
+                            return value.substring(0, 1)=='X' ? value.substring(1) : value
+                        }
+                    },{
+                        field:'matName', sortable:false, title:'物料名称'
+                    },{
+                        field:'matUnit', sortable:false, title:'计量单位'
+                    },{
+                        field:'matPrice', sortable:false, title:'单价', align:'right'
+                    },{
+                        field:'matAmount', sortable:false, title:'数量', align:'right'
+                    }
+                ] ]
+            });
+        });
+
+        function reloadData(makeTeam, askMonth, askStep){
+            $('#askCodeDg').iDatagrid('reload',{
+                askTeam: makeTeam==null ? $('#askTeam').val() : makeTeam,
+                askMonth: askMonth==null ? $('#askMonth').val() : askMonth,
+                askStep: askStep==null ? $('#askStep').val() : askStep
+            });
+        }
+
+        function reloadForm(askNo){
+            $('#matFormDg').iDatagrid('reload',{
+                matQry:'',
+                askNo:askNo == null ? $('#pAskNo').val() : askNo
+            });
+        }
+
+        function reloadFile(askNo){
+            $('#attachmentDg').iDatagrid('reload',{
+                puuid:askNo == null ? $('#pAskNo').val() : askNo
+            });
+        }
+
+        function picFormatter(value, row, index) {
+            var html = ""
+            if (row.filePath) {
+                html = "<div class=\"box\" style='text-align: center;padding: 3px' data-toggle=\"topjui-viewer\">" +
+                    "<img style='width: 100px;' src='/system/attachment/showPic?path=" +
+                    row.filePath + "' title='点击预览' alt='" + value + "'>" +
+                    "</div>"
+            }
+            return html
+        }
+
+        function pictureUrlOnChange(value) {
+            $("#imgBox").show();
+            $("#imgBox img").attr('src', "/system/attachment/showPic?path=" + value);
+            $.parser.parse('.imgBox');
+        }
+    </script>
+</th:block>
+</body>
+</html>

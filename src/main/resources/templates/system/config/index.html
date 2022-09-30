@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+   <style>
+       .textbox-label {
+           width: 130px !important;}
+   </style>
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <!-- datagrid表格 -->
+            <table data-toggle="topjui-edatagrid"
+                   data-options="id:'configDatagrid',
+                   selectOnCheck:false,
+                   reloadAfterSave:true,
+                   url:'/system/config/getPageSetData',
+                   saveUrl:'/system/config/save',
+                   updateUrl:'/system/config/update'">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                    <th data-options="field:'name',title:'名称',sortable:true,editor:{type:'textbox',options:{required:true,height:30}}"></th>
+                    <th data-options="field:'code',title:'代码',sortable:true,editor:{type:'textbox',options:{required:true,height:30}}"></th>
+                    <th data-options="field:'value',title:'值',sortable:true,editor:{type:'textbox',options:{required:true,height:30}}"></th>
+                    <th data-options="field:'description',title:'描述',sortable:true,editor:{type:'textbox',options:{required:true,height:30}}"></th>
+                    <th data-options="field:'sort',title:'排序',sortable:true,width:60,editor:{type:'numberspinner',options:{required:true,height:30}}"></th>
+                    <th data-options="field:'creator',title:'创建人',sortable:true"></th>
+                    <th data-options="field:'createTime',title:'创建时间',sortable:true"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- 表格工具栏 -->
+    <div id="configDatagrid-toolbar" class="topjui-toolbar" data-options="grid:{
+           type:'datagrid',
+           id:'configDatagrid'
+       }" style="display:none">
+        <ewsd:rbac str="configAddDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'edatagrid',
+               extend:'#configDatagrid-toolbar',
+               type:'addRow',
+               iconCls:'fa fa-plus',
+               btnCls:'topjui-btn-green'">新增</a>
+        </ewsd:rbac>
+
+        <ewsd:rbac str="configEditDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'edatagrid',
+           extend:'#configDatagrid-toolbar',
+           type:'saveRow',
+           iconCls:'fa fa-save',
+           btnCls:'topjui-btn-blue'">保存</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="configCancelBtn">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'edatagrid',
+       extend:'#configDatagrid-toolbar',
+       type:'cancelRow',
+       iconCls:'fa fa-close',
+       btnCls:'topjui-btn-black'">取消</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="/system/config/delete">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#configDatagrid-toolbar',
+           btnCls:'topjui-btn-red',
+           url:'/system/config/delete'">删除</a>
+        </ewsd:rbac>
+
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#configDatagrid-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#configDatagrid-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+        <!--<a href="javascript:void(0)"-->
+           <!--data-toggle="topjui-menubutton"-->
+           <!--data-options="-->
+           <!--btnCls:'topjui-btn-blue',-->
+           <!--iconCls:'fa fa-sign-out',-->
+           <!--onClick:select-->
+         <!--">导出Excel</a>-->
+        <!--<a href="javascript:void(0)"-->
+           <!--data-toggle="topjui-menubutton"-->
+           <!--data-options="-->
+           <!--btnCls:'topjui-btn-orange',-->
+           <!--iconCls:'fa fa-cloud-upload',-->
+           <!--onClick:selectImport-->
+         <!--">导入Excel</a>-->
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <!--<script src="../../static/js/security/mainframe.js"-->
+    <!--th:src="@{/js/security/mainframe.js}"></script>-->
+    <script>
+        //导出配置界面
+        function select() {
+            var $editDialog = $('<form id="myDialog"></form>'); // 创建form表单元素
+            $editDialog.iDialog({
+                title: '导出Excel',
+                width: 950,
+                height: 450,
+                closed: false,
+                cache: false,
+                href: '/system/exportImport/select?tablesName=sys_config',//增加页面
+                modal: true
+            });
+        }
+
+        //导入配置界面
+        function selectImport() {
+            var $editDialog = $('<form id="myDialog"></form>'); // 创建form表单元素
+            $editDialog.iDialog({
+                title: '导入Excel',
+                width: 950,
+                height: 450,
+                closed: false,
+                cache: false,
+                href: '/system/exportImport/import?tablesName=sys_config',//增加页面
+                modal: true
+            });
+        }
+
+    </script>
+</th:block>
+</body>
+</html>

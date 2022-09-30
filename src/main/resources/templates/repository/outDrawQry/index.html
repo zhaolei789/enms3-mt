@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <form id="outDrawForm" style="height:50%">
+        <div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+            <table id="outDrawDg"></table>
+        </div>
+    </form>
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <div data-toggle="topjui-layout" data-options="fit:true">
+            <div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'40%'">
+                <table id="logDg"></table>
+            </div>
+            <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="outDrawDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'outDrawDg'
+       }" style="display:none">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">领用日期：</label>
+    <input id="date1Qry" name="date1Qry" th:value="${date1Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+    <label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+    <input id="date2Qry" name="date2Qry" th:value="${date2Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">领用区队：</label>
+    <input data-toggle="topjui-combobox" name="teamNoQry" id="teamNoQry" th:value="${teamNoQry}" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getUserDeptSet',width:'150px'">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">领料仓库：</label>
+    <input data-toggle="topjui-combobox" id="storeNoQry" value="" name="storeNoQry" data-options="width:'150px',valueField:'storeNo',textField:'storeName', url:'/repository/mStore/getStoreList1'">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">费用来源：</label>
+    <input data-toggle="topjui-combobox" id="itemQry" value="" name="itemQry" data-options="width:'150px',valueField:'itemNo',textField:'itemName', url:'/material/mItem/getMatItemSet'">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">新旧类别：</label>
+    <input data-toggle="topjui-combobox" name="newOldQry" id="newOldQry" value="" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.dSrc',width:'150px',loadFilter:function(data){
+        data.unshift({value:'', text:'--全部--'});
+        return data
+    }">
+
+    <a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+    </a>
+
+    <a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+    </a>
+
+    <br />
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">单号：</label>
+    <input id="drawNoQry" data-toggle="topjui-textbox" name="drawNoQry" data-options="width:'120px'" value="">
+
+    <label class="topjui-form-label" style="width:50px;float:none;display:inline-block">分类：</label>
+    <input id="erpTypeQry" data-toggle="topjui-textbox" name="erpTypeQry" data-options="width:'150px'" value="">
+
+    <label class="topjui-form-label" style="width:70px;float:none;display:inline-block">编码：</label>
+    <input id="matCodeQry" data-toggle="topjui-textbox" name="matCodeQry" data-options="width:'150px'" value="">
+
+    <label class="topjui-form-label" style="width:70px;float:none;display:inline-block">描述：</label>
+    <input id="matNameQry" data-toggle="topjui-textbox" name="matNameQry" data-options="width:'150px'" value="">
+
+    <label class="topjui-form-label" style="width:70px;float:none;display:inline-block">状态：</label>
+    <input data-toggle="topjui-combobox" name="stepQry" id="stepQry" value="7202F" data-options="valueField:'processNo',textField:'processName',url:'/system/sysAuditProcess/getListByFuuid?fuuid=D0180DF7E4324DD091306C26F2207145',width:'150px'">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">申请类型：</label>
+    <input data-toggle="topjui-combobox" name="urgentQry" id="urgentQry" value="" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=r.outStockType',width:'150px'">
+
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        $(document).ready(function(){
+            var cancelRight = [[${cancelRight}]];
+
+            $('#storeNoQry').iCombobox({
+                loadFilter:function(data){
+                    data.unshift({storeNo:'', storeName:'--全部--'});
+                    return data
+                }
+            })
+
+            $('#itemQry').iCombobox({
+                loadFilter:function(data) {
+                    data.unshift({itemNo: '', itemName: '--全部--'});
+                    return data
+                }
+            })
+
+            $('#urgentQry').iCombobox({
+                loadFilter:function(data){
+                    data.unshift({value:'', text:'--全部--'});
+                    return data
+                }
+            })
+
+            $('#teamNoQry').iCombobox({
+                loadFilter:function(data){
+                    data.unshift({id:'', text:'--全部--'});
+                    return data
+                }
+            })
+
+            $('#stepQry').iCombobox({
+                loadFilter:function(data){
+                    data.unshift({processNo:'', processName:'--全部--'});
+                    return data
+                }
+            })
+
+            $('#outDrawDg').iDatagrid({
+                queryParams:{
+                    date1Qry:$('#date1Qry').iDatebox('getValue'),
+                    date2Qry:$('#date2Qry').iDatebox('getValue'),
+                    teamNoQry:$('#teamNoQry').iCombobox('getValue'),
+                    storeNoQry:$('#storeNoQry').iCombobox('getValue'),
+                    itemQry:$('#itemQry').iCombobox('getValue'),
+                    drawNoQry:$('#drawNoQry').iTextbox('getValue'),
+                    erpTypeQry:$('#erpTypeQry').iTextbox('getValue'),
+                    matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+                    matNameQry:$('#matNameQry').iTextbox('getValue'),
+                    stepQry:$('#stepQry').iCombobox('getValue'),
+                    urgentQry:$('#urgentQry').iCombobox('getValue'),
+                    newOldQry:$('#newOldQry').iCombobox('getValue')
+                },
+                singleSelect:true,
+                selectOnCheck:false,
+                checkOnSelect:false,
+                url:'/repository/outDrawQry/getPageSet',
+                columns:[ [
+                    {
+                        field:'drawNo',title:'操作',sortable:false, formatter:function(value, row, index){
+                            if(cancelRight && row.drawStep=='7202F' && row.outAmount>0){
+                                return '<a style="font-weight: bold; color: #00b7ee" cancelBtn="'+value+'">冲单</a>'
+                            }else{
+                                return '---'
+                            }
+                        }
+                    },{
+                        field:'drawStepName',title:'状态',sortable:false
+                    },{
+                        field:'reserve2',title:'领料单号',sortable:false
+                    },{
+                        field:'applyDate',title:'申请日期',sortable:false, formatter:function(value, row, index){
+                            return value.substring(0, 4) + "-" + value.substring(4, 6) + '-' + value.substring(6, 8)
+                        }
+                    },{
+                        field:'planTeamName',title:'申请单位',sortable:false
+                    },{
+                        field:'outDate',title:'领用日期',sortable:false, formatter:function(value, row, index){
+                            if(value!='' && value!=null){
+                                return value.substring(0, 4) + "-" + value.substring(4, 6) + '-' + value.substring(6, 8)
+                            }else{
+                                return ''
+                            }
+                        }
+                    },{
+                        field:'teamName',title:'入库单位',sortable:false
+                    },{
+                        field:'erpType',title:'物料分类',sortable:false
+                    },{
+                        field:'typeName',title:'分类描述',sortable:false
+                    },{
+                        field:'matCode',title:'物料编码',sortable:false, formatter:function(value, row, index){
+                            return value.substring(0, 1) == 'X' ? value.substring(1) : value;
+                        }
+                    },{
+                        field:'matName',title:'物料描述',sortable:false
+                    },{
+                        field:'matUnit',title:'单位',sortable:false
+                    },{
+                        field:'applyAmount',title:'申请数量',sortable:false, align:'right'
+                    },{
+                        field:'outAmount',title:'领料数量',sortable:false, align:'right'
+                    },{
+                        field:'matPrice',title:'价格',sortable:false, align:'right'
+                    },{
+                        field:'bala',title:'金额',sortable:false, align:'right'
+                    },{
+                        field:'prjName',title:'工程项目',sortable:false
+                    },{
+                        field:'storeName',title:'出库仓库',sortable:false
+                    },{
+                        field:'applyInfo',title:'备注信息',sortable:false
+                    },{
+                        field:'empName',title:'审批人员',sortable:false
+                    },{
+                        field:'agreeDate',title:'审批时间',sortable:false, formatter:function(value, row, index){
+                            var date = value=='' || value==null ? '' : value.substring(0, 4) + "-" + value.substring(4, 6) + '-' + value.substring(6, 8)
+                            var time = row.agreeTime=='' || row.agreeTime==null ? '' : row.agreeTime.substring(0, 2)+':'+row.agreeTime.substring(2, 4)+':'+row.agreeTime.substring(4, 6)
+                            return date + ' ' + time
+                        }
+                    }
+                ] ],
+                onClickRow:function(index, row){
+                    reloadLog(row.checkNo)
+                },
+                onLoadSuccess:function(data){
+                    $('[cancelBtn]').click(function(){
+                        var drawNo = $(this).attr('cancelBtn');
+                        $.iMessager.confirm('确认对话框', '您确定冲单吗？', function (r) {
+                            if(r){
+                                var postData = { drawNo: drawNo}; // 请求中携带的JSON数据
+                                var url = '/repository/outDrawQry/cancel';//请求的地址
+                                $.post(url,postData,function (res) {
+                                    if(res.statusCode == 200){
+                                        $.iMessager.show({title: '我的消息', msg: res.message, timeout: 5000, showType: 'slide'});// '消息窗口'组件
+                                    }else {
+                                        $.iMessager.alert('操作提示', res.message, 'messager-error');
+                                    }
+                                },"JSON")
+                            }
+                        });
+                    })
+                }
+            });
+
+            $('#searchBtn').click(function(){
+                reloadData();
+            });
+
+            $('#downloadBtn').click(function(){
+                $('#outDrawForm').iForm('submit', {
+                    url:'/repository/outDrawQry/export',
+                    success:function(data){
+
+                    }
+                });
+            });
+
+            $('#logDg').iDatagrid({
+                singleSelect:true,
+                selectOnCheck:false,
+                checkOnSelect:false,
+                pagination:false,
+                url:'/system/tCheck/getCheck',
+                columns:[ [
+                    {
+                        field:'stepCodeName',title:'步骤',sortable:false
+                    },{
+                        field:'userName',title:'审批人员',sortable:false
+                    },{
+                        field:'occDate',title:'审批时间',sortable:false, formatter:function(value, row, index){
+                            var time = row.occTime;
+                            return value.substring(0, 4) + "-" + value.substring(4, 6) + '-' + value.substring(6, 8) + ' ' + time.substring(0, 2) + ':' + time.substring(2, 4) + ":" + time.substring(4, 6)
+                        }
+                    },{
+                        field:'direct',title:'审批方向',sortable:false, formatter:function(value, row, index){
+                            if(value=='sys.checkDirect.0'){
+                                return '---'
+                            }else{
+                                return row.directName
+                            }
+                        }
+                    },{
+                        field:'idea',title:'审批意见',sortable:false
+                    },{
+                        field:'logInfo',title:'备注',sortable:false
+                    }
+                ] ]
+            });
+        });
+
+        function reloadData(){
+            $('#outDrawDg').iDatagrid('reload',{
+                date1Qry:$('#date1Qry').iDatebox('getValue'),
+                date2Qry:$('#date2Qry').iDatebox('getValue'),
+                teamNoQry:$('#teamNoQry').iCombobox('getValue'),
+                storeNoQry:$('#storeNoQry').iCombobox('getValue'),
+                itemQry:$('#itemQry').iCombobox('getValue'),
+                drawNoQry:$('#drawNoQry').iTextbox('getValue'),
+                erpTypeQry:$('#erpTypeQry').iTextbox('getValue'),
+                matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+                matNameQry:$('#matNameQry').iTextbox('getValue'),
+                stepQry:$('#stepQry').iCombobox('getValue'),
+                urgentQry:$('#urgentQry').iCombobox('getValue'),
+                newOldQry:$('#newOldQry').iCombobox('getValue')
+            })
+        }
+
+        function reloadLog(checkNo){
+            $('#logDg').iDatagrid('reload', {
+                checkNo:checkNo
+            })
+        }
+    </script>
+</th:block>
+</body>
+</html>

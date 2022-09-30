@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+
+    <style>
+        .align-center {
+            text-align: center;
+        }
+        .margin-top-10{
+            margin-top: 10px;
+        }
+        .layui-container-fluid {
+            margin: 5px;
+        }
+        .panel-body p{
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #333;
+        }
+        .panel-body{
+            border: none;
+        }
+        body {
+            font-family: "microsoft yahei", "Times New Roman", "宋体", Times, serif;
+            letter-spacing: 1px;
+        }
+    </style>
+    <link href="/plugins/ueditor/third-party/SyntaxHighlighter/shCoreDefault.css"
+          rel="stylesheet" type="text/css"/>
+
+    <div class="layui-container">
+        <div class="layui-row">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header align-center">
+                        <h3 class="panel-title text-center"  th:text="${oaTopicBase.title}"></h3>
+                    </div>
+                    <div class="layui-card-body">
+                        <div class="list-group text-center">
+                            <div class="list-group-item align-center">
+                                    <span>
+                                        <i class="fa fa-user" th:utext="${oaTopicBase.creator}"></i>
+                                    </span>
+                                <span>
+                                    <i class="fa fa-clock-o" th:utext="${CreateTime}"></i>
+                                    </span>
+                            </div>
+                        </div>
+                        <div class="content margin-top-10" th:utext=" ${oaTopicDocument.content}">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript"
+            src="/plugins/ueditor/third-party/SyntaxHighlighter/shCore.js"></script>
+    <script type="text/javascript"
+            src="/plugins/jquery/plugins/jquery.imgAutoSize.js"></script>
+    <script type="text/javascript">
+        $(function ($) {
+            SyntaxHighlighter.all();
+            $('.content').imgAutoSize(0);
+        });
+    </script>
+</th:block>
+</body>
+</html>

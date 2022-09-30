@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.DataMapper">
+    <select id="getList" resultType="cn.ewsd.material.model.MSettleItem">
+		 SELECT si.item_no, si.item_name, si.item_unit, siv.occ_value, siv.data_type
+		 FROM s_settle_item si
+		 LEFT JOIN s_settle_item_value siv ON siv.item_no=si.item_no
+		 WHERE si.link_team=#{userTeam} AND siv.occ_month=#{occMonth}
+    </select>
+
+	<select id="getItem" resultType="cn.ewsd.material.model.MSettleItem">
+		 SELECT item_no, item_name, item_unit
+		 FROM s_settle_item
+		 WHERE link_team=#{_parameter}
+    </select>
+
+	<insert id="insertSettleValue" parameterType="cn.ewsd.material.model.MSettleItem">
+		INSERT INTO s_settle_item_value (`data_id`, `data_type`, `item_no`, `item_name`, `occ_month`, `team_no`, `occ_value`,
+										 `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{dataId}, #{dataType}, #{itemNo}, #{itemName}, #{occMonth}, #{teamNo}, #{occValue},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<update id="updateSettleValue" parameterType="cn.ewsd.material.model.MSettleItem">
+		UPDATE s_settle_item_value SET occ_value=#{occValue} WHERE item_no=#{itemNo} AND data_type=#{dataType} AND occ_month=#{occMonth}
+	</update>
+
+	<select id="getDayList" resultType="cn.ewsd.material.model.MSettleItem">
+		SELECT item_no, data_type, occ_value, occ_day
+		FROM s_settle_day_value
+		WHERE occ_month=#{occMonth} AND item_no=#{itemNo}
+	</select>
+
+	<delete id="deleteDayData">
+		DELETE FROM s_settle_day_value WHERE occ_month=#{_parameter}
+	</delete>
+
+	<insert id="insertDayData" parameterType="cn.ewsd.material.model.MSettleItem">
+		INSERT INTO s_settle_day_value (`data_id`, `data_type`, `item_no`, `item_name`, `occ_month`, `team_no`, `occ_value`, `occ_day`,
+										 `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{dataId}, #{dataType}, #{itemNo}, #{itemName}, #{occMonth}, #{teamNo}, #{occValue}, #{occDay},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<update id="updateDayData" parameterType="cn.ewsd.material.model.MSettleItem">
+		UPDATE s_settle_day_value SET occ_value=#{occValue} WHERE item_no=#{itemNo} AND data_type=#{dataType} AND occ_month=#{occMonth} AND occ_day=#{occDay}
+	</update>
+
+</mapper>

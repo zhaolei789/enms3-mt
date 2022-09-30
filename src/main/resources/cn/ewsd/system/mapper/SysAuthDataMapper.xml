@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.SysAuthDataMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.system.model.SysAuthData" id="sysAuthDataMap">
+        <result property="uuid" column="uuid"/>
+        <result property="creatorId" column="creatorId"/>
+        <result property="creator" column="creator"/>
+        <result property="createTime" column="createTime"/>
+        <result property="modifierId" column="modifierId"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modifyTime" column="modifyTime"/>
+        <result property="isDel" column="isDel"/>
+        <result property="id" column="id"/>
+        <result property="pid" column="pid"/>
+        <result property="text" column="text"/>
+        <result property="state" column="state"/>
+        <result property="status" column="status"/>
+        <result property="orgId" column="orgId"/>
+        <result property="sort" column="sort"/>
+        <result property="levelId" column="levelId"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator
+		  ,  	  	     			 create_time
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 is_del
+		  ,  	  	     			 id
+		  ,  	  	     			 pid
+		  ,  	  	     			 text
+		  ,  	  	     			 state
+		  ,  	  	     			 status
+		  ,  	  	     			 org_id
+		  ,  	  	     			 sort
+		  ,  	  	     			 level_id
+		  ,  	  	     			 remark
+		  ,                          org_name
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.SysAuthData">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_auth_data
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.system.model.SysAuthData">
+		select  <include refid="Base_Column_List" />  from sys_auth_data where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.system.model.SysAuthData">
+		select  <include refid="Base_Column_List" />  from sys_auth_data
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_auth_data 
+	</select>
+    <select id="getListByLevelId" resultType="cn.ewsd.system.model.SysAuthData">
+		SELECT <include refid="Base_Column_List" /> FROM sys_auth_data WHERE level_id = #{param1}
+	</select>
+	<select id="getListByPid" resultType="cn.ewsd.system.model.SysAuthData">
+		SELECT <include refid="Base_Column_List" /> FROM sys_auth_data WHERE pid = #{param1} and level_id !=0
+	</select>
+	<select id="getIncreasementId" resultType="java.lang.Integer">
+		SELECT MAX(a.id)+1 FROM sys_auth_data a
+	</select>
+	<select id="getLisById" resultType="cn.ewsd.system.model.SysAuthData">
+		SELECT * FROM sys_auth_data WHERE id in (${_parameter})
+	</select>
+    <select id="getListById" resultType="cn.ewsd.system.model.SysAuthData">
+		SELECT * FROM sys_auth_data WHERE id =#{param1}
+	</select>
+
+    <insert id="executeSave" parameterType="cn.ewsd.system.model.SysAuthData">
+		insert into sys_auth_data
+		(
+			`uuid`, 
+			`creator_id`,
+			`creator`, 
+			`create_time`,
+			`modifier_id`,
+			`modifier`, 
+			`modify_time`,
+			`is_del`,
+			`id`, 
+			`pid`, 
+			`text`, 
+			`state`, 
+			`status`, 
+			`org_id`,
+			`sort`, 
+			`level_id`,
+			`remark`
+		)
+		values
+		(
+			#{uuid}, 
+			#{creator_id},
+			#{creator}, 
+			#{create_time},
+			#{modifier_id},
+			#{modifier}, 
+			#{modify_time},
+			#{is_del},
+			#{id}, 
+			#{pid}, 
+			#{text}, 
+			#{state}, 
+			#{status}, 
+			#{org_id},
+			#{sort}, 
+			#{level_id},
+			#{remark}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.system.model.SysAuthData">
+		update sys_auth_data 
+		<set>
+			<if test="creator_id != null">`creatorId` = #{creator_id}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="create_time != null">`createTime` = #{create_time}, </if>
+			<if test="modifier_id != null">`modifierId` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modifyTime` = #{modify_time}, </if>
+			<if test="is_del != null">`isDel` = #{is_del}, </if>
+			<if test="id != null">`id` = #{id}, </if>
+			<if test="pid != null">`pid` = #{pid}, </if>
+			<if test="text != null">`text` = #{text}, </if>
+			<if test="state != null">`state` = #{state}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="org_id != null">`orgId` = #{org_id}, </if>
+			<if test="sort != null">`sort` = #{sort}, </if>
+			<if test="level_id != null">`levelId` = #{level_id}, </if>
+			<if test="remark != null">`remark` = #{remark}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from sys_auth_data where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from sys_auth_data where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

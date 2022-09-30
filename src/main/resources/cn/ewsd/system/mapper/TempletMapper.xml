@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.ewsd.system.mapper.TempletMapper">
+
+    <resultMap type="cn.ewsd.system.model.Templet" id="reportTemplet">
+        <id column="uuid" jdbcType="BIGINT" property="uuid"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="content" jdbcType="BLOB" property="content"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime"/>
+    </resultMap>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.Templet">
+        select
+        *
+        from report_templet
+        <where>
+            <if test="filterSort != null">
+                ${filterSort}
+            </if>
+        </where>
+    </select>
+
+    <select id="checkExistByName" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(*) from report_templet where name = #{name}
+    </select>
+
+    <select id="queryReportFileList" resultMap="reportTemplet">
+        select * from report_templet
+    </select>
+
+    <select id="queryUreportFileByName" resultMap="reportTemplet">
+        select * from report_templet where name = #{name}
+    </select>
+
+    <delete id="deleteReportFileByName" parameterType="java.lang.String">
+        delete from report_templet where name = #{name}
+    </delete>
+
+    <insert id="insertReportFile" parameterType="cn.ewsd.system.model.Templet">
+        insert into report_templet (uuid, name, content, create_time, modify_time) values
+        (#{uuid}, #{name}, #{content}, #{createTime}, #{modifyTime})
+    </insert>
+
+    <update id="updateReportFile" parameterType="cn.ewsd.system.model.Templet">
+        update report_templet set
+        name = #{name} ,
+        content = #{content},
+        create_time = #{createTime},
+        modify_time = #{modifyTime}
+        where uuid = #{uuid}
+    </update>
+
+</mapper>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<!--井下周转登记-->
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="keyAnalyForm" style="height:100%">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+			<table id="keyAnalyDg"></table>
+		</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="keyAnalyDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'keyAnalyDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">日期：</label>
+	<input id="date1Qry" name="date1Qry" th:value="${date1Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+	<label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+	<input id="date2Qry" name="date2Qry" th:value="${date2Qry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+	</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#keyAnalyDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/repository/keyAnaly/list',
+				queryParams:{
+					date1Qry:$('#date1Qry').iDatebox('getValue'),
+					date2Qry:$('#date2Qry').iDatebox('getValue')
+				},
+				columns:[ [
+					{
+						field:'balaTypeName', sortable:false, title:'物料组'
+					},{
+						field:'balaMatCode', sortable:false, title:'物料编码'
+					},{
+						field:'balaMatName', sortable:false, title:'物料描述'
+					},{
+						field:'balaMatUnit', sortable:false, title:'单位'
+					},{
+						field:'balaBala', sortable:false, title:'金额TOP20', align:'right'
+					},{
+						field:'amountTypeName', sortable:false, title:'物料组'
+					},{
+						field:'amountMatCode', sortable:false, title:'物料编码'
+					},{
+						field:'amountMatName', sortable:false, title:'物料描述'
+					},{
+						field:'amountMatUnit', sortable:false, title:'单位'
+					},{
+						field:'amountBala', sortable:false, title:'数量TOP20', align:'right'
+					},{
+						field:'priceTypeName', sortable:false, title:'物料组'
+					},{
+						field:'priceMatCode', sortable:false, title:'物料编码'
+					},{
+						field:'priceMatName', sortable:false, title:'物料描述'
+					},{
+						field:'priceMatUnit', sortable:false, title:'单位'
+					},{
+						field:'priceBala', sortable:false, title:'价值TOP20', align:'right'
+					}
+				] ]
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#downloadBtn').click(function(){
+				$('#keyAnalyForm').iForm('submit', {
+					url:'/repository/keyAnaly/download',
+					success:function(data){
+
+					}
+				});
+			});
+		})
+
+		function reloadData(){
+			$('#keyAnalyDg').iDatagrid('reload',{
+				date1Qry:$('#date1Qry').iDatebox('getValue'),
+				date2Qry:$('#date2Qry').iDatebox('getValue')
+			});
+		}
+	</script>
+
+</th:block>
+</body>
+</html>

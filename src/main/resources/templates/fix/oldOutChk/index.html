@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="oldOutChkForm" style="height:100%">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+			<table id="oldOutChkDg"></table>
+		</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="oldOutChkDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'oldOutChkDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">区队：</label>
+	<input data-toggle="topjui-combobox" id="teamNoQry" name="teamNoQry" value="" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',width:'150px'">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+		<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+			<span class="l-btn-text">查询</span>
+			<span class="l-btn-icon fa fa-search">&nbsp;</span>
+		</span>
+	</a>
+
+	<a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">审核通过</span>
+            <span class="l-btn-icon fa fa-check">&nbsp;</span>
+        </span>
+	</a>
+
+	<a href="javascript:void(0)" id="backBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">退回草稿</span>
+            <span class="l-btn-icon fa fa-reply">&nbsp;</span>
+        </span>
+	</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			$('#teamNoQry').iCombobox({
+				loadFilter:function(data){
+					data.unshift({id:'', text:'--全部--'});
+					return data
+				}
+			})
+
+			$('#oldOutChkDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/fix/oldOutChk/getPageSet',
+				queryParams:{
+					teamNoQry:$('#teamNoQry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'drawNo', sortable:false, title:'', checkbox:true
+					},{
+						field:'reserve2', sortable:false, title:'领料单号'
+					},{
+						field:'drawStepName', sortable:false, title:'审批步骤'
+					},{
+						field:'storeName', sortable:false, title:'发料仓库'
+					},{
+						field:'teamName', sortable:false, title:'领用单位'
+					},{
+						field:'matCode', sortable:false, title:'物料编码'
+					},{
+						field:'matName', sortable:false, title:'物料描述'
+					},{
+						field:'matUnit', sortable:false, title:'单位'
+					},{
+						field:'chkAmount', sortable:false, title:'申请数量', formatter:function(value, row, index){
+							return '<input type="hidden" name="step_'+ row.drawNo +'" value="'+ row.drawStep +'" /><span class="textbox"><input class="textbox-text" type="number" id="amount_'+ row.drawNo +'" name="amount_'+ row.drawNo +'" value="'+ value +'" disabled /></span>'
+						}
+					},{
+						field:'stockAmount', sortable:false, title:'旧料库存', align:'right'
+					},{
+						field:'matPrice', sortable:false, title:'单价', align:'right'
+					},{
+						field:'matBala', sortable:false, title:'金额', align:'right'
+					},{
+						field:'ifSend', sortable:false, title:'是否配送', formatter:function(value, row, index){
+							if(value=='1'){
+								return '是'
+							}else{
+								return '否'
+							}
+						}
+					},{
+						field:'useAddr', sortable:false, title:'配送地点'
+					},{
+						field:'pickDate', sortable:false, title:'配送时间', formatter:function(value, row, index){
+							if (value != null && value != '') {
+								var s = value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+								if (row.pickTime != '') {
+									s += ' ' + row.pickTime.substring(0, 2)
+								}
+								return s
+							} else {
+								return '';
+							}
+						}
+					},{
+						field:'applyInfo', sortable:false, title:'申请原因'
+					},{
+						field:'applyDate', sortable:false, title:'申请日期', formatter:function(value, row, index){
+							return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8);
+						}
+					}
+				] ],
+				onCheck:function(index, row){
+					$('#amount_' + row.drawNo).removeAttr('disabled');
+				},
+				onUncheck:function(index, row){
+					$('#amount_' + row.drawNo).attr('disabled', 'disabled');
+				},
+				onCheckAll:function(rows){
+					$('[name^="amount_"]').removeAttr("disabled");
+				},
+				onUncheckAll:function(rows){
+					$('[name^="amount_"]').attr("disabled", 'disabled');
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#submitBtn').click(function(){
+				$('#oldOutChkForm').iForm('submit', {
+					url:'/fix/oldOutChk/submit',
+					success:function(data){
+						data = $.parseJSON(data);
+						if(data.statusCode == 200){
+							$.iMessager.show({
+								title:data.title,
+								msg:data.message
+							})
+							reloadData();
+						} else {
+							$.iMessager.alert({
+								icon:'messager-error',
+								title:data.title,
+								msg:data.message
+							});
+						}
+					}
+				});
+			});
+
+			$('#backBtn').click(function(){
+				$('#oldOutChkForm').iForm('submit', {
+					url:'/fix/oldOutChk/back',
+					success:function(data){
+						data = $.parseJSON(data);
+						if(data.statusCode == 200){
+							$.iMessager.show({
+								title:data.title,
+								msg:data.message
+							})
+							reloadData();
+						} else {
+							$.iMessager.alert({
+								icon:'messager-error',
+								title:data.title,
+								msg:data.message
+							});
+						}
+					}
+				});
+			});
+		})
+
+		function reloadData(){
+			$('#oldOutChkDg').iDatagrid('reload',{
+				teamNoQry:$('#teamNoQry').iCombobox('getValue')
+			});
+		}
+	</script>
+
+</th:block>
+</body>
+</html>

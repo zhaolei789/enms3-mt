@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+	  layout:decorator="public/layout">
+
+<style>
+	.layout-split-east{
+		left: 460px !important;
+	}
+</style>
+<th:block layout:fragment="css"></th:block>
+
+<th:block layout:fragment="content">
+	<div data-toggle="topjui-layout" data-options="fit:true">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+			<table id="detailDg"></table>sdfsdfsdfdsf
+		</div>
+
+		<div id="detailDg-toolbar" class="topjui-toolbar"
+			 data-options="grid:{
+           type:'datagrid',
+           id:'detailDg'
+       }" style="display:none">
+
+			<input type="hidden" name="teamNo" id="teamNo" th:value="${teamNo}">
+			<input type="hidden" name="planStep" id="planStep" th:value="${planStep}">
+			<input type="hidden" name="itemNo" id="itemNo" th:value="${itemNo}">
+			<input type="hidden" name="beginMonth" id="beginMonth" th:value="${beginMonth}">
+			<input type="hidden" name="endMonth" id="endMonth" th:value="${endMonth}">
+
+			<label class="topjui-form-label" style="width:60px;float:none;display:inline-block">计划来源：</label>
+			<input data-toggle="topjui-combobox" name="planSrcQry" id="planSrcQry" value="" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.planSrc',width:'150px'">
+
+			<label class="topjui-form-label" style="width:70px;float:none;display:inline-block">材料：</label>
+			<input id="matQry" data-toggle="topjui-textbox" name="matQry" data-options="width:'150px'" value="">
+
+			<label class="topjui-form-label" style="width:70px;float:none;display:inline-block">金额：</label>
+			<input data-toggle="topjui-combobox" id="balaFlag" value="d" name="balaFlag" data-options="width:'200px',valueField:'value',textField:'text',data:[
+				{value:'d', text:'大于'},
+				{value:'x', text:'小于'}
+			]">
+			<input id="matBalaQry" data-toggle="topjui-textbox" name="matBalaQry" data-options="width:'150px'" value="">
+
+			<a href="javascript:void(0)" id="searchBtn1" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">查询</span>
+                <span class="l-btn-icon fa fa-search">&nbsp;</span>
+            </span>
+			</a>
+
+		</div>
+	</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" src="/plugins/layui/layui.js"></script>
+	<script type="text/javascript" src="/topjui/js/topjui.core.min.js"></script>
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function () {
+			$('#detailDg').iDatagrid({
+				queryParams:{
+					teamNo:$('#teamNo').val(),
+					planStep:$('#planStep').val(),
+					itemNo:$('#itemNo').val(),
+					beginMonth:$('#beginMonth').val(),
+					endMonth:$('#endMonth').val(),
+					planSrcQry:$('#planSrcQry').iCombobox('getValue'),
+					matQry:$('#matQry').iTextbox('getValue'),
+					balaFlag:$('#balaFlag').iCombobox('getValue'),
+					matBalaQry:$('#matBalaQry').iTextbox('getValue')
+				},
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/material/planStepState/getDetailPageSet',
+				columns:[ [
+					{
+						field:'teamName',title:'编制单位',sortable:false
+					},{
+						field:'centerName',title:'成本中心',sortable:false
+					},{
+						field:'itemName',title:'费用科目',sortable:false
+					},{
+						field:'znksTeamName',title:'业务科室',sortable:false
+					},{
+						field:'matCode',title:'物料编码',sortable:false
+					},{
+						field:'matName',title:'物料描述',sortable:false
+					},{
+						field:'matAddr',title:'库存地',sortable:false
+					},{
+						field:'matUnitName',title:'单位',sortable:false
+					},{
+						field:'matAmount',title:'计划数',sortable:false
+					},{
+						field:'matPrice',title:'价格',sortable:false
+					},{
+						field:'matBala',title:'金额',sortable:false
+					},{
+						field:'usableAmount',title:'可领数',sortable:false
+					},{
+						field:'oldAmount',title:'申请在途',sortable:false
+					},{
+						field:'prjName',title:'工程名称',sortable:false
+					},{
+						field:'planSrcName',title:'计划来源',sortable:false
+					},{
+						field:'planMonth',title:'计划月份',sortable:false
+					},{
+						field:'planDate',title:'提交日期',sortable:false
+					},{
+						field:'factoryNo',title:'工厂',sortable:false
+					},{
+						field:'moveType',title:'科目类型',sortable:false
+					},{
+						field:'matUse',title:'用途及备注',sortable:false
+					},{
+						field:'remark',title:'质量要求或主机生产厂',sortable:false
+					}
+				] ]
+			});
+			alert(234)
+			$('#searchBtn1').click(function(){
+				reloadData1();
+			});
+		});
+
+		function reloadData1(){
+			$('#detailDg').iDatagrid('reload',{
+				teamNo:$('#teamNo').val(),
+				planStep:$('#planStep').val(),
+				itemNo:$('#itemNo').val(),
+				beginMonth:$('#beginMonth').val(),
+				endMonth:$('#endMonth').val(),
+				planSrcQry:$('#planSrcQry').iCombobox('getValue'),
+				matQry:$('#matQry').iTextbox('getValue'),
+				balaFlag:$('#balaFlag').iCombobox('getValue'),
+				matBalaQry:$('#matBalaQry').iTextbox('getValue')
+			});
+		}
+	</script>
+</th:block>
+</html>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MMakeFormMapper">
+    <select id="getMakeFormList" resultType="cn.ewsd.material.model.MMakeForm">
+        SELECT mf.*, m.mat_code, m.mat_name, m.mat_unit
+        FROM m_make_form mf
+        LEFT JOIN m_material m ON mf.mat_no=m.mat_no
+        WHERE ask_no=#{askNo}
+        <if test="matQry!=''">
+            AND (m.mat_code LIKE CONCAT('%', #{matQry}, '%') OR m.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+        </if>
+    </select>
+
+    <insert id="insertMakeForm" parameterType="cn.ewsd.material.model.MMakeForm">
+        INSERT INTO m_make_form (`ask_no`, `prod_no`, `mat_no`, `mat_price`, `mat_amount`, `other_fee`,
+                                 `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+        VALUES (#{askNo}, #{prodNo}, #{matNo}, #{matPrice}, #{matAmount}, #{otherFee},
+                #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+    </insert>
+
+    <delete id="deleteByAskNo">
+        DELETE FROM m_make_form WHERE ask_no=#{_parameter}
+    </delete>
+</mapper>

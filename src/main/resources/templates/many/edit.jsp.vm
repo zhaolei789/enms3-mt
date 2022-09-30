@@ -1,0 +1,39 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+    #foreach($column in $columns1)
+	#if(!($column.columnName == "uuid"
+	|| $column.columnName == "creator_id"
+	|| $column.columnName == "creator"
+	|| $column.columnName == "create_time"
+	|| $column.columnName == "modifier_id"
+	|| $column.columnName == "modifier"
+	|| $column.columnName == "modify_time"
+	|| $column.columnName == "creator_org_id"))
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">${column.comments}</label>
+			<div class="topjui-input-block">
+				#if($column.attrType == "Date")
+				<input type="text" name="${column.columnNameCamelCase}"
+					data-toggle="topjui-datetimebox"
+					data-options="prompt:'${column.comments}'">
+				#elseif($column.attrType == "Integer")
+				<input type="text" name="${column.columnNameCamelCase}"
+					data-toggle="topjui-numberbox"
+					data-options="prompt:'${column.comments}'">
+				#else
+				<input type="text" name="${column.columnNameCamelCase}"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'${column.comments}'">
+				#end
+			</div>
+		</div>
+    #end
+	#end
+	</div>
+</div>

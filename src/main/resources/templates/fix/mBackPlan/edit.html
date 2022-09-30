@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+	  layout:decorator="public/layout">
+
+<style>
+	.topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+		margin-top: 10px;
+	}
+</style>
+
+<th:block layout:fragment="css">
+
+</th:block>
+<th:block layout:fragment="content">
+	<input type="hidden" id="planNo" name="planNo" th:value="${backPlan.planNo}">
+	<div class="topjui-fluid">
+		<div class="topjui-row">
+			<div class="topjui-col-sm12" style="margin-top: 10px">
+				<label class="topjui-form-label">管理科室：</label>
+				<label class="topjui-form-label" style="width:auto; text-align: left" th:text="${backPlan.planTeamName}"></label>
+			</div>
+			<div class="topjui-col-sm12" style="margin-top: 10px">
+				<label class="topjui-form-label">回收修复单位：</label>
+				<label class="topjui-form-label" style="width:auto; text-align: left" th:text="${backPlan.teamName}"></label>
+			</div>
+			<div class="topjui-col-sm6" style="margin-top: 10px">
+				<label class="topjui-form-label">计划类型：</label>
+				<label class="topjui-form-label" style="width:auto; text-align: left" th:text="${backPlan.fixTypeName}"></label>
+			</div>
+			<div class="topjui-col-sm6" style="margin-top: 10px">
+				<label class="topjui-form-label">材料代码：</label>
+				<label class="topjui-form-label" style="width:auto; text-align: left" th:text="${backPlan.matCode}"></label>
+			</div>
+			<div class="topjui-col-sm6" style="margin-top: 10px">
+				<label class="topjui-form-label">材料名称：</label>
+				<label class="topjui-form-label" style="width:auto; text-align: left" th:text="${backPlan.matName}"></label>
+			</div>
+			<div class="topjui-col-sm6" style="margin-top: 10px">
+				<label class="topjui-form-label">计划数量：</label>
+				<label class="topjui-form-label" style="width:auto; text-align: left" th:text="${backPlan.planAmount}"></label>
+			</div>
+			<div class="topjui-col-sm6" style="margin-top: 10px">
+				<label class="topjui-form-label">减少数量：</label>
+				<div class="topjui-input-block">
+					<input type="text" name="amount" data-toggle="topjui-textbox" data-options="prompt:''" value="">已回收数<span th:text="${inAmount}"></span>
+				</div>
+			</div>
+			<div class="topjui-col-sm6" style="margin-top: 10px">
+				<label class="topjui-form-label">调整原因：</label>
+				<div class="topjui-input-block">
+					<input type="text" name="remark" data-toggle="topjui-textbox" data-options="prompt:''" value="">
+				</div>
+			</div>
+		</div>
+	</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+
+	</script>
+</th:block>
+</html>

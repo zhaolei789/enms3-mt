@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'tSignDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/cost/tSign/getPageSet'">
+            <thead>
+            <tr>
+                								<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+						    									<th data-options="field:'createTime',title:'',sortable:true"></th>
+						    									<th data-options="field:'creator',title:'',sortable:true"></th>
+						    									<th data-options="field:'creatorId',title:'',sortable:true"></th>
+						    									<th data-options="field:'creatorOrgId',title:'',sortable:true"></th>
+						    									<th data-options="field:'modifierId',title:'',sortable:true"></th>
+						    									<th data-options="field:'modifier',title:'',sortable:true"></th>
+						    									<th data-options="field:'modifierTime',title:'',sortable:true"></th>
+						    									<th data-options="field:'billId',title:'业务ID',sortable:true"></th>
+						    									<th data-options="field:'userId',title:'审批用户ID',sortable:true"></th>
+						    									<th data-options="field:'userName',title:'用户名称',sortable:true"></th>
+						    									<th data-options="field:'checkId',title:'审核ID',sortable:true"></th>
+						    									<th data-options="field:'checkDate',title:'',sortable:true"></th>
+						    									<th data-options="field:'checkTime',title:'',sortable:true"></th>
+						    									<th data-options="field:'result',title:'0待审 1同意 2驳回',sortable:true"></th>
+						    									<th data-options="field:'remark',title:'',sortable:true"></th>
+						    									<th data-options="field:'stepKey',title:'',sortable:true"></th>
+						    									<th data-options="field:'stepCode',title:'',sortable:true"></th>
+						    	            </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="tSignDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'tSignDg'
+       }" style="display:none">
+		<ewsd:rbac str="tSignAddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#tSignDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'tSignAddDg',
+               href:'/cost/tSign/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/cost/tSign/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="tSignEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#tSignDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'tSignEditDg',
+               href:'/cost/tSign/edit',
+               url:'/cost/tSign/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/cost/tSign/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'tSignDg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/cost/tSign/deleteBatch">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#tSignDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/cost/tSign/deleteBatch'">删除</a>
+		</ewsd:rbac>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#tSignDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#tSignDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

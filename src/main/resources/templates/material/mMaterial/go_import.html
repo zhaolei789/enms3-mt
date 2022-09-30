@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+
+<th:block layout:fragment="css">
+</th:block>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true" style="position: relative">
+        <div class="upload" style="padding: 20px;">
+            <div class="topjui-row">
+                <div style="padding: 10px;width: 100%;display: flex;align-items: center;justify-content: space-around">
+                    <span style="height: 1px;display: block;width: 5%;background:#f5f5f5;"></span><span
+                        style="font-weight: bold">上传Excel</span><span
+                        style="height: 1px;display: block;width: 88%;background:#f5f5f5;"></span>
+                </div>
+                <p>导入Excel请先下载模板，在模板里添加完数据后再上传Excel文件，点击"导入数据"按钮</p>
+            </div>
+            <input type="text" name="thumbnail" id="excelUpload" data-toggle="topjui-uploadbox" data-options="editable:false,
+               buttonText:'上传Excel',
+               accept:'file',
+               uploadUrl:'/system/attachment/upload'">
+        </div>
+        <div class="p-footer"
+             style="position: absolute;bottom: 0 !important;text-align: right;width: 100%;height: 40px;background:#F5F5F5;line-height: 40px;border-top: 1px solid #ddd;">
+            <a href="/excel_template/MATERIAL_IN.xlsx" target="_blank"
+               data-toggle="topjui-linkbutton"
+               data-options="
+                   iconCls: 'fa fa-cloud-download',
+                   btnCls:'topjui-btn-orange'
+                   ">下载模板</a>
+            <a href="#"
+               data-toggle="topjui-linkbutton"
+               data-options="
+                   iconCls: 'fa fa-file-excel-o',
+                    onClick:excelUpload">导入数据</a>
+            <a href="#"
+               data-toggle="topjui-linkbutton"
+               data-options="
+                    iconCls: 'fa fa-close',
+                    btnCls:'topjui-btn-red',
+                    onClick:close" style="margin-right: 5px">关闭</a>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+
+    <script>
+        //关闭页面
+        function close() {
+            $('#importDialog').iDialog('destroy');
+        }
+
+        function excelUpload() {
+            var address = $('#excelUpload').iUploadbox('getValue');
+            if (address == '') {
+                $.iMessager.alert("提示", '请上传Excel！')
+                return
+            }
+            $.iMessager.progress({"text": '请求中......'})
+            var url = '/material/mMaterial/exportleadingIn';
+            var postData = {
+                address: address
+            };
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: postData,
+                dataType: 'json',
+                async: false,
+                success: function (res) {
+                    try {
+                        if (res.statusCode == 200) {
+                            $.iMessager.show({
+                                title: res.title,
+                                msg: res.message,
+                                timeout: 1000
+                            });
+                            $('#importDialog').iDialog('destroy');
+                            $('#mMaterialDg').iDatagrid('reload');
+                        } else {
+                            $.iMessager.alert("提示", res.message)
+                        }
+                    } catch (e) {
+                        $.iMessager.alert("提示", res.message)
+                    } finally {
+                        $.iMessager.progress('close');
+                    }
+                }
+            });
+        }
+
+    </script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.MFeeItemMapper">
+	<select id="getItemForSelect" resultType="cn.ewsd.cost.model.MFeeItem">
+		SELECT item_no, item_name
+		FROM m_fee_item
+		WHERE 1=1
+		<if test="itemType!=null">
+		  AND item_type=#{itemType}
+		</if>
+		<if test="ifUse!=null">
+		  AND if_use=#{ifUse}
+		</if>
+		<if test="teamNo!=null">
+		  AND team_no=#{teamNo}
+		</if>
+	</select>
+
+	<select id="getMatAssessItemList" resultType="cn.ewsd.cost.model.MFeeItem">
+		SELECT a.item_no, a.item_name, a.ass_ratio, a.award_ratio, a.punish_ratio,
+			   a.ass_cycle, a.out_type, b.prj_no, b.prj_name, a.item_type, a.if_enter,
+			   IFNULL(b.norm_amount,1) norm_amount, b.norm_price, a.up_item
+		FROM m_fee_item a
+		LEFT JOIN m_assess_norm b ON a.item_no=b.item_no AND b.team_no=#{_parameter}
+		WHERE a.if_use='1' AND a.team_no=#{_parameter} AND a.item_type = 'm.itemType.42'
+	</select>
+
+	<select id="getFeeItemList" resultType="cn.ewsd.cost.model.MFeeItem">
+		SELECT fi.*, (SELECT text FROM sys_organization WHERE id=fi.team_no) team_name,
+			   (SELECT text FROM sys_dic_item WHERE value=fi.out_type) out_type_name,
+			   (SELECT text FROM sys_dic_item WHERE value=fi.ass_cycle) ass_cycle_name,
+			   (SELECT text FROM sys_dic_item WHERE value=fi.up_item) up_item_name
+		FROM m_fee_item fi
+		WHERE fi.item_type=#{itemType} AND fi.if_use=#{ifUse} AND fi.mng_dept=#{mngDept}
+		<if test="teamNo!=''">
+		  AND fi.team_no LIKE CONCAT('%', #{teamNo}, '%')
+		</if>
+	</select>
+
+	<insert id="insertFeeItem" parameterType="cn.ewsd.cost.model.MFeeItem">
+		INSERT INTO m_fee_item (`item_no`, `item_name`, `item_type`, `item_unit`, `ass_price`, `ass_ratio`, `award_ratio`,
+								`punish_ratio`, `price_type`, `mng_dept`, `order_no`, `if_use`, `out_type`, `team_no`, `if_enter`,
+								`ass_cycle`, `if_main`, `up_item`, `item_model`,
+								`uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{itemNo}, #{itemName}, #{itemType}, #{itemUnit}, #{assPrice}, #{assRatio}, #{awardRatio},
+				#{punishRatio}, #{priceType}, #{mngDept}, #{orderNo}, #{ifUse}, #{outType}, #{teamNo}, #{ifEnter},
+				#{assCycle}, #{ifMain}, #{upItem}, #{itemModel},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<select id="getFeeItemByItemNo" resultType="cn.ewsd.cost.model.MFeeItem">
+		SELECT * FROM m_fee_item WHERE item_no=#{_parameter}
+	</select>
+
+	<update id="updateFeeItem" parameterType="cn.ewsd.cost.model.MFeeItem">
+		UPDATE m_fee_item
+		<set>
+			<if test="itemName!=null">`item_name`=#{itemName},</if>
+			<if test="itemModel!=null">`item_model`=#{itemModel},</if>
+			<if test="itemUnit!=null">`item_unit`=#{itemUnit},</if>
+			<if test="assPrice!=null">`ass_price`=#{assPrice},</if>
+			<if test="assRatio!=null">`ass_ratio`=#{assRatio},</if>
+			<if test="awardRatio!=null">`award_ratio`=#{awardRatio},</if>
+			<if test="punishRatio!=null">`punish_ratio`=#{punishRatio},</if>
+			<if test="priceType!=null">`price_type`=#{priceType},</if>
+			<if test="outType!=null">`out_type`=#{outType},</if>
+			<if test="ifEnter!=null">`if_enter`=#{ifEnter},</if>
+			<if test="assCycle!=null">`ass_cycle`=#{assCycle},</if>
+			<if test="ifUse!=null">`if_use`=#{ifUse},</if>
+			<if test="orderNo!=null">`order_no`=#{orderNo},</if>
+			<if test="upItem!=null">`up_item`=#{upItem}</if>
+		</set>
+		WHERE item_no=#{itemNo}
+	</update>
+
+	<delete id="deleteFeeItem">
+		DELETE FROM m_fee_item WHERE item_no=#{_parameter}
+	</delete>
+
+	<select id="getTeamItemQuotaItem" resultType="cn.ewsd.cost.model.MFeeItem">
+		SELECT item_no, item_name
+		FROM m_fee_item
+		WHERE team_no=#{teamNo} AND if_use='1' AND mng_dept=#{mngTeam}
+	</select>
+</mapper>

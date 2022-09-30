@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.MRationMapper">
+	<select id="getRationList" resultType="cn.ewsd.cost.model.MRation">
+		SELECT mr.*, (SELECT text FROM sys_dic_item WHERE value=mr.denom) denom_name
+		FROM m_ration mr
+		WHERE 1=1
+		<if test="rationQry!=''">
+		  AND ration_name LIKE CONCAT('%', #{rationQry}, '%')
+		</if>
+		ORDER BY mr.ration_no
+	</select>
+
+	<insert id="insertRation" parameterType="cn.ewsd.cost.model.MRation">
+		INSERT INTO m_ration (`ration_no`, `ration_code`, `ration_name`, `ration_unit`, `is_import`, `res_set`, `denom`, `order_no`, `is_using`,
+							  `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{rationNo}, #{rationCode}, #{rationName}, #{rationUnit}, #{isImport}, #{resSet}, #{denom}, #{orderNo}, #{isUsing},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<select id="getRationByNo" resultType="cn.ewsd.cost.model.MRation">
+		SELECT * FROM m_ration WHERE ration_no=#{_parameter}
+	</select>
+
+	<update id="updateRation" parameterType="cn.ewsd.cost.model.MRation">
+		UPDATE m_ration
+		<set>
+			<if test="rationName!=null">`ration_name`=#{rationName},</if>
+			<if test="rationUnit!=null">`ration_unit`=#{rationUnit},</if>
+			<if test="denom!=null">`denom`=#{denom},</if>
+			<if test="isUsing!=null">`is_using`=#{isUsing},</if>
+		</set>
+		WHERE ration_no=#{rationNo}
+	</update>
+
+	<delete id="deleteRation">
+		DELETE FROM m_ration
+		WHERE ration_no IN
+		<foreach collection="rationNos.split(',')" item="rationNo" open="(" separator="," close=")">
+			#{rationNo}
+		</foreach>
+	</delete>
+
+	<delete id="deleteRationMat">
+		DELETE FROM m_ration_mat
+		WHERE ration_no IN
+		<foreach collection="rationNos.split(',')" item="rationNo" open="(" separator="," close=")">
+			#{rationNo}
+		</foreach>
+	</delete>
+
+	<select id="getRationMatList" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT mr.mat_no, m.mat_code, m.mat_name, m.mat_unit, m.mat_price, m.erp_type, m.type_name
+		FROM m_ration_mat mr
+		LEFT JOIN m_material m ON m.mat_no=mr.mat_no
+		WHERE mr.ration_no=#{rationNo}
+		<if test="matQry!=''">
+			AND (m.mat_code LIKE CONCAT('_', #{matQry}, '%') OR mat_name LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+	</select>
+
+	<select id="getMatForSelect" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT mo.mat_no, mm.mat_code, mm.mat_name, mm.mat_unit, mm.erp_type, mm.type_name
+		FROM m_out mo
+		LEFT JOIN m_material mm ON mo.mat_no=mm.mat_no
+		WHERE mo.data_src IN ('m.dataSrc.3','m.dataSrc.P')
+		  AND mo.draw_step='7202F'
+		  AND NOT EXISTS (SELECT '1' FROM m_ration_mat WHERE mat_no=mo.mat_no)
+		<if test="_parameter!=''">
+		  AND (mm.mat_code LIKE CONCAT('_', #{_parameter}, '%') OR mm.mat_name LIKE CONCAT('%', #{_parameter}, '%'))
+		</if>
+		GROUP BY mo.mat_no, mm.mat_code, mm.mat_name, mm.mat_unit, mm.erp_type, mm.type_name
+		ORDER BY mm.erp_type
+		LIMIT 50
+	</select>
+
+	<delete id="deleteRationMat1">
+		DELETE FROM m_ration_mat
+		WHERE ration_no=#{rationNo}
+		  AND mat_no IN
+		<foreach collection="matNos" item="matNo" open="(" separator="," close=")">
+			#{matNo}
+		</foreach>
+	</delete>
+
+	<insert id="insertRationMat">
+		INSERT INTO m_ration_mat (`ration_no`, `mat_no`)
+		VALUES (#{rationNo}, #{matNo})
+	</insert>
+</mapper>

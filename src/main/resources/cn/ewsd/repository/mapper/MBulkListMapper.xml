@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.repository.mapper.MBulkListMapper">
+    <insert id="insertBulk" parameterType="cn.ewsd.repository.model.MBulkList">
+        INSERT INTO m_bulk_list (`list_id`, `check_no`, `mat_no`, `store_no`, `site_no`, `theory_amount`, `real_amount`, `check_emp`, `reason`,
+                                 `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+        VALUES (#{listId}, #{checkNo}, #{matNo}, #{storeNo}, #{siteNo}, #{theoryAmount}, #{realAmount}, #{checkEmp}, #{reason},
+                #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+    </insert>
+
+    <delete id="deleteBulkByCheckNo">
+        DELETE FROM m_bulk_list WHERE check_no=#{_parameter}
+    </delete>
+
+    <delete id="deleteBulkByListId">
+        DELETE FROM m_bulk_list WHERE list_id=#{_parameter}
+    </delete>
+
+    <select id="getBulkList" resultType="cn.ewsd.repository.model.MBulkList">
+        SELECT a.list_id, a.store_no, a.site_no, a.mat_no, a.theory_amount, m.mat_code, m.mat_name, m.mat_unit, IFNULL(reason, '') reason, b.check_step,
+               m.erp_type, m.type_name, (CASE WHEN IFNULL(a.real_amount, -1)=-1 THEN a.theory_amount ELSE a.real_amount END) real_amount
+        FROM m_bulk_list a
+		LEFT JOIN m_material m ON a.mat_no=m.mat_no
+		LEFT JOIN m_check b ON a.check_no=b.check_no
+		WHERE a.check_no=#{checkNo}
+		<if test="siteNoQry!=''">
+            AND a.site_no=#{siteNoQry}
+        </if>
+        <if test="matNameQry!=''">
+            AND CONCAT(m.mat_name, m.mat_code) LIKE CONCAT('%', #{matNameQry}, '%')
+        </if>
+    </select>
+
+    <update id="updateBulk" parameterType="cn.ewsd.repository.model.MBulkList">
+        UPDATE m_bulk_list
+        <set>
+            <if test="realAmount!=null">real_amount=#{realAmount},</if>
+            <if test="siteNo!=null">site_no=#{siteNo},</if>
+            <if test="reason!=null">reason=#{reason},</if>
+            <if test="checkEmp!=null">check_emp=#{checkEmp}</if>
+        </set>
+        WHERE list_id=#{listId}
+    </update>
+
+    <select id="getBulk" resultType="cn.ewsd.repository.model.MBulkList">
+        SELECT * FROM m_bulk_list WHERE list_id=#{_parameter}
+    </select>
+    
+    <select id="getDiffBulkList" resultType="cn.ewsd.repository.model.MBulkList">
+        SELECT * FROM m_bulk_list WHERE theory_amount!=real_amount AND check_no=#{_parameter}
+    </select>
+
+    <select id="getCheckBulkList" resultType="cn.ewsd.repository.model.MBulkList">
+        SELECT a.check_no, a.list_id, a.site_no, a.mat_no, a.theory_amount, m.mat_code, m.mat_name, m.mat_unit, m.erp_type, m.type_name, IFNULL(reason, '') reason, b.check_step, a.real_amount
+		FROM m_bulk_list a
+		LEFT JOIN m_material m ON a.mat_no=m.mat_no
+		LEFT JOIN m_check b ON a.check_no=b.check_no
+		WHERE a.check_no=#{_parameter} AND b.check_step='72134' AND a.theory_amount!=a.real_amount
+    </select>
+    
+    <select id="getBulkCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) cnt FROM m_bulk_list WHERE check_no=#{_parameter} AND theory_amount!=real_amount
+    </select>
+
+    <select id="getBulkStock" resultType="cn.ewsd.repository.model.MBulkList">
+        SELECT b.*, c.in_amount, c.out_amount, c.stock_amount, c.pack_amount, c.bulk_amount
+		FROM m_bulk_list b
+		LEFT JOIN m_stock c ON b.mat_no=c.mat_no AND b.store_no=c.store_no
+		WHERE b.check_no=#{_parameter} AND b.theory_amount!=b.real_amount
+    </select>
+    
+    <update id="updBulk">
+        UPDATE m_bulk_list SET check_emp=#{checkEmp} WHERE check_no=#{checkNo} AND IFNULL(check_emp, '')=''
+    </update>
+
+    <select id="getInventQryList" resultType="cn.ewsd.repository.model.MBulkList">
+        SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, b.mat_price, b.erp_type, b.type_name, c.user_name
+		FROM m_bulk_list a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN sys_user c ON a.check_emp=c.uuid
+		LEFT JOIN m_check d ON a.check_no=d.check_no
+		WHERE a.check_no=#{_parameter} AND a.theory_amount!=a.real_amount
+		ORDER BY a.site_no ASC
+    </select>
+</mapper>

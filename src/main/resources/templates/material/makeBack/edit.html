@@ -1,0 +1,25 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="askNo" name="askNo">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+    	<div class="topjui-col-sm8">
+			<label class="topjui-form-label">回收预期</label>
+			<div class="topjui-input-block">
+				<input type="text" data-toggle="topjui-datebox" name="needDate" data-options="required:true">
+			</div>
+		</div>
+		<div class="topjui-col-sm8">
+			<label class="topjui-form-label">预计回收单位</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="preTeam" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',loadFilter:function(data){
+					data.unshift({id:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,116 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<div class="topjui-fluid">
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">科目名称</label>
+            <div class="topjui-input-block">
+                <input type="text" name="itemName"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'科目名称',required:true">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">预警基线</label>
+            <div class="topjui-input-block">
+                <input type="text" name="warnLine"
+                       data-toggle="topjui-numberbox"
+                       data-options="prompt:'预警基线必须小于1',min:0,max:1,precision:2">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">考核周期</label>
+            <div class="topjui-input-block">
+                <input type="text" name="assPeriod"
+                       data-toggle="topjui-combobox"
+                       data-options="prompt:'考核周期',
+					    required:true,
+					    prompt:'必填',
+                        panelHeight:190,
+                        url:'/system/dicSet/getDicItemByCode?code=f.khzq',
+                        valueField:'value',
+    				    textField:'text'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">提取方式</label>
+            <div class="topjui-input-block">
+                <input type="text" name="getType"
+                       data-toggle="topjui-combobox"
+                       data-options="prompt:'提取方式',
+					    required:true,
+					    prompt:'必填',
+                        panelHeight:190,
+                        url:'/system/dicSet/getDicItemByCode?code=f.getType',
+                        valueField:'value',
+    				    textField:'text'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">使用分母</label>
+            <div class="topjui-input-block">
+                <input type="text" name="denomType"
+                       data-toggle="topjui-combobox"
+                       data-options="prompt:'使用分母',
+					    required:true,
+					    prompt:'必填',
+                        panelHeight:190,
+                        url:'/system/dicSet/getDicItemByCode?code=f.denomType',
+                        valueField:'value',
+    				    textField:'text'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">关联仓库</label>
+            <div class="topjui-input-block">
+                <input type="text" name="linkStore"
+                       data-toggle="topjui-combobox"
+                       data-options="prompt:'关联仓库',
+                        panelHeight:190,
+                        url:'/cost/fAward/getSysStoreList?storeLevel=r.storeLevel.1',
+                        valueField:'store_no',
+    				    textField:'store_name'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">科目类型</label>
+            <div class="topjui-input-block">
+                <input type="text" name="itemType"
+                       data-toggle="topjui-combobox"
+                       data-options="prompt:'科目类型',
+					    required:true,
+					    prompt:'必填',
+                        panelHeight:190,
+                        url:'/system/dicSet/getDicItemByCode?code=f.itemType',
+                        valueField:'value',
+    				    textField:'text'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">是否启用</label>
+            <div class="topjui-input-block">
+                <input type="text" name="ifOn"
+                       data-toggle="topjui-combobox"
+                       data-options="prompt:'是否启用',
+					    required:true,
+                        panelHeight:190,
+                        url:'/system/dicSet/getDicItemByCode?code=yesOrNo',
+                        valueField:'value',
+    				    textField:'text'">
+            </div>
+        </div>
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">排序编号</label>
+            <div class="topjui-input-block">
+                <input type="text" name="orderNo"
+                       data-toggle="topjui-numberbox"
+                       data-options="prompt:'排序编号'">
+            </div>
+        </div>
+
+    </div>
+</div>

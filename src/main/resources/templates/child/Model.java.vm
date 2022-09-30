@@ -1,0 +1,81 @@
+package ${package}.model;
+
+import java.io.Serializable;
+import java.util.Date;
+import org.apache.commons.lang.builder.ReflectionToStringBuilder;
+import ${basepackage}.common.model.MCoreBase;
+import javax.persistence.Table;
+#if(${hasBigDecimal})
+import java.math.BigDecimal;
+#end
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.format.annotation.DateTimeFormat;
+/**
+ * ${comments}
+ * 
+ * @Author ${author}
+ * @Email ${email}
+ * @Date ${datetime}
+ */
+@Table(name="${tableName}")
+public class ${className} extends MCoreBase{
+	private static final long serialVersionUID = 1L;
+	
+#foreach ($column in $columns)
+	#if(!($column.columnName == "uuid"
+	|| $column.columnName == "creator_id"
+	|| $column.columnName == "creator"
+	|| $column.columnName == "create_time"
+	|| $column.columnName == "creator_org_id"
+	|| $column.columnName == "modifier_id"
+	|| $column.columnName == "modifier"
+	|| $column.columnName == "modify_time"))
+	// $column.comments
+	#if($column.attrType == "Date")
+    @DateTimeFormat(
+        pattern = "yyyy-MM-dd HH:mm:ss"
+    )
+    @JsonFormat(
+        pattern = "yyyy-MM-dd HH:mm:ss",
+        timezone = "GMT+8"
+    )
+    private $column.attrType $column.columnNameCamelCase;
+	#elseif($column.attrType == "Integer")
+    private $column.attrType $column.columnNameCamelCase;
+	#else
+    private $column.attrType $column.columnNameCamelCase;
+	#end
+	#end
+#end
+
+#foreach ($column in $columns)
+	#if(!($column.columnName == "uuid"
+	|| $column.columnName == "creator_id"
+	|| $column.columnName == "creator"
+	|| $column.columnName == "create_time"
+	|| $column.columnName == "creator_org_id"
+	|| $column.columnName == "modifier_id"
+	|| $column.columnName == "modifier"
+	|| $column.columnName == "modify_time"))
+
+	/**
+	 * 设置：${column.comments}
+	 */
+	public void set${column.columnNameFirstUpperCase}($column.attrType $column.columnNameCamelCase) {
+		this.$column.columnNameCamelCase = $column.columnNameCamelCase;
+	}
+
+	/**
+	 * 获取：${column.comments}
+	 */
+	public $column.attrType get${column.columnNameFirstUpperCase}() {
+		return $column.columnNameCamelCase;
+	}
+	#end
+#end
+
+	@Override
+	public String toString() {
+		return  ReflectionToStringBuilder.toString(this);
+	}
+}

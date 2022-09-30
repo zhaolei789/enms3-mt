@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MTeamStockMapper">
+	<select id="getCountByMatNo" resultType="java.lang.Integer">
+		SELECT COUNT(mat_no) FROM m_team_stock WHERE mat_no=#{matNo}
+	</select>
+
+	<update id="updateTeamStock" parameterType="cn.ewsd.material.model.MTeamStock">
+		UPDATE m_team_stock
+		<set>
+			<if test="matAmount!=null">mat_amount=mat_amount+#{matAmount},</if>
+			<if test="useAmount!=null">use_amount=use_amount+#{useAmount}</if>
+		</set>
+		WHERE 1=1
+		<if test="teamNo!=null">
+			AND team_no=#{teamNo}
+		</if>
+		<if test="storeNo!=null">
+			AND store_no=#{storeNo}
+		</if>
+		<if test="matNo!=null">
+			AND mat_no=#{matNo}
+		</if>
+		<if test="matStatus!=null">
+			AND mat_status=#{matStatus}
+		</if>
+	</update>
+
+	<insert id="insertTeamStock" parameterType="cn.ewsd.material.model.MTeamStock">
+		INSERT INTO m_team_stock (`store_no`, `mat_no`, `mat_status`, `team_no`, `mat_amount`, `use_amount`, `site_code`,
+								  `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`
+		) VALUES (#{storeNo}, #{matNo}, #{matStatus}, #{teamNo}, #{matAmount}, #{useAmount}, #{siteCode},
+				  #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime}
+		)
+	</insert>
+
+	<select id="getTeamStock" resultType="cn.ewsd.material.model.MTeamStock">
+		SELECT * FROM m_team_stock
+		WHERE team_no=#{teamNo} AND store_no=#{storeNo} AND mat_no=#{matNo} AND mat_status=#{matStatus}
+	</select>
+	
+	<select id="getTeamNew" resultType="cn.ewsd.material.model.MTeamStock">
+		SELECT SUM(mat_amount) mat_amount, o.text site_code
+		FROM m_team_stock ts
+		LEFT JOIN sys_organization o ON o.id=ts.team_no
+		WHERE ts.mat_no=#{_parameter} AND ts.mat_amount>0
+		GROUP BY ts.team_no
+	</select>
+
+	<select id="getTeamOld" resultType="cn.ewsd.material.model.MTeamStock">
+		SELECT mat_amount, use_amount FROM m_team_stock WHERE mat_no=#{matNo} AND team_no=#{teamNo}
+	</select>
+
+	<select id="getTeamStockList" resultType="cn.ewsd.material.model.MTeamStock">
+		SELECT ts.*, o.text team_name
+		FROM m_team_stock ts
+		LEFT JOIN sys_organization o ON o.id=ts.team_no
+		WHERE ts.mat_no=#{_parameter} AND ts.mat_amount>0
+	</select>
+
+	<select id="getTeamStockQryList" resultType="cn.ewsd.material.model.MTeamStock">
+		SELECT a.mat_no, a.store_no ,ms.store_name, a.team_no, (SELECT text FROM sys_dic_item WHERE value=a.mat_status) mat_status, a.site_code, b.mat_code, b.mat_name, b.mat_unit, b.erp_type, b.type_name,
+        	   SUM(a.mat_amount) mat_amount, SUM(a.use_amount) use_amount, MAX(b.mat_price) mat_price, MAX(b.re_flag) re_flag, SUM(a.mat_amount*b.mat_price) mat_bala,
+        	   (SELECT text FROM sys_organization WHERE id=a.team_no) team_name
+        FROM m_team_stock a
+        LEFT JOIN m_material b ON a.mat_no=b.mat_no
+        LEFT JOIN m_store ms ON a.store_no=ms.store_no
+        WHERE a.mat_amount &gt; 0
+          AND a.team_no IN
+        <foreach collection="userDeptIds.split(',')" item="userDept" open="(" separator="," close=")">
+			#{userDept}
+		</foreach>
+		<if test="teamNoQry!=''">
+		  AND a.team_no=#{teamNoQry}
+		</if>
+		<if test="storeNoQry!=''">
+		  AND a.store_no=#{storeNoQry}
+		</if>
+		<if test="matCodeQry!=''">
+		  AND b.mat_code LIKE CONCAT('_', #{matCodeQry}, '%')
+		</if>
+		<if test="matNameQry!=''">
+		  AND b.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+        GROUP BY a.mat_no, a.store_no, ms.store_name, a.mat_status, a.site_code, a.team_no, b.mat_code, b.mat_name, b.mat_unit, b.erp_type, b.type_name
+	</select>
+
+	<select id="getTeamStockQryMatList" resultType="cn.ewsd.material.model.MTeamStock">
+		SELECT a.team_no, a.store_no, a.mat_amount, b.mat_unit, b.mat_price, a.mat_amount*b.mat_price mat_bala,
+        	   (SELECT store_name FROM m_store WHERE store_no=a.store_no) AS store_name,
+        	   (SELECT text FROM sys_organization WHERE id=a.team_no) team_name
+        FROM m_team_stock a, m_material b
+        WHERE a.mat_no=b.mat_no AND a.mat_no=#{matNo}
+          AND a.team_no IN
+		<foreach collection="userDeptIds.split(',')" item="userDept" open="(" separator="," close=")">
+			#{userDept}
+		</foreach>
+		<if test="storeNo!=''">
+		  AND a.store_no=#{storeNo}
+		</if>
+		<if test="teamNo!=''">
+		  AND a.team_no=#{teamNo}
+		</if>
+        ORDER BY a.mat_amount DESC
+	</select>
+</mapper>

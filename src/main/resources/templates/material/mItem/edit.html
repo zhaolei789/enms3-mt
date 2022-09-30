@@ -1,0 +1,70 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">科目编号</label>
+			<div class="topjui-input-block">
+				<input type="text" name="itemNo" data-toggle="topjui-textbox" data-options="prompt:'',required:true">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">科目名称</label>
+			<div class="topjui-input-block">
+				<input type="text" name="itemName" data-toggle="topjui-textbox" data-options="prompt:'',required:true">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">承包类型</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="payType" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.payType',required:true,loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">承包单位</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="payTeam" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',loadFilter:function(data){
+					data.unshift({id:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">项目用途</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="itemUse" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.itemUse',loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">预警基线</label>
+			<div class="topjui-input-block">
+				<input type="text" name="warnLine" data-toggle="topjui-numberbox" data-options="min:0,max:1,prompt:'',precision:2">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">排序序号</label>
+			<div class="topjui-input-block">
+				<input type="text" name="orderNo" data-toggle="topjui-numberbox" data-options="prompt:''">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">是否启用</label>
+			<div class="topjui-input-block">
+				<select id="cc" data-toggle="topjui-combobox" name="ifOn" data-options="required:true">
+					<option value="1">是</option>
+					<option value="0">否</option>
+				</select>
+			</div>
+		</div>
+    </div>
+</div>

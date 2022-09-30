@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+<!--核减绩效统计-->
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+		<table id="fHjjxtjDg"></table>
+        <!--<table data-toggle="topjui-datagrid"
+               data-options="id:'fHjjxtjDg',
+               singleSelect:true,
+               loadMsg:'正在努力统计数据...',
+               pagination:false,
+               url:'/cost/fTj/getHjjxtj'
+		">
+            <thead>
+            <tr>
+				<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+				<th data-options="field:'id',title:'部门ID',sortable:true"></th>
+				<th data-options="field:'text',title:'部门',sortable:true"></th>
+				<th data-options="field:'all_award',title:'合计金额',sortable:true"></th>
+				<th data-options="field:'aqkh_award',title:'安全考核',sortable:true"></th>
+				<th data-options="field:'clkh_award',title:'环保考核',sortable:true"></th>
+				<th data-options="field:'jdkh_award',title:'运输考核',sortable:true"></th>
+				<th data-options="field:'mzkh_award',title:'材料考核',sortable:true"></th>
+				<th data-options="field:'qykh_award',title:'机电考核',sortable:true"></th>
+				<th data-options="field:'swkh_award',title:'煤质考核',sortable:true"></th>
+				<th data-options="field:'sckh_award',title:'企业考核',sortable:true"></th>
+				<th data-options="field:'zlkh_award',title:'三违考核',sortable:true"></th>
+				<th data-options="field:'tfkh_award',title:'生产考核',sortable:true"></th>
+				<th data-options="field:'hbkh_award',title:'质量考核',sortable:true"></th>
+				<th data-options="field:'yskh_award',title:'通防考核',sortable:true"></th>
+			</tr>
+            </thead>
+        </table>-->
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="fHjjxtjDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'fHjjxtjDg'
+       }" style="display:none">
+	<a href="javascript:void(0)"
+	   data-toggle="topjui-menubutton"
+	   data-options="method:'filter',
+       extend:'#fHjjxtjDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+	<form class="search-box" id="queryForm" name="dataForm" method="post">
+		上报日期:
+		<input type="text" name="query_start" id="query_start"
+			   data-toggle="topjui-datebox"
+			   data-options="prompt:'上报开始',width:120,"
+		>
+		至:
+		<input type="text" name="query_end" id="query_end"
+			   data-toggle="topjui-datebox"
+			   data-options="prompt:'上报截止',width:120,"
+		>
+		<a href="javascript:void(0)" id="query_button"
+		   data-toggle="topjui-menubutton"
+		   data-options="method:'query',
+            iconCls:'fa fa-search',
+            btnCls:'topjui-btn-red',
+            form:{id:'queryForm'},
+            grid:{type:'datagrid','id':'fHjjxtjDg'}">查询</a>
+	</form>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script th:inline="javascript">
+		//页面前置参数
+		var query_start = [[${query_start}]];
+		var query_end = [[${query_end}]];
+
+		$('#fHjjxtjDg').iDatagrid({
+			singleSelect:true,
+			loadMsg:'正在努力统计数据...',
+			pagination:false,
+			url:'/cost/fTj/getHjjxtj',
+			columns:[ [
+				{field:'uuid',title:'',sortable:true,checkbox:true},
+				{field:'id',title:'部门ID',sortable:true},
+				{field:'text',title:'部门',sortable:true},
+				{field:'all_award',title:'合计金额',sortable:true},
+				{field:'aqkh_award',title:'安全考核',sortable:true},
+				{field:'clkh_award',title:'环保考核',sortable:true},
+				{field:'jdkh_award',title:'运输考核',sortable:true},
+				{field:'mzkh_award',title:'材料考核',sortable:true},
+				{field:'qykh_award',title:'机电考核',sortable:true},
+				{field:'swkh_award',title:'煤质考核',sortable:true},
+				{field:'sckh_award',title:'企业考核',sortable:true},
+				{field:'zlkh_award',title:'三违考核',sortable:true},
+				{field:'tfkh_award',title:'生产考核',sortable:true},
+				{field:'hbkh_award',title:'质量考核',sortable:true},
+				{field:'yskh_award',title:'通防考核',sortable:true}
+			] ],
+			onLoadSuccess:function(data){
+				//debugger;
+				var all_award_all = 0;
+				var aqkh_award_all = 0;
+				var clkh_award_all = 0;
+				var jdkh_award_all = 0;
+				var mzkh_award_all = 0;
+				var qykh_award_all = 0;
+				var swkh_award_all = 0;
+				var sckh_award_all = 0;
+				var zlkh_award_all = 0;
+				var tfkh_award_all = 0;
+				var hbkh_award_all = 0;
+				var yskh_award_all = 0;
+				$.each(data.rows, function(i, row){
+					all_award_all += row.all_award;
+					aqkh_award_all += row.aqkh_award;
+					clkh_award_all += row.clkh_award;
+					jdkh_award_all += row.jdkh_award;
+					mzkh_award_all += row.mzkh_award;
+					qykh_award_all += row.qykh_award;
+					swkh_award_all += row.swkh_award;
+					sckh_award_all += row.sckh_award;
+					zlkh_award_all += row.zlkh_award;
+					tfkh_award_all += row.tfkh_award;
+					hbkh_award_all += row.hbkh_award;
+					yskh_award_all += row.yskh_award;
+				})
+
+				$('#fHjjxtjDg').iDatagrid('appendRow',{
+					uuid:'hjjxtj',
+					id: '--',
+					text: '合计',
+					all_award: all_award_all,
+					aqkh_award: aqkh_award_all,
+					clkh_award: clkh_award_all,
+					jdkh_award: jdkh_award_all,
+					mzkh_award: mzkh_award_all,
+					qykh_award: qykh_award_all,
+					swkh_award: swkh_award_all,
+					sckh_award: sckh_award_all,
+					zlkh_award: zlkh_award_all,
+					tfkh_award: tfkh_award_all,
+					hbkh_award: hbkh_award_all,
+					yskh_award: yskh_award_all
+				});
+				$('#query_start').iDatebox('setValue', query_start);
+				$('#query_end').iDatebox('setValue', query_end);
+			}
+		});
+
+		 $(function () {
+		// 	//页面选择框初始赋值
+		// 	// $('#query_start').iCombobox('setValue', query_start);
+		// 	// $('#query_end').iCombobox('setValue', query_end);
+		// 	// $('#fHjjxtjDg').iDatagrid({
+		// 	// 	onLoadSuccess: function(){
+		// 	//
+		// 	// 	}
+		// 	// })
+			 $('#query_button').bind('click', function(){
+				 query_start = $('#query_start').iDatebox('getValue');
+				 query_end = $('#query_end').iDatebox('getValue');
+			 });
+		 })
+	</script>
+</th:block>
+</body>
+</html>

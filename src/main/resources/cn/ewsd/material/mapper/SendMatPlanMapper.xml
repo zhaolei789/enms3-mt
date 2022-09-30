@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.SendMatPlanMapper">
+	<select id="getPlanMonth" resultType="cn.ewsd.material.model.SendMatPlan">
+        SELECT plan_month
+        FROM m_plan
+        WHERE plan_step='7105S'
+        GROUP BY plan_month
+        ORDER BY plan_month DESC
+    </select>
+
+    <select id="getPageSet" resultType="cn.ewsd.material.model.SendMatPlan">
+        SELECT p.*, (p.mat_amount * p.mat_price) mat_bala, m.erp_type, m.type_name, m.mat_code, m.mat_name, m.mat_unit,
+               o.text team_name, di.text plan_type_name, m.mat_unit mat_unit_name, di2.text move_type_name, di3.text item_name
+        FROM m_plan p
+        LEFT JOIN m_material m ON p.mat_no=m.mat_no
+        LEFT JOIN sys_organization o ON p.team_no=o.id
+        LEFT JOIN sys_dic_item di ON di.value=p.plan_type
+        LEFT JOIN sys_dic_item di2 ON di2.value=p.move_type
+        LEFT JOIN sys_dic_item di3 ON di3.value=p.item_type
+        WHERE p.plan_month=#{planMonth} AND p.plan_step='7105S'
+        <if test='planType!=""'> AND p.plan_type=#{planType}</if>
+        <if test='prjNo!=""'> AND p.prj_no=#{prjNo}</if>
+        <if test='matCode!=""'> AND m.mat_code LIKE CONCAT('_' + #{matCode} + '%')</if>
+        <if test='matName!=""'> AND m.mat_name LIKE CONCAT('%' + #{matCode} + '%')</if>
+        <if test='teamNo!=""'> AND p.team_no=#{teamNo}</if>
+        <if test='itemNo!=""'> AND p.item_no=#{itemNo}</if>
+        <if test='centerNo!=""'> AND p.cost_center=#{centerNo}</if>
+    </select>
+</mapper>

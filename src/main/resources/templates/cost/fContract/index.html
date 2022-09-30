@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'fContractDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/cost/fContract/getPageSet'">
+            <thead>
+            <tr>
+				<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+                <!--<th data-options="field:'contractId',title:'合同ID',sortable:true"></th>-->
+				<th data-options="field:'contractNo',title:'合同编号',sortable:true"></th>
+				<th data-options="field:'contractName',title:'合同名称',sortable:true"></th>
+				<!--<th data-options="field:'contractNameJp',title:'简拼',sortable:true"></th>-->
+				<th data-options="field:'bidType',title:'竞标类别',sortable:true"></th>
+				<th data-options="field:'buyType',title:'采办方式',sortable:true"></th>
+				<th data-options="field:'currency',title:'币种',sortable:true"></th>
+				<th data-options="field:'contractBala',title:'合同金额',sortable:true"></th>
+				<th data-options="field:'beginDate',title:'合同开始日',sortable:true"></th>
+				<th data-options="field:'endDate',title:'合同结束日',sortable:true"></th>
+				<th data-options="field:'teamNoName',title:'维护部门',sortable:true"></th>
+				<!--<th data-options="field:'linkId',title:'对应合同',sortable:true"></th>
+				<th data-options="field:'modiInfo',title:'变更内容',sortable:true"></th>
+				<th data-options="field:'teamNo',title:'录入部门',sortable:true"></th>
+				<th data-options="field:'modiDate',title:'录入日期',sortable:true"></th>-->
+			</tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="fContractDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'fContractDg'
+       }" style="display:none">
+		<ewsd:rbac str="fContractAddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#fContractDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'fContractAddDg',
+               href:'/cost/fContract/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/cost/fContract/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="fContractEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#fContractDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'fContractEditDg',
+               href:'/cost/fContract/edit',
+               url:'/cost/fContract/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/cost/fContract/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'fContractDg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/cost/fContract/deleteBatch">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#fContractDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/cost/fContract/deleteBatch'">删除</a>
+		</ewsd:rbac>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#fContractDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#fContractDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+
+    <br />
+    <form id="queryForm" name="dataForm" method="post" style="padding-top: 5px;padding-left: 5px;">
+        名称/简拼:
+        <input type="text" name="query_contractName" id="contractName" data-toggle="topjui-textbox"
+               data-options="id:'contractName',prompt:'名称/简拼',width:135">
+        竞标类别:
+        <input type="text" name="query_bidType"
+               data-toggle="topjui-combobox"
+               data-options="prompt:'竞标类别',
+						prompt:'竞标类别',
+                   		panelHeight:150,
+                   		width:150,
+                   		icons:[{
+                          iconCls:'fa fa-remove',
+                          handler: function(e){
+                              $(e.data.target).combobox('clear');
+                          }
+                        }],
+                   		url:'/system/dicSet/getDicItemByCode?code=f.bidType',
+                   		valueField:'value',
+    					textField:'text'"
+        >
+        采办方式:
+        <input type="text" name="query_buyType"
+               data-toggle="topjui-combobox"
+               data-options="prompt:'采办方式',
+						prompt:'采办方式',
+                   		panelHeight:190,
+                   		width:150,
+                   		icons:[{
+                          iconCls:'fa fa-remove',
+                          handler: function(e){
+                              $(e.data.target).combobox('clear');
+                          }
+                        }],
+                   		url:'/system/dicSet/getDicItemByCode?code=f.buyType',
+                   		valueField:'value',
+    					textField:'text'"
+        >
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'query',
+            iconCls:'fa fa-search',
+            btnCls:'topjui-btn-red',
+            form:{id:'queryForm'},
+            grid:{type:'datagrid','id':'fContractDg'}">查询</a>
+    </form>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

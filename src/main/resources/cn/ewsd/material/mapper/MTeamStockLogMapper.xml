@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MTeamStockLogMapper">
+	<insert id="insertTeamStockLog" parameterType="cn.ewsd.material.model.MTeamStockLog">
+		INSERT INTO m_team_stock_log (`log_id`, `store_no`, `team_no`, `mat_no`, `occ_date`, `occ_amount`, `occ_bala`, `inout_flag`, `data_src`, `bill_no`, `mat_status`,
+								  	  `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`
+		) VALUES (#{logId}, #{storeNo}, #{teamNo}, #{matNo}, #{occDate}, #{occAmount}, #{occBala}, #{inoutFlag}, #{dataSrc}, #{billNo}, #{matStatus},
+				  #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime}
+		)
+	</insert>
+</mapper>

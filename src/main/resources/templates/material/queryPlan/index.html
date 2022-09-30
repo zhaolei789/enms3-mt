@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <form id="queryPlanForm" style="height: 60%">
+        <div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+            <table id="queryPlanDg"></table>
+        </div>
+    </form>
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <div data-toggle="topjui-layout" data-options="fit:true">
+            <div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'40%'">
+                <table id="logDg"></table>
+            </div>
+            <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+                <table id="historyDg"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="queryPlanDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'queryPlanDg'
+       }" style="display:none">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">成本中心：</label>
+    <input data-toggle="topjui-combobox" name="teamQry" id="teamQry" value="" data-options="valueField:'id',textField:'text',url:'/system/sysUserQryOrg/getDeptSet',width:'150px'">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">工程项目：</label>
+    <input data-toggle="topjui-combobox" name="prjStatusQry" id="prjStatusQry" value="m.prjStatus.0" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=m.prjStatus',width:'80px'">
+    <input data-toggle="topjui-combobox" name="prjNoQry" id="prjNoQry" value="" data-options="valueField:'prjNo',textField:'prjName',url:'/material/mPrj/getPrjList',width:'199px'">
+
+    <label class="topjui-form-label" style="width:70px;float:none;display:inline-block">预留：</label>
+    <input data-toggle="topjui-combobox" id="reseFlagQry" value="ALL" name="reseFlagQry" data-options="width:'150px',valueField:'value',textField:'text',data:[
+    				{value:'ALL', text:'--全部--'},
+    				{value:'ONLY', text:'已生成'},
+    				{value:'NO', text:'未生成'}
+    			]">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">提报单号：</label>
+    <input id="reserveQry" data-toggle="topjui-textbox" name="reserveQry" data-options="width:'150px'" value="">
+
+    <label class="topjui-form-label" style="width:70px;float:none;display:inline-block">金额：</label>
+    <input data-toggle="topjui-combobox" id="balaFlag" value="d" name="balaFlag" data-options="width:'75px',valueField:'value',textField:'text',data:[
+    				{value:'d', text:'大于'},
+    				{value:'x', text:'小于'}
+    			]">
+    <input id="matBalaQry" data-toggle="topjui-textbox" name="matBalaQry" data-options="width:'100px'" value="">
+
+    <a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+    </a>
+
+    <br />
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">费用来源：</label>
+    <input data-toggle="topjui-combobox" name="itemNoQry" id="itemNoQry" value="" data-options="valueField:'itemNo',textField:'itemName',url:'/material/mItem/getMatItemSet',width:'150px'">
+
+    <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">月份区间：</label>
+    <select id="yearQry" data-toggle="topjui-combobox" name="yearQry" data-options="width:80" >
+        <option th:each="i:${#numbers.sequence(2015, endYear)}" th:value="${i}" th:text="${i}" th:selected="${i==currentYear}"></option>
+    </select>
+    <select id="mon1Qry" data-toggle="topjui-combobox" name="mon1Qry" data-options="width:80" >
+        <option value="">&nbsp;</option>
+        <option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}" th:selected="${i==currentMonth}"></option>
+    </select>
+    <label class="topjui-form-label" style="width:20px;float:none;display:inline-block">至</label>
+    <select id="mon2Qry" data-toggle="topjui-combobox" name="mon2Qry" data-options="width:80" >
+        <option value="">&nbsp;</option>
+        <option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}"></option>
+    </select>
+
+    <label class="topjui-form-label" style="width:70px;float:none;display:inline-block">编码：</label>
+    <input id="matCodeQry" data-toggle="topjui-textbox" name="matCodeQry" data-options="width:'150px'" value="">
+
+    <label class="topjui-form-label" style="width:70px;float:none;display:inline-block">描述：</label>
+    <input id="matNameQry" data-toggle="topjui-textbox" name="matNameQry" data-options="width:'150px'" value="">
+
+    <label class="topjui-form-label" style="width:70px;float:none;display:inline-block">步骤：</label>
+    <input data-toggle="topjui-combobox" name="planStepQry" id="planStepQry" value="7105F" data-options="valueField:'processNo',textField:'processName',url:'/system/sysAuditProcess/getListByFuuid?fuuid=9C5389EA53854E12A8031ACF5AB9A3DB',width:'180px'">
+
+    <a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+    </a>
+
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        $(document).ready(function(){
+            var planModi = [[${planModi}]];
+            var planModiOk = [[${planModiOk}]];
+
+            $('#teamQry').iCombobox({
+                loadFilter:function(data){
+                    data.unshift({id:'', text:'--全部--'});
+                    return data
+                },
+                onChange:function(newValue, oldValue){
+                    $('#prjNoQry').iCombobox('reload', '/material/mPrj/getPrjList?teamNo='+newValue+'&prjStatus='+$('#prjStatusQry').iCombobox('getValue'));
+                }
+            })
+
+            $('#prjStatusQry').iCombobox({
+                loadFilter:function(data){
+                    data.unshift({value:'', text:'--全部--'});
+                    return data
+                },
+                onChange:function(newValue, oldValue){
+                    $('#prjNoQry').iCombobox('reload', '/material/mPrj/getPrjList?prjStatus='+newValue+'&teamNo='+$('#teamQry').iCombobox('getValue'));
+                }
+            })
+
+            $('#prjNoQry').iCombobox({
+                queryParams:{
+                    teamNo:$('#teamQry').iCombobox('getValue'),
+                    prjStatus:$('#prjStatusQry').iCombobox('getValue')
+                },
+                loadFilter:function(data){
+                    data.unshift({prjNo:'', prjName:'--全部--'});
+                    return data
+                }
+            })
+
+            $('#itemNoQry').iCombobox({
+                loadFilter:function(data){
+                    data.unshift({itemNo:'', itemName:'--全部--'});
+                    return data
+                }
+            })
+
+            $('#planStepQry').iCombobox({
+                loadFilter:function(data){
+                    data.unshift({processNo:'', processName:'--全部--'});
+                    return data
+                }
+            })
+
+            $('#queryPlanDg').iDatagrid({
+                queryParams:{
+                    teamQry:$('#teamQry').iCombobox('getValue'),
+                    prjStatusQry:$('#prjStatusQry').iCombobox('getValue'),
+                    prjNoQry:$('#prjNoQry').iCombobox('getValue'),
+                    itemNoQry:$('#itemNoQry').iCombobox('getValue'),
+                    yearQry:$('#yearQry').iCombobox('getValue'),
+                    mon1Qry:$('#mon1Qry').iCombobox('getValue'),
+                    mon2Qry:$('#mon2Qry').iCombobox('getValue'),
+                    planStepQry:$('#planStepQry').iCombobox('getValue'),
+                    matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+                    matNameQry:$('#matNameQry').iTextbox('getValue'),
+                    reserveQry:$('#reserveQry').iTextbox('getValue'),
+                    matBalaQry:$('#matBalaQry').iTextbox('getValue'),
+                    balaFlag:$('#balaFlag').iCombobox('getValue'),
+                    reseFlagQry:$('#reseFlagQry').iCombobox('getValue')
+                },
+                singleSelect:true,
+                selectOnCheck:false,
+                checkOnSelect:false,
+                url:'/material/queryPlan/getPageSet',
+                columns:[ [
+                    {
+                        field:'costCenter',title:'成本中心',sortable:false, formatter:function(value, row, index){
+                            return value+' '+row.centerName;
+                        }
+                    },{
+                        field:'planStep',title:'审批',sortable:false, formatter:function(value, row, index){
+                            var backCount = parseInt(row.count);
+                            var planStep = row.planStep;
+                            var checkNo = row.checkNo;
+                            var deptName = planStep == '71052' ? row.znksTeamName : planStep == '71057' ? row.offerDeptName : '';
+                            if(backCount > 0 && planStep == '71050'){
+                                return row.direct;
+                            }else{
+                                return planStep=='71052' || planStep=='71057' ? deptName : row.planStepName;
+                            }
+                        }
+                    },{
+                        field:'erpType',title:'材料分类',sortable:false
+                    },{
+                        field:'matCode',title:'物料编码',sortable:false
+                    },{
+                        field:'matName',title:'物料描述',sortable:false
+                    },{
+                        field:'matAddr',title:'库存地',sortable:false, formatter:function(value, row, index){
+                            if(planModi && row.planStep!='7105X'){
+                                return '<a style="font-weight: bold;color: #00a0e9;cursor: pointer" planModi="'+ row.planNo +'">'+ value +'</a>'
+                            }else{
+                                return value
+                            }
+                        }
+                    },{
+                        field:'matUnitName',title:'单位',sortable:false
+                    },{
+                        field:'matAmount',title:'计划数',sortable:false, align:'right', formatter:function(value, row, index){
+                            var planStep = row.planStep;
+                            if(planModiOk && (planStep=='7105F' || planStep=='7105O' || planStep=='7105Q')){
+                                return '<a style="font-weight: bold;color: #00a0e9;cursor: pointer" planModiOk="'+ row.planNo +'">'+ value +'</a>'
+                            }else{
+                                return value;
+                            }
+                        }
+                    },{
+                        field:'matPrice',title:'价格',sortable:false, align:'right'
+                    },{
+                        field:'matBala',title:'金额',sortable:false, align:'right'
+                    },{
+                        field:'itemName',title:'费用来源',sortable:false
+                    },{
+                        field:'reserveNo',title:'提报单号',sortable:false
+                    },{
+                        field:'usableAmount',title:'可领数',sortable:false, align:'right'
+                    },{
+                        field:'prjName',title:'工程名称',sortable:false
+                    },{
+                        field:'matUse',title:'用途及备注',sortable:false
+                    },{
+                        field:'planMonth',title:'计划月份',sortable:false, formatter:function(value, row, index){
+                            return value.substring(0, 4) + '-' + value.substring(4, 6);
+                        }
+                    },{
+                        field:'planSrcName',title:'计划类型',sortable:false
+                    },{
+                        field:'ifUrgent',title:'是否应急',sortable:false, formatter:function(value, row, index){
+                            if(value=='1'){
+                                return '是'
+                            }else{
+                                return '否'
+                            }
+                        }
+                    },{
+                        field:'trackingNo',title:'需求跟踪',sortable:false
+                    },{
+                        field:'planDate',title:'提交日期',sortable:false, formatter:function(value, row, index){
+                            var time = row.planTime;
+                            return value.substring(0, 4) + "-" + value.substring(4, 6) + '-' + value.substring(6, 8) + ' ' + time.substring(0, 2) + ':' + time.substring(2, 4) + ":" + time.substring(4, 6)
+                        }
+                    },{
+                        field:'factoryName',title:'工厂',sortable:false
+                    },{
+                        field:'moveTypeName',title:'科目类型',sortable:false
+                    },{
+                        field:'wbsElement',title:'WBS元素',sortable:false
+                    },{
+                        field:'typeName',title:'分类描述',sortable:false
+                    }
+                ] ],
+                onClickRow:function(index, row){
+                    reloadLog(row.checkNo)
+                    reloadHis(row.matNo)
+                },
+                onLoadSuccess:function(data){
+                    $('[planModi]').click(function(){
+                        var planNo = $(this).attr('planModi');
+                        $('#'+planNo).iDialog('openDialog', {
+                            id:planNo,
+                            title:'调整计划',
+                            href:'/material/queryPlan/planModi?planNo='+planNo,
+                            buttons:[{
+                                text:'关闭',
+                                iconClass:'fa fa-close',
+                                btnCls:'topjui-btn-red',
+                                handler:function(){
+                                    $('#'+planNo).iDialog('close');
+                                }
+                            },{
+                                text:'确认调整',
+                                iconClass:'fa fa-save',
+                                btnCls:'topjui-btn-blue',
+                                handler:function(){
+                                    $('#'+planNo).iForm('submit', {
+                                        url:'/material/queryPlan/savePlanModi',
+                                        success:function(data){
+                                            data = $.parseJSON(data);
+                                            if(data.statusCode == 200){
+                                                $.iMessager.show({
+                                                    title:data.title,
+                                                    msg:data.message
+                                                })
+                                                $('#'+planNo).iDialog('close');
+                                            } else {
+                                                $.iMessager.alert({
+                                                    icon:'messager-error',
+                                                    title:data.title,
+                                                    msg:data.message
+                                                });
+                                            }
+                                        }
+                                    });
+                                }
+                            }]
+                        });
+                    });
+                    $('[planModiOk]').click(function(){
+                        var planNo = $(this).attr('planModiOk');
+                        $('#ok'+planNo).iDialog('openDialog', {
+                            id:'ok'+planNo,
+                            title:'调整计划',
+                            href:'/material/queryPlan/planModiOk?planNo='+planNo,
+                            buttons:[{
+                                text:'关闭',
+                                iconClass:'fa fa-close',
+                                btnCls:'topjui-btn-red',
+                                handler:function(){
+                                    $('#ok'+planNo).iDialog('close');
+                                }
+                            },{
+                                text:'确认调整',
+                                iconClass:'fa fa-save',
+                                btnCls:'topjui-btn-blue',
+                                handler:function(){
+                                    $('#ok'+planNo).iForm('submit', {
+                                        url:'/material/queryPlan/savePlanModiOk',
+                                        success:function(data){
+                                            data = $.parseJSON(data);
+                                            if(data.statusCode == 200){
+                                                $.iMessager.show({
+                                                    title:data.title,
+                                                    msg:data.message
+                                                })
+                                                $('#ok'+planNo).iDialog('close');
+                                            } else {
+                                                $.iMessager.alert({
+                                                    icon:'messager-error',
+                                                    title:data.title,
+                                                    msg:data.message
+                                                });
+                                            }
+                                        }
+                                    });
+                                }
+                            },{
+                                text:'关闭计划',
+                                iconClass:'fa fa-trash',
+                                btnCls:'topjui-btn-red',
+                                handler:function(){
+                                    $('#ok'+planNo).iForm('submit', {
+                                        url:'/material/queryPlan/savePlanModiOk?isDelete=true',
+                                        success:function(data){
+                                            data = $.parseJSON(data);
+                                            if(data.statusCode == 200){
+                                                $.iMessager.show({
+                                                    title:data.title,
+                                                    msg:data.message
+                                                })
+                                                $('#ok'+planNo).iDialog('close');
+                                            } else {
+                                                $.iMessager.alert({
+                                                    icon:'messager-error',
+                                                    title:data.title,
+                                                    msg:data.message
+                                                });
+                                            }
+                                        }
+                                    });
+                                }
+                            }]
+                        });
+                    });
+                }
+            });
+
+            $('#searchBtn').click(function(){
+                reloadDetail();
+            });
+
+            $('#logDg').iDatagrid({
+                singleSelect:true,
+                selectOnCheck:false,
+                checkOnSelect:false,
+                pagination:false,
+                url:'/system/tCheck/getCheck',
+                columns:[ [
+                    {
+                        field:'stepCodeName',title:'步骤',sortable:false
+                    },{
+                        field:'userName',title:'审批人员',sortable:false
+                    },{
+                        field:'occDate',title:'审批时间',sortable:false, formatter:function(value, row, index){
+                            var time = row.occTime;
+                            return value.substring(0, 4) + "-" + value.substring(4, 6) + '-' + value.substring(6, 8) + ' ' + time.substring(0, 2) + ':' + time.substring(2, 4) + ":" + time.substring(4, 6)
+                        }
+                    },{
+                        field:'direct',title:'审批方向',sortable:false, formatter:function(value, row, index){
+                            if(value=='sys.checkDirect.0'){
+                                return '---'
+                            }else{
+                                return row.directName
+                            }
+                        }
+                    },{
+                        field:'idea',title:'审批意见',sortable:false
+                    },{
+                        field:'logInfo',title:'备注',sortable:false
+                    }
+                ] ]
+            });
+
+            $('#historyDg').iDatagrid({
+                singleSelect:true,
+                selectOnCheck:false,
+                checkOnSelect:false,
+                url:'/material/queryPlan/getMatHis',
+                columns:[ [
+                    {
+                        field:'planMonth',title:'计划月份',sortable:false, formatter:function(value, row, index){
+                            return value.substring(0, 4) + '-' + value.substring(4, 6)
+                        }
+                    },{
+                        field:'costCenter',title:'成本中心',sortable:false
+                    },{
+                        field:'centerName',title:'成本名称',sortable:false
+                    },{
+                        field:'teamName',title:'编制单位',sortable:false
+                    },{
+                        field:'planStepName',title:'审批',sortable:false
+                    },{
+                        field:'matAddr',title:'库存地',sortable:false
+                    },{
+                        field:'matUnitName',title:'单位',sortable:false
+                    },{
+                        field:'matAmount',title:'计划数',sortable:false
+                    },{
+                        field:'matPrice',title:'价格',sortable:false
+                    },{
+                        field:'matBala',title:'金额',sortable:false
+                    },{
+                        field:'reserveNo',title:'预留号',sortable:false
+                    },{
+                        field:'usableAmount',title:'可领数',sortable:false
+                    },{
+                        field:'prjName',title:'工程名称',sortable:false
+                    },{
+                        field:'matUse',title:'用途备注',sortable:false
+                    },{
+                        field:'planNo',title:'单据编号',sortable:false
+                    },{
+                        field:'planType',title:'类型',sortable:false
+                    },{
+                        field:'itemName',title:'科目',sortable:false
+                    },{
+                        field:'planDate',title:'提交日期',sortable:false, formatter:function(value, row, index){
+                            var time = row.planTime;
+                            return value.substring(0, 4) + "-" + value.substring(4, 6) + '-' + value.substring(6, 8) + ' ' + time.substring(0, 2) + ':' + time.substring(2, 4) + ":" + time.substring(4, 6)
+                        }
+                    },{
+                        field:'factoryNo',title:'工厂',sortable:false
+                    },{
+                        field:'moveTypeName',title:'移动类型',sortable:false
+                    },{
+                        field:'wbsElement',title:'WBS元素',sortable:false
+                    }
+                ] ]
+            });
+
+            $('#downloadBtn').click(function(){
+                $('#queryPlanForm').iForm('submit', {
+                    url:'/material/queryPlan/download',
+                    success:function(data){
+
+                    }
+                });
+            });
+        });
+
+        function reloadDetail(){
+            $('#queryPlanDg').iDatagrid('reload',{
+                teamQry:$('#teamQry').iCombobox('getValue'),
+                prjStatusQry:$('#prjStatusQry').iCombobox('getValue'),
+                prjNoQry:$('#prjNoQry').iCombobox('getValue'),
+                itemNoQry:$('#itemNoQry').iCombobox('getValue'),
+                yearQry:$('#yearQry').iCombobox('getValue'),
+                mon1Qry:$('#mon1Qry').iCombobox('getValue'),
+                mon2Qry:$('#mon2Qry').iCombobox('getValue'),
+                planStepQry:$('#planStepQry').iCombobox('getValue'),
+                matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+                matNameQry:$('#matNameQry').iTextbox('getValue'),
+                reserveQry:$('#reserveQry').iTextbox('getValue'),
+                matBalaQry:$('#matBalaQry').iTextbox('getValue'),
+                balaFlag:$('#balaFlag').iCombobox('getValue'),
+                reseFlagQry:$('#reseFlagQry').iCombobox('getValue')
+            })
+        }
+
+        function reloadLog(checkNo){
+            $('#logDg').iDatagrid('reload', {
+                checkNo:checkNo
+            })
+        }
+
+        function reloadHis(matNo){
+            $('#historyDg').iDatagrid('reload', {
+                matNo:matNo
+            })
+        }
+    </script>
+</th:block>
+</body>
+</html>

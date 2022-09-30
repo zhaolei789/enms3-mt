@@ -1,0 +1,647 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.repository.mapper.MOutMapper">
+	<update id="updateOfferTeam" parameterType="cn.ewsd.repository.model.MOut">
+		UPDATE m_out SET offer_team=#{offerTeam} WHERE mat_no=#{matNo} AND data_src=#{dataSrc} AND draw_step NOT IN ('72020','7202F')
+	</update>
+
+	<select id="getCountByMatNo" resultType="java.lang.Integer">
+		SELECT COUNT(mat_no) FROM m_out WHERE mat_no=#{matNo}
+	</select>
+
+	<select id="getPurchaseCircleConsumption" resultType="java.lang.Double">
+		SELECT IFNULL(SUM(out_amount), 0) FROM m_out
+		WHERE draw_step='7202F' AND mat_no=#{matNo} AND store_no=#{storeNo} AND out_date&gt;=#{beginDate} AND out_date&lt;=#{endDate}
+	</select>
+	
+	<select id="getApplySet" resultType="cn.ewsd.repository.model.MOut">
+		SELECT plan_no, SUM(chk_amount) chk_amount
+		FROM m_out
+		WHERE draw_step NOT IN ('7202F', '7202X') AND plan_no IN
+		<foreach collection="_parameter.split(',')" item="planNo" open="(" separator="," close=")">
+			#{planNo}
+		</foreach>
+		GROUP BY plan_no
+	</select>
+
+	<select id="getZaiTuByPlanNo" resultType="cn.ewsd.repository.model.MOut">
+		SELECT IFNULL(SUM(out_amount), 0) out_amount
+		FROM m_out
+		WHERE plan_no=#{_parameter} AND draw_step!='7202F' AND draw_step!='7202X'
+	</select>
+
+	<select id="getYiLingByPlanNo" resultType="cn.ewsd.repository.model.MOut">
+		SELECT IFNULL(SUM(out_amount), 0) out_amount
+		FROM m_out
+		WHERE plan_no=#{_parameter} AND draw_step='7202F'
+	</select>
+
+	<delete id="deleteByPlanNo">
+		DELETE FROM m_out WHERE plan_no=#{_parameter}
+	</delete>
+
+	<select id="getOutApplyList" resultType="cn.ewsd.repository.model.MOut">
+		SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, b.erp_type, b.type_name, (a.chk_amount*a.mat_price) as bala,
+			   (SELECT store_name FROM m_store WHERE store_no=a.store_no) as store_name, CASE WHEN a.draw_step='72023' THEN IFNULL(o2.text, '待关联科室') ELSE ap.process_name END draw_step_name,
+			   (SELECT prj_name FROM m_prj WHERE prj_no=a.prj_no) as prj_name, o.text plan_team_name, o1.text offer_team_name
+		FROM m_out a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN sys_audit_process ap ON ap.process_no=a.draw_step
+		LEFT JOIN sys_organization o ON o.id=a.plan_team
+		LEFT JOIN sys_organization o1 ON o1.id=a.offer_team
+		LEFT JOIN (SELECT MAX(team_no) team_no, mat_no FROM m_team_mat GROUP BY mat_no) tm ON tm.mat_no=a.mat_no
+		LEFT JOIN sys_organization o2 ON o2.id=tm.team_no
+		WHERE a.data_src='m.dataSrc.3'
+		  AND a.apply_date&gt;=#{date1Qry} AND a.apply_date&lt;=#{date2Qry}
+		  AND a.plan_team=#{teamNo}
+		<if test="storeNoQry!=''">
+			AND a.store_no=#{storeNoQry}
+		</if>
+		<if test="addrQry!=''">
+			AND a.use_addr LIKE CONCAT('%', #{addrQry}, '%')
+			AND EXISTS (SELECT '1' FROM m_prj WHERE prj_no=a.prj_no AND prj_name LIKE CONCAT('%', #{addrQry}, '%'))
+		</if>
+		<if test="appTypeQry!=''">
+			AND a.urgent_level=#{appTypeQry}
+		</if>
+		<if test="matCodeQry!=''">
+			AND b.mat_code LIKE CONCAT('_', #{matCodeQry}, '%')
+		</if>
+		<if test="matNameQry!=''">
+			AND b.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+		<if test="planStepQry!=''">
+			AND a.draw_step=#{planStepQry}
+		</if>
+		ORDER BY a.reserve2 DESC
+	</select>
+
+	<select id="getChkAmountByPlanNo" resultType="java.lang.Double">
+		SELECT IFNULL(SUM(chk_amount), 0)
+		FROM m_out
+		WHERE draw_step NOT IN ('7202X', '72020', '7202F') AND plan_no=#{_parameter}
+	</select>
+
+	<insert id="insertOut" parameterType="cn.ewsd.repository.model.MOut">
+		INSERT INTO m_out (`draw_no`, `out_type`, `data_src`, `plan_no`, `plan_team`, `mat_no`, `apply_amount`, `apply_date`, `apply_time`, `apply_emp`,
+						   `urgent_level`, `store_addr`, `if_send`, `use_addr`, `apply_info`, `chk_amount`, `agree_date`, `agree_time`, `agree_emp`,
+						   `abc_type`, `draw_step`, `check_no`, `out_amount`, `pick_date`, `pick_time`, `draw_emp`, `team_no`, `store_no`, `out_date`,
+						   `out_time`, `pay_team`, `f_month`, `item_no`, `plan_price`, `mat_price`, `price1`, `price2`, `prj_no`, `reserve_no`, `link_no`,
+						   `offer_team`, `reserve1`, `reserve2`, `reserve3`,
+						   `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{drawNo}, #{outType}, #{dataSrc}, #{planNo}, #{planTeam}, #{matNo}, #{applyAmount}, #{applyDate}, #{applyTime}, #{applyEmp},
+				#{urgentLevel}, #{storeAddr}, #{ifSend}, #{useAddr}, #{applyInfo}, #{chkAmount}, #{agreeDate}, #{agreeTime}, #{agreeEmp},
+				#{abcType}, #{drawStep}, #{checkNo}, #{outAmount}, #{pickDate}, #{pickTime}, #{drawEmp}, #{teamNo}, #{storeNo}, #{outDate},
+				#{outTime}, #{payTeam}, #{fMonth}, #{itemNo}, #{planPrice}, #{matPrice}, #{price1}, #{price2}, #{prjNo}, #{reserveNo}, #{linkNo},
+				#{offerTeam}, #{reserve1}, #{reserve2}, #{reserve3},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<select id="getDrawCheckIndex" resultType="cn.ewsd.repository.model.MOut">
+		SELECT a.plan_team, LEFT(a.apply_date, 6) AS apply_month, a.draw_step, COUNT(*) cnt, SUM(a.chk_amount*a.mat_price) bala, ap.process_name draw_step_name, o.text plan_team_name
+		FROM m_out a
+		LEFT JOIN sys_audit_process ap ON ap.process_no=a.draw_step
+		LEFT JOIN sys_organization o ON o.id=a.plan_team
+		WHERE a.data_src='m.dataSrc.3'
+		  AND a.draw_step NOT IN ('72020', '7202F','7202X')
+		  AND a.draw_step IN (SELECT process_no
+		  					  FROM sys_audit_process
+		  					  WHERE uuid IN (SELECT step_uuid
+		  					  				 FROM sys_user_step
+		  					  				 WHERE user_id=#{userId} AND process_uuid='D0180DF7E4324DD091306C26F2207145'))
+		  AND ((a.draw_step='72021' AND a.team_no=#{userTeam})
+			   OR
+			   (a.draw_step='7202T' AND EXISTS (SELECT '1' FROM sys_user_store WHERE store_no=a.store_no AND user_id=#{userId}))
+			   OR
+			   (a.draw_step='72023' AND EXISTS (SELECT '1' FROM m_team_mat WHERE mat_no=a.mat_no AND team_no=#{userTeam}))
+			   OR
+			   a.draw_step='72024'
+			   OR
+			   a.draw_step='72022')
+		GROUP BY a.plan_team, LEFT(a.apply_date,6), a.draw_step, ap.process_name, o.text
+	</select>
+
+	<select id="getDrawPendingRecords" resultType="cn.ewsd.repository.model.MOut">
+		SELECT COUNT(*) cnt
+		FROM m_out a
+		WHERE a.data_src='m.dataSrc.3'
+		  AND a.draw_step NOT IN ('72020', '7202F','7202X')
+		  AND a.draw_step IN (SELECT process_no
+		  					  FROM sys_audit_process
+		  					  WHERE uuid IN (SELECT step_uuid
+		  					  				 FROM sys_user_step
+		  					  				 WHERE user_id=#{userId} AND process_uuid='D0180DF7E4324DD091306C26F2207145'))
+		  AND ((a.draw_step='72021' AND a.team_no=#{userTeam})
+			   OR
+			   (a.draw_step='7202T' AND EXISTS (SELECT '1' FROM sys_user_store WHERE store_no=a.store_no AND user_id=#{userId}))
+			   OR
+			   (a.draw_step='72023' AND EXISTS (SELECT '1' FROM m_team_mat WHERE mat_no=a.mat_no AND team_no=#{userTeam}))
+			   OR
+			   a.draw_step='72024'
+			   OR
+			   a.draw_step='72022')
+	</select>
+
+	<select id="getDrawCheckList" resultType="cn.ewsd.repository.model.MOut">
+		SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, b.erp_type, b.type_name, mt.team_amount,
+		       (a.chk_amount*a.mat_price) AS mat_bala, CONCAT(a.apply_date, ' ', a.apply_time) apply_dt,
+			   (SELECT prj_name FROM m_prj WHERE prj_no=a.prj_no) AS prj_name, b.pack_scale, o.text plan_team_name,
+			   (SELECT store_name FROM m_store WHERE store_no=a.store_no) AS store_name, avg.avg_amount, st.site_code
+		FROM m_out a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN sys_organization o ON o.id=a.plan_team
+		LEFT JOIN (SELECT mat_no, store_no, site_code
+				   FROM m_stock
+				   WHERE store_no IN (SELECT store_no FROM m_store WHERE store_level='r.storeLevel.1')) st ON st.mat_no=a.mat_no AND st.store_no=a.store_no
+		LEFT JOIN (SELECT mat_no, SUM(out_amount) / TIMESTAMPDIFF(DAY,'2019-05-17 00:00:00',DATE_FORMAT(NOW(), '%Y-%m-%d %H:%i:%S')) * 30 avg_amount
+		 		   FROM m_out
+		 		   WHERE draw_step='7202F' AND plan_team=#{teamNo}
+		 		   GROUP BY mat_no) avg ON avg.mat_no=a.mat_no
+		LEFT JOIN (SELECT mat_no, SUM(mat_amount) team_amount
+				   FROM m_team_stock
+				   WHERE team_no=#{teamNo}
+				   GROUP BY mat_no) mt ON a.mat_no=mt.mat_no
+		WHERE a.data_src='m.dataSrc.3' AND a.draw_step=#{drawStep} AND a.plan_team=#{teamNo}
+		  AND LEFT(a.apply_date, 6)=#{applyDate}
+		  AND a.apply_date&gt;=#{date1Qry} AND a.apply_date&lt;=#{date2Qry}
+		<if test="drawStep=='7202T'">
+			AND EXISTS (SELECT '1' FROM sys_user_store WHERE store_no=a.store_no AND user_id=#{userNo})
+		</if>
+		<if test="drawNoQry!=''">
+			AND a.reserve2 LIKE CONCAT('%', #{drawNoQry}, '%')
+		</if>
+		<if test="storeNoQry!=''">
+			AND a.store_no=#{storeNoQry}
+		</if>
+		<if test="matQry!=''">
+			AND (b.mat_code LIKE CONCAT('_', #{matQry}, '%') OR b.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+		<if test="typeQry!=''">
+			AND (b.erp_type LIKE CONCAT(#{typeQry}, '%') OR b.type_name LIKE CONCAT('%', #{typeQry}, '%'))
+		</if>
+		<if test="drawStep=='72023'">
+			AND EXISTS (SELECT '1' FROM m_team_mat WHERE mat_no=a.mat_no AND team_no=#{userTeam})
+		</if>
+	</select>
+
+	<select id="getRoadAmount" resultType="java.lang.Double">
+		SELECT IFNULL(SUM(chk_amount), 0) AS amount
+		FROM m_out
+		WHERE mat_no=#{matNo} AND data_src='m.dataSrc.3' AND store_no=#{storeNo}
+		AND draw_step NOT IN ('72020', '7202F', '7202X')
+	</select>
+
+	<select id="getOutByDrawNo" resultType="cn.ewsd.repository.model.MOut">
+		SELECT o.*, p.prj_type1
+		FROM m_out o
+		LEFT JOIN m_prj p ON p.prj_no=o.prj_no
+		WHERE o.draw_no=#{_parameter}
+	</select>
+
+	<update id="updateOut" parameterType="cn.ewsd.repository.model.MOut">
+		UPDATE m_out
+		<set>
+			<if test="drawStep!=null">`draw_step`=#{drawStep},</if>
+			<if test="chkAmount!=null">`chk_amount`=#{chkAmount},</if>
+			<if test="teamNo!=null">`team_no`=#{teamNo},</if>
+			<if test="storeNo!=null">`store_no`=#{storeNo},</if>
+			<if test="agreeEmp!=null">`agree_emp`=#{agreeEmp},</if>
+			<if test="agreeDate!=null">`agree_date`=#{agreeDate},</if>
+			<if test="agreeTime!=null">`agree_time`=#{agreeTime},</if>
+			<if test="reserveNo!=null">`reserve_no`=#{reserveNo},</if>
+			<if test="outAmount!=null">`out_amount`=#{outAmount},</if>
+			<if test="drawEmp!=null">`draw_emp`=#{drawEmp},</if>
+			<if test="outDate!=null">`out_date`=#{outDate},</if>
+			<if test="outTime!=null">`out_time`=#{outTime},</if>
+			<if test="fMonth!=null">`f_month`=#{fMonth},</if>
+			<if test="payTeam!=null">`pay_team`=#{payTeam},</if>
+		</set>
+		WHERE draw_no=#{drawNo}
+	</update>
+
+	<select id="getOccurBala" resultType="java.lang.Double">
+		SELECT IFNULL(ROUND(SUM(out_amount*mat_price), 2), 0) occur_bala
+		FROM m_out
+		WHERE NOT EXISTS (SELECT '1' FROM m_plan WHERE plan_no=m_out.plan_no AND if_urgent='1')
+		  AND pay_team=#{payTeam} AND data_src='m.dataSrc.3' AND draw_step='7202F'
+		<if test="prjNo!=null">
+			AND prj_no=#{prjNo}
+		</if>
+		<if test="itemNo!=null">
+			AND item_no=#{itemNo}
+		</if>
+		<if test="fMonth!=null">
+			AND f_month=#{fMonth}
+		</if>
+	</select>
+
+	<select id="getDrawList" resultType="cn.ewsd.repository.model.MOut">
+		SELECT CASE WHEN a.draw_step='7202F' THEN a.out_date ELSE a.apply_date END occ_date,
+	    	   CASE WHEN a.draw_step='7202F' THEN a.out_amount ELSE a.chk_amount END amount, a.mat_price,
+	    	   CASE WHEN a.draw_step='7202F' THEN (a.out_amount*a.mat_price) ELSE (a.chk_amount*a.mat_price) END bala,
+	    	   (SELECT item_name FROM m_item WHERE item_no=a.item_no) item_name, a.draw_step,
+	    	   (SELECT prj_name FROM m_prj WHERE prj_no=a.prj_no) prj_name, ap.process_name draw_step_name
+	    FROM m_out a
+	    INNER JOIN m_prj b ON a.prj_no=b.prj_no
+	    INNER JOIN m_material c ON a.mat_no=c.mat_no
+	    LEFT JOIN sys_audit_process ap ON ap.process_no=a.draw_step
+	    WHERE a.plan_team=#{teamNo} AND a.data_src='m.dataSrc.3'
+	      AND a.draw_step!='7202X' AND a.mat_no IN (#{newMatNo}, #{oldMatNo})
+	    ORDER BY a.out_date DESC
+	</select>
+	
+	<select id="getApplyStepList" resultType="cn.ewsd.repository.model.MOut">
+		SELECT COUNT(*) count, a.draw_step, a.plan_team
+		FROM m_out a
+		WHERE a.plan_team IN
+		<foreach collection="deptIds.split(',')" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		AND a.apply_date &gt;= #{date1Qry} AND a.apply_date &lt;= #{date2Qry}
+		GROUP BY a.plan_team,a.draw_step
+	</select>
+
+	<select id="getApplyStepTeam" resultType="cn.ewsd.repository.model.MOut">
+		SELECT b.plan_team, o.text plan_team_name
+		FROM (SELECT COUNT(*) count, a.draw_step, a.plan_team
+			  FROM m_out a
+			  WHERE a.plan_team IN
+			  <foreach collection="deptIds.split(',')" item="id" open="(" separator="," close=")">
+				#{id}
+			  </foreach>
+			  AND a.apply_date &gt;= #{date1Qry} AND a.apply_date &lt;= #{date2Qry}
+			  GROUP BY a.plan_team,a.draw_step) b
+		LEFT JOIN sys_organization o ON o.id=b.plan_team
+		GROUP BY b.plan_team, o.text
+	</select>
+
+	<select id="getApplyStepDetail" resultType="cn.ewsd.repository.model.MOut">
+		SELECT a.draw_no, a.plan_no, a.check_no, a.team_no, a.apply_date, a.draw_step, b.erp_type, b.type_name, b.mat_code,
+			   b.mat_name, b.mat_unit, a.apply_amount, a.chk_amount, a.out_amount, b.mat_price, (a.out_amount*b.mat_price) mat_bala,
+			   a.apply_info, c.item_no, c.remark, o.text team_name
+		FROM m_out a
+		INNER JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN m_plan c ON a.plan_no=c.plan_no
+		LEFT JOIN sys_organization o ON o.id=a.team_no
+		WHERE a.plan_team=#{teamNo}
+		  AND a.apply_date &gt;= #{date1Qry} AND a.apply_date &lt;= #{date2Qry}
+		<if test="drawStep!=''">
+			AND a.draw_step = #{drawStep}
+		</if>
+		<if test="itemNo!=''">
+			AND c.item_no = #{itemNo}
+		</if>
+		<if test="planTypeQry!=''">
+			AND c.plan_type = #{planTypeQry}
+		</if>
+		<if test="ifRole">
+			AND EXISTS (SELECT 1 FROM m_item WHERE item_no=a.item_no AND pay_team=#{userTeam})
+		</if>
+		<if test="matQry!=''">
+			AND CONCAT(b.mat_code, b.mat_name) LIKE CONCAT('%', #{matQry}, '%')
+		</if>
+	</select>
+
+	<select id="getOutDrawPageSet" resultType="cn.ewsd.repository.model.MOut">
+		SELECT a.draw_no, (SELECT text FROM sys_organization WHERE id=a.plan_team) plan_team_name, a.out_date, m.erp_type, m.type_name, m.mat_code, m.mat_name, a.check_no, a.if_send, pp.wbs_element,
+			   a.chk_amount, a.apply_date, a.out_amount, a.mat_price, a.out_amount*a.mat_price bala, (SELECT text FROM sys_dic_item WHERE value=a.urgent_level) urgent_level, (SELECT text FROM sys_organization WHERE id=a.team_no) team_name,
+			   a.team_no, a.use_addr, (SELECT store_name FROM m_store WHERE store_no=a.store_no) store_name, a.draw_step, a.item_no, a.apply_info, a.apply_amount, a.mat_no, a.pick_date, a.pick_time,
+			   CASE WHEN a.check_no=0 THEN a.out_date ELSE a.agree_date END agree_date, a.reserve2, a.reserve_no,
+			   CASE WHEN a.check_no=0 THEN a.out_time ELSE a.agree_time END agree_time, (SELECT prj_name FROM m_prj WHERE prj_no=a.prj_no) prj_name, (SELECT item_name FROM m_item WHERE item_no=a.item_no) item_name,
+			   CASE WHEN a.draw_step='72023' THEN IFNULL((SELECT text FROM sys_organization WHERE id=tm.team_no), '待关联科室') ELSE (SELECT process_name FROM sys_audit_process WHERE process_no=a.draw_step) END draw_step_name,
+			   CASE WHEN a.check_no=0 THEN (SELECT user_name FROM sys_user WHERE uuid=a.apply_emp) ELSE (SELECT user_name FROM sys_user WHERE uuid=a.agree_emp) END emp_name, pp.plan_month, m.mat_unit
+		FROM m_out a
+		LEFT JOIN m_material m ON m.mat_no=a.mat_no
+		LEFT JOIN m_plan pp ON a.plan_no=pp.plan_no
+		LEFT JOIN (SELECT MAX(team_no) team_no, mat_no FROM m_team_mat GROUP BY mat_no) tm ON tm.mat_no=a.mat_no
+		WHERE CASE WHEN a.draw_step='7202F' THEN a.out_date ELSE a.apply_date END &gt;= #{date1Qry}
+		  AND CASE WHEN a.draw_step='7202F' THEN a.out_date ELSE a.apply_date END &lt;= #{date2Qry}
+		  AND a.data_src IN ('m.dataSrc.3', 'm.dataSrc.P')
+		  AND a.out_type!='r.outStockType.5'
+		  AND NOT EXISTS (SELECT '1' FROM m_in_back WHERE a.draw_no=init_bill)
+		<if test="newOldQry!=''">
+			AND a.data_src=#{newOldQry}
+		</if>
+		<if test="teamNoQry!=''">
+			AND a.team_no=#{teamNoQry}
+		</if>
+		<if test="stepQry!=''">
+			AND a.draw_step=#{stepQry}
+		</if>
+		<if test="itemQry!=''">
+			AND a.item_no=#{itemQry}
+		</if>
+		<if test="urgentQry!=''">
+			AND a.out_type=#{urgentQry}
+		</if>
+		<if test="drawNoQry!=''">
+			AND a.reserve2=#{drawNoQry}
+		</if>
+		<if test="storeNoQry!=''">
+			AND a.store_no=#{storeNoQry}
+		</if>
+		<if test="erpTypeQry!=''">
+			AND m.erp_type LIKE CONCAT(#{erpTypeQry}, '%')
+		</if>
+		<if test="matCodeQry!=''">
+			AND m.mat_code LIKE CONCAT('_', #{matCodeQry}, '%')
+		</if>
+		<if test="matNameQry!=''">
+			AND m.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+		  AND (a.plan_team IN
+		<foreach collection="deptIds.split(',')" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		   OR EXISTS (SELECT '1' FROM sys_user_store WHERE user_id=#{userId} AND store_no=a.store_no))
+	</select>
+	
+	<select id="getKeyAnalyBalaTop20" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT mo.mat_no, mm.mat_code, mm.mat_name, mm.mat_unit, mm.erp_type, mm.type_name, SUM(mo.out_amount*mo.mat_price) bala
+		FROM m_out mo
+		LEFT JOIN m_material mm ON mo.mat_no=mm.mat_no
+		WHERE mo.data_src IN ('m.dataSrc.3', 'm.dataSrc.P') AND mo.draw_step='7202F' AND mm.new_old='X'
+		AND mo.out_date&gt;=#{date1Qry} AND mo.out_date&lt;=#{date2Qry}
+		GROUP BY mo.mat_no, mm.mat_code, mm.mat_name, mm.mat_unit ,mm.erp_type, mm.type_name
+		ORDER BY SUM(mo.out_amount*mo.mat_price) DESC
+		LIMIT 20
+	</select>
+	
+	<select id="getKeyAnalyPriceTop20" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT mo.mat_no, mm.mat_code, mm.mat_name, mm.mat_unit, mm.erp_type, mm.type_name, MAX(mo.mat_price) bala
+		FROM m_out mo
+		LEFT JOIN m_material mm ON mo.mat_no=mm.mat_no
+		WHERE mo.data_src IN ('m.dataSrc.3', 'm.dataSrc.P') AND mo.draw_step='7202F' AND mm.new_old='X'
+		AND mo.out_date&gt;=#{date1Qry} AND mo.out_date&lt;=#{date2Qry}
+		GROUP BY mo.mat_no, mm.mat_code, mm.mat_name, mm.mat_unit ,mm.erp_type, mm.type_name
+		ORDER BY MAX(mo.mat_price) DESC
+		LIMIT 20
+	</select>
+	
+	<select id="getKeyAnalyAmountTop20" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT mo.mat_no, mm.mat_code, mm.mat_name, mm.mat_unit, mm.erp_type, mm.type_name, SUM(mo.out_amount) bala
+		FROM m_out mo
+		LEFT JOIN m_material mm ON mo.mat_no=mm.mat_no
+		WHERE mo.data_src IN ('m.dataSrc.3', 'm.dataSrc.P') AND mo.draw_step='7202F' AND mm.new_old='X'
+		AND mo.out_date&gt;=#{date1Qry} AND mo.out_date&lt;=#{date2Qry}
+		GROUP BY mo.mat_no, mm.mat_code, mm.mat_name, mm.mat_unit ,mm.erp_type, mm.type_name
+		ORDER BY SUM(mo.out_amount) DESC
+		LIMIT 20
+	</select>
+
+	<select id="getStockOutDetail" resultType="cn.ewsd.repository.model.MOut">
+		SELECT a.*, (a.mat_price*a.out_amount) bala, (SELECT store_name FROM m_store WHERE store_no=a.store_no) store_name,
+			   CASE WHEN a.data_src='m.dataSrc.5' THEN '盘点记录' ELSE (SELECT user_name FROM sys_user WHERE uuid=a.agree_emp) END emp_name,
+			   (SELECT user_name FROM sys_user WHERE uuid=a.draw_emp) draw_emp_name, o.text team_name
+		FROM m_out a
+		LEFT JOIN sys_organization o ON o.id=a.team_no
+		WHERE a.mat_no=#{matNo} AND a.out_date&gt;=#{date1Qry} AND a.out_date&lt;=#{date2Qry} AND a.draw_step='7202F'
+		<if test="storeNoQry!=''">
+			AND a.store_no=#{storeNoQry}
+		</if>
+		<if test="!ifPower">
+			AND a.store_no!='1S'
+		</if>
+		ORDER BY a.out_date DESC
+	</select>
+
+	<select id="getOldApplyDetail" resultType="cn.ewsd.repository.model.MOut">
+		SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, st.store_name, CASE WHEN a.draw_step='72023' THEN o.text ELSE ap.process_name END draw_step_name,
+			   ((CASE WHEN a.out_amount=0 THEN a.chk_amount ELSE a.out_amount END) * a.mat_price) mat_bala,
+			   ((CASE WHEN a.out_amount=0 THEN a.chk_amount ELSE a.out_amount END) * a.price1) fix_bala
+		FROM m_out a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN m_store st ON a.store_no=st.store_no
+		LEFT JOIN sys_audit_process ap ON ap.process_no=a.draw_step
+		LEFT JOIN sys_organization o ON o.id=a.offer_team
+		WHERE a.apply_date&gt;=#{date1Qry} AND a.apply_date&lt;=#{date2Qry}
+		  AND a.data_src='m.dataSrc.P'
+		  AND a.plan_team = #{userTeam}
+		<if test="matQry!=''">
+			AND (b.mat_code LIKE CONCAT('%', #{matQry}, '%') OR b.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+		ORDER BY a.draw_no DESC
+	</select>
+
+	<select id="getOldOutChkList" resultType="cn.ewsd.repository.model.MOut">
+		SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, (a.chk_amount*a.mat_price) mat_bala, CASE WHEN a.draw_step='72023' THEN o1.text ELSE ap.process_name END draw_step_name,
+			   (SELECT store_name FROM m_store WHERE store_no=a.store_no) as store_name, o.text team_name, s.stock_amount
+		FROM m_out a
+		INNER JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN sys_audit_process ap ON ap.process_no=a.draw_step
+		LEFT JOIN sys_organization o ON o.id=a.team_no
+		LEFT JOIN sys_organization o1 ON o1.id=a.offer_team
+		LEFT JOIN m_stock s ON s.mat_no=a.mat_no AND s.store_no=a.store_no
+		WHERE a.data_src='m.dataSrc.P'
+		  AND a.draw_step NOT IN ('72020','7202F')
+		  AND a.draw_step IN (SELECT process_no
+		  					  FROM sys_audit_process
+		  					  WHERE uuid IN (SELECT step_uuid
+		  					  				 FROM sys_user_step
+		  					  				 WHERE user_id=#{userId} AND process_uuid='D0180DF7E4324DD091306C26F2207145'))
+		  AND
+			(a.draw_step='72022'
+			 OR
+			 a.draw_step='72021' AND a.team_no=#{userTeam}
+			 OR
+			 a.draw_step='72023' AND a.offer_team=#{userTeam}
+			 OR
+			 a.draw_step='7202T' AND EXISTS (SELECT '1' FROM sys_user_store WHERE store_no=a.store_no AND user_id=#{userId})
+			)
+		<if test="teamNoQry!=''">
+			AND a.team_no=#{teamNoQry}
+		</if>
+	</select>
+
+	<select id="getDrawApplyPrint" resultType="cn.ewsd.repository.model.MOut">
+		SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, b.erp_type, b.type_name, (a.chk_amount*a.mat_price) chk_bala,
+        	   (SELECT store_name FROM m_store WHERE store_no=a.store_no) store_name, o.text team_name,
+        	   (SELECT item_name FROM m_item WHERE item_no=a.item_no) item_name, ms.site_code,
+        	   (a.apply_amount*a.mat_price) as plan_bala,(a.out_amount*a.mat_price) out_bala, p.prj_name
+        FROM m_out a
+        LEFT JOIN m_material b ON a.mat_no=b.mat_no
+        LEFT JOIN m_stock ms ON a.store_no=ms.store_no AND a.mat_no=ms.mat_no
+		LEFT JOIN sys_organization o ON o.id=a.team_no
+		LEFT JOIN m_prj p ON p.prj_no=a.prj_no
+        WHERE a.draw_no IN
+        <foreach collection="drawNos.split(',')" item="drawNo" open="(" separator="," close=")">
+			#{drawNo}
+		</foreach>
+		ORDER BY a.reserve2 DESC
+	</select>
+	
+	<select id="getOldMatEditOut" resultType="cn.ewsd.repository.model.MOut">
+		SELECT a.draw_no, a.mat_no, a.team_no, CAST((a.out_amount*b.old_rate) as SIGNED) amount, b.old_rate, a.out_date
+		FROM m_out a
+		INNER JOIN m_type_mat b ON a.mat_no=b.mat_no AND b.type_code='m.TypeCode.10'
+		WHERE NOT EXISTS (SELECT '1' FROM m_hand_in WHERE store_no='' AND link_no=a.draw_no)
+	</select>
+	
+	<select id="getOutStatQryList" resultType="cn.ewsd.repository.model.MOut">
+		SELECT db.team_no, db.store_no, SUM(IFNULL(db.out_amount * db.mat_price, 0)) bala
+		FROM m_out db
+		LEFT JOIN m_material m ON m.mat_no=db.mat_no
+		WHERE db.out_date&gt;=#{beginDateQry} AND db.out_date&lt;=#{endDateQry}
+		  AND IFNULL(db.store_no,'')!='' AND db.draw_step='7202F'
+		  AND db.data_src IN ('m.dataSrc.3', 'm.dataSrc.P')
+		<if test="matCodeQry!=''">
+			AND m.mat_code LIKE CONCAT('_', #{matCodeQry}, '%')
+		</if>
+		<if test="matNameQry!=''">
+			AND m.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+		GROUP BY db.team_no, db.store_no
+	</select>
+
+	<select id="getOutStatQryTeam" resultType="cn.ewsd.repository.model.MOut">
+		SELECT IFNULL(db.team_no, '') team_no, IFNULL(o.text, '') team_name
+		FROM (SELECT db.team_no, db.store_no, SUM(IFNULL(db.out_amount * db.mat_price, 0)) bala
+			  FROM m_out db
+			  LEFT JOIN m_material m ON m.mat_no=db.mat_no
+			  WHERE db.out_date&gt;=#{beginDateQry} AND db.out_date&lt;=#{endDateQry}
+				AND IFNULL(db.store_no,'')!='' AND db.draw_step='7202F'
+				AND db.data_src IN ('m.dataSrc.3', 'm.dataSrc.P')
+		<if test="matCodeQry!=''">
+				AND m.mat_code LIKE CONCAT('_', #{matCodeQry}, '%')
+		</if>
+		<if test="matNameQry!=''">
+				AND m.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+			  GROUP BY db.team_no, db.store_no) db
+		LEFT JOIN sys_organization o ON o.id=db.team_no
+		GROUP BY db.team_no, o.text
+		ORDER BY db.team_no
+	</select>
+
+	<select id="getOutStatQryItem" resultType="cn.ewsd.repository.model.MOut">
+		SELECT ms.store_no, ms.store_name
+		FROM m_store ms
+		INNER JOIN (SELECT db.team_no, db.store_no, SUM(IFNULL(db.out_amount * db.mat_price, 0)) bala
+					FROM m_out db
+					LEFT JOIN m_material m ON m.mat_no=db.mat_no
+					WHERE db.out_date&gt;=#{beginDateQry} AND db.out_date&lt;=#{endDateQry}
+					  AND IFNULL(db.store_no,'')!='' AND db.draw_step='7202F'
+					  AND db.data_src IN ('m.dataSrc.3', 'm.dataSrc.P')
+		<if test="matCodeQry!=''">
+					  AND m.mat_code LIKE CONCAT('_', #{matCodeQry}, '%')
+		</if>
+		<if test="matNameQry!=''">
+					  AND m.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+					GROUP BY db.team_no, db.store_no) a ON ms.store_no=a.store_no
+		GROUP BY ms.store_no, ms.store_name
+	</select>
+
+	<select id="getOutStatQryDetail" resultType="cn.ewsd.repository.model.MOut">
+		SELECT db.store_no, s.store_name, m.mat_code, m.mat_name, m.erp_type, m.type_name, m.mat_unit, di1.text out_type, db.apply_info,
+			   SUM(db.out_amount) out_amount, db.mat_price, db.out_date, SUM(db.out_amount)*db.mat_price bala, e.user_name emp_name
+		FROM m_out db
+		LEFT JOIN m_material m ON db.mat_no=m.mat_no
+		LEFT JOIN m_store s ON s.store_no=db.store_no
+		LEFT JOIN sys_dic_item di1 ON di1.value=db.out_type
+		LEFT JOIN sys_user e ON (CASE WHEN IFNULL(db.draw_emp, '')='' THEN db.agree_emp ELSE db.draw_emp END)=e.uuid
+		WHERE db.team_no=#{teamNo} AND db.out_date&gt;=#{date1Qry} AND db.out_date&lt;=#{date2Qry}
+		  AND db.data_src IN ('m.dataSrc.3', 'm.dataSrc.P')
+		  AND db.draw_step='7202F'
+		<if test="matCodeQry!=''">
+			AND m.mat_code LIKE CONCAT('_', #{matCodeQry}, '%')
+		</if>
+		<if test="matNameQry!=''">
+			AND m.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+		GROUP BY db.store_no, s.store_name, m.mat_code, m.mat_name, m.mat_unit, m.erp_type, m.type_name, db.out_type, db.mat_price, db.out_date, e.user_name, db.apply_info
+		ORDER BY db.store_no
+	</select>
+
+	<select id="getOldOutQryList" resultType="cn.ewsd.repository.model.MOut">
+		SELECT a.*, b.mat_code, b.mat_unit, b.mat_name, ct.text as center_name, ct.dept_code as center_no, b.fix_price,
+			   (a.mat_price*a.out_amount) AS mat_bala, (b.fix_price*a.out_amount) AS fix_bala, b.fix_content,
+			   (SELECT store_name FROM m_store WHERE store_no=a.store_no) store_name,
+			   (SELECT IFNULL(text, '待关联科室') FROM sys_organization WHERE a.offer_team=id) znks_name,
+			   (SELECT process_name FROM sys_audit_process WHERE process_no=a.draw_step) draw_step_name
+		FROM m_out a
+		LEFT JOIN m_material b ON a.mat_no = b.mat_no
+		LEFT JOIN sys_organization ct ON a.team_no=ct.id
+		WHERE (a.team_no IN
+		<foreach collection="userDeptIds.split(',')" item="userDept" open="(" separator="," close=")">
+			#{userDept}
+		</foreach>
+		 	   OR a.offer_team=#{userTeam}) AND a.data_src='m.dataSrc.P'
+		<if test="teamNoQry!=''">
+		  AND a.team_no=#{teamNoQry}
+		</if>
+		<if test="typeQry!=''">
+		  AND a.out_type=#{typeQry}
+		</if>
+		<if test="stepQry!=''">
+		  AND a.draw_step=#{stepQry}
+		</if>
+		<if test="outTeamQry!=''">
+		  AND a.offer_team=#{outTeamQry}
+		</if>
+		<if test="date1Qry!=''">
+		  AND a.apply_date &gt;= #{date1Qry}
+		</if>
+		<if test="date2Qry!=''">
+		  AND a.apply_date &lt;= #{date2Qry}
+		</if>
+		<if test="storeQry!=''">
+		  AND a.store_no=#{storeQry}
+		</if>
+		<if test="matQry!=''">
+		  AND (b.mat_code LIKE CONCAT(#{matQry}, '%') OR b.mat_code LIKE CONCAT('_', #{matQry}, '%') OR b.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+	</select>
+
+	<select id="getRationAnalOutList" resultType="cn.ewsd.cost.model.MRation">
+		SELECT rm.ration_no, LEFT(mo.f_month,4) occ_year,
+			   CASE WHEN mr.denom='m.denom.3'
+			   THEN (CASE WHEN IFNULL(wo.dig, 0)=0 THEN 0 ELSE (SUM(mo.out_amount) / wo.dig) END)
+			   ELSE (CASE WHEN IFNULL(wo.out1 ,0)=0 THEN 0 ELSE (SUM(mo.out_amount) / wo.out1) END)
+			   END amount,
+			   CASE WHEN mr.denom='m.denom.3'
+			   THEN (CASE WHEN IFNULL(wo.dig, 0)=0 THEN 0 ELSE (SUM(mo.out_amount * mo.mat_price) / wo.dig) END)
+			   ELSE (CASE WHEN IFNULL(wo.out1, 0)=0 THEN 0 ELSE (SUM(mo.out_amount * mo.mat_price) / wo.out1) END)
+			   END bala,
+			   CASE WHEN mr.denom!='m.denom.3'
+			   THEN (CASE WHEN IFNULL(wo.raw,0)=0 THEN 0 ELSE (SUM(mo.out_amount) / wo.raw) END)
+			   ELSE 0 END raw_amount,
+			   CASE WHEN mr.denom!='m.denom.3'
+			   THEN (CASE WHEN IFNULL(wo.raw, 0)=0 THEN 0 ELSE (SUM(mo.out_amount * mo.mat_price) / wo.raw) END)
+			   ELSE 0 END raw_bala
+		FROM m_out mo
+		INNER JOIN m_ration_mat rm ON mo.mat_no=rm.mat_no
+		INNER JOIN m_ration mr ON rm.ration_no=mr.ration_no
+		LEFT JOIN (SELECT LEFT(work_month, 4) occ_year, SUM(occ_saleout/10000) out1, SUM(plan_dig) dig, SUM(occ_rawout/10000) raw
+			  	   FROM m_work
+			  	   WHERE team_no=18
+			  	   GROUP BY LEFT(work_month, 4)) wo ON LEFT(mo.f_month,4)=wo.occ_year
+		WHERE mo.data_src IN ('m.dataSrc.3', 'm.dataSrc.P') AND mo.draw_step='7202F'
+		GROUP BY rm.ration_no, LEFT(mo.f_month,4), wo.out1, wo.dig, wo.raw, mr.denom
+	</select>
+
+	<select id="getPeriodWarnRecords" resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM (SELECT d.bill_no, (d.bill_amount - IFNULL(d.out_amount,0)) amount,
+					 m.mat_code, m.mat_name, m.mat_unit, m.erp_type, m.type_name,d.set_price,
+					 ((d.bill_amount - IFNULL(d.out_amount,0))*d.set_price) as bala,d.bill_date,
+					 ep.center_no
+			  FROM m_in d
+			  LEFT JOIN m_material m ON d.mat_no=m.mat_no
+			  LEFT JOIN m_ep_plan ep ON d.reserve_no=ep.ep_id
+		      WHERE d.data_src = 'm.dataSrc.1' AND d.in_step='7201F'
+		        AND NOT EXISTS (SELECT '1' FROM m_in_back WHERE init_bill=d.bill_no)  AND d.in_type!='r.inBillType.3'
+				AND (IFNULL(m.qa_period,0)>0
+			    AND (d.bill_amount - IFNULL(d.out_amount,0))>0
+			    AND DATE_FORMAT(DATE_SUB(STR_TO_DATE(d.reserve4, '%Y%m%d'), INTERVAL -IFNULL(m.qa_period, 0) day), '%Y%m%d') &lt;= #{_parameter})
+		) a
+	</select>
+	
+	<select id="getStockWarnRecords" resultType="java.lang.Integer">
+		SELECT count(*)
+		FROM m_stock a
+		LEFT JOIN m_safe_stock b ON a.mat_no=b.mat_no AND a.store_no=b.store_no
+		WHERE b.red_warn>0 AND b.red_warn>a.stock_amount AND a.stock_amount>0
+	</select>
+</mapper>

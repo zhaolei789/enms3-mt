@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.TopicBaseMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.system.model.TopicBase" id="TopicBaseMap">
+        <!--<result property="uuid" column="uuid"/>-->
+        <!--<result property="creatorId" column="creatorId"/>-->
+        <!--<result property="creator" column="creator"/>-->
+        <!--<result property="createTime" column="createTime"/>-->
+        <!--<result property="modifierId" column="modifierId"/>-->
+        <!--<result property="modifier" column="modifier"/>-->
+        <!--<result property="modifyTime" column="modifyTime"/>-->
+        <!--<result property="moduleUuid" column="moduleUuid"/>-->
+        <!--<result property="title" column="title"/>-->
+        <!--<result property="categoryId" column="categoryId"/>-->
+        <!--<result property="lastReply" column="lastReply"/>-->
+        <!--<result property="replyCount" column="replyCount"/>-->
+        <!--<result property="ipAddress" column="ipAddress"/>-->
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator
+		  ,  	  	     			 create_time
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 module_uuid
+		  ,  	  	     			 title
+		  ,  	  	     			 category_id
+		  ,  	  	     			 last_reply
+		  ,  	  	     			 reply_count
+		  ,  	  	     			 ip_address
+		  ,                          status
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.TopicBase">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_topic_base
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.system.model.TopicBase">
+		select  <include refid="Base_Column_List" />  from sys_topic_base where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.system.model.TopicBase">
+		select  <include refid="Base_Column_List" />  from sys_topic_base
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_topic_base
+	</select>
+	<select id="getDetails" resultType="java.util.HashMap">
+		SELECT * FROM sys_topic_base,sys_topic_document WHERE sys_topic_base.uuid = #{uuid} AND sys_topic_base.uuid = sys_topic_document.topic_uuid
+	</select>
+	<select id="getChildIds" parameterType="map" statementType="CALLABLE" resultType="java.lang.String">
+      {
+            call p_get_child_ids(
+                #{p1,mode=IN,jdbcType=NUMERIC},
+                #{p2,mode=IN,jdbcType=NUMERIC},
+                #{p3,mode=OUT,jdbcType=VARCHAR}
+            )
+        }
+
+	</select>
+	<select id="getLatestOaTopicByCategoryId" resultType="cn.ewsd.system.model.TopicBase">
+		SELECT * FROM sys_topic_base WHERE category_id = #{arg0} order by create_time desc limit #{arg1}
+	</select>
+	<select id="getoaTopicStatus" resultType="cn.ewsd.system.model.TopicBase">
+		SELECT * FROM sys_topic_base WHERE status = #{arg0}
+	</select>
+	<!--<select id="getoaTopics" resultType="cn.ewsd.system.model.OaCategory">-->
+		<!--SELECT * FROM oa_category WHERE type='topic' AND levelId !=1-->
+	<!--</select>-->
+
+	<insert id="executeSave" parameterType="cn.ewsd.system.model.TopicBase">
+		insert into sys_topic_base
+		(
+			`uuid`, 
+			`creator_id`,
+			`creator`, 
+			`create_time`,
+			`modifier-id`,
+			`modifier`, 
+			`modify_time`,
+			`module_uuid`,
+			`title`, 
+			`category_id`,
+			`last_reply`,
+			`reply_count`,
+			`ip_address`
+		)
+		values
+		(
+			#{uuid}, 
+			#{creator_id},
+			#{creator}, 
+			#{create_time},
+			#{modifier-id},
+			#{modifier}, 
+			#{modify_time},
+			#{module_uuid},
+			#{title}, 
+			#{category_id},
+			#{last_reply},
+			#{reply_count},
+			#{ip_address}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.system.model.TopicBase">
+		update sys_topic_base
+		<set>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="modifier-id != null">`modifier-id` = #{modifier-id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}, </if>
+			<if test="module_uuid != null">`module_uuid` = #{module_uuid}, </if>
+			<if test="title != null">`title` = #{title}, </if>
+			<if test="category_id != null">`category_id` = #{category_id}, </if>
+			<if test="last_reply != null">`last_reply` = #{last_reply}, </if>
+			<if test="reply_count != null">`reply_count` = #{reply_count}, </if>
+			<if test="ip_address != null">`ip_address` = #{ip_address}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from sys_topic_base where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from sys_topic_base where uuid in
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

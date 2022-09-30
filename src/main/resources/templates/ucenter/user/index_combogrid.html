@@ -1,0 +1,212 @@
+
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'west',title:'',split:true,border:false,width:'20%',iconCls:'fa fa-sitemap',headerCls:'border_right',bodyCls:'border_right'">
+        <!-- treegrid表格 -->
+        <table data-toggle="topjui-treegrid"
+               data-options="id:'orgnizationDatagrid',
+			   idField:'id',
+			   treeField:'text',
+			   url:'${ctx}/ucenter/organization/getListByCodeSetIdAndLevelId?codeSetId=A&levelId=1',
+			   expandUrl:'${ctx}/ucenter/organization/getListByPid?pid={id}',
+			   childGrid:{
+			   	   param:'codeSetId:codeSetId,id:id',
+                   grid:[
+                       {type:'datagrid',id:'userDatagrid'},
+                   ]
+			   }">
+            <thead>
+            <tr>
+                <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                <th data-options="field:'text',title:'机构名称',width:100"></th>
+            </tr>
+            </thead>
+        </table>
+    </div>
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,bodyCls:'border_left'">
+        <!-- datagrid表格 -->
+        <table data-toggle="topjui-edatagrid"
+               data-options="id:'userDatagrid',
+                   url:'${ctx}/ucenter/user/getPageSet'">
+            <thead>
+            <tr>
+                <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                <th data-options="field:'userNameId',title:'员工号'"></th>
+                <th data-options="field:'userName',title:'姓名',width:100,
+                    editor:{
+                        type:'combogrid',
+                        options:{
+                            required:true,
+                            panelWidth:450,
+                            mode:'remote',
+                            url:'${ctx}/ucenter/user/getListByKeywords',
+                            idField:'userNameId',
+                            textField:'userName',
+                            fitColumns:true,
+                            columns:[[
+                                {field: 'userName', title: '姓名'},
+                                {field: 'userNameId', title: '用户名'},
+                                {field: 'orgName', title: '所属机构', width: 100},
+                                {field: 'post', title: '职位', width: 100}
+                            ]],
+                            onSelect:function(index, row){
+                                var grid = $('#userDatagrid');
+                                var rowIndex= grid.datagrid('getRowIndex',grid.datagrid('getSelected'));
+                                grid.datagrid('beginEdit', rowIndex);
+                                var editors = grid.datagrid('getEditors', rowIndex);
+                                var telephone, email, mobile;
+                                telephone = grid.datagrid('getEditor',{index: rowIndex, field:'telephone'});
+                                email = grid.datagrid('getEditor',{index: rowIndex, field:'email'});
+                                mobile = grid.datagrid('getEditor',{index: rowIndex, field:'mobile'});
+                                $(telephone.target).textbox('setValue',row.userNameId);
+                                $(email.target).textbox('setValue',row.userName);
+                                $(mobile.target).textbox('setValue',row.post);
+                            }
+                        }
+                    }"></th>
+                <th data-options="field:'sex',title:'性别',width:50,editor:{type:'combobox',options:{required:true,url:'${ctx}/system/codeItem/getListByCodeSetIdAndLevelId?codeSetId=AAAA&levelId=5',valueField:'code',panelHeight:'auto'}}"></th>
+                <th data-options="field:'telephone',title:'电话',editor:{type:'textbox',options:{required:true}}"></th>
+                <th data-options="field:'email',title:'电子邮箱',editor:{type:'textbox',options:{required:true}}"></th>
+                <th data-options="field:'mobile',title:'手机',editor:{type:'textbox',options:{required:true}}"></th>
+                <th data-options="field:'orgName',title:'所属机构'"></th>
+                <th data-options="field:'post',title:'职务'"></th>
+                <th data-options="field:'userGroup',title:'用户组'"></th>
+                <th data-options="field:'zone',title:'所属区域',hidden:true,formatter:function(value,row,index){return row.country+' '+row.province+' '+row.city+' '+row.district}"></th>
+            </tr>
+            </thead>
+        </table>
+
+    </div>
+</div>
+
+<!-- 用户 表格工具栏 -->
+<div id="userDatagrid-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'userDatagrid'
+       }" style="display:none">
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'openDialog',
+       dialog:{
+           id:'userAddDialog',
+           href:'${ctx}/ucenter/user/edit',
+           height:450,
+           buttonsGroup:[
+               {text:'保存',url:'${ctx}/ucenter/user/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+           ]
+       }">新增</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'openDialog',
+	   component:'edit',
+	   iconCls:'fa fa-pencil',
+       dialog:{
+           id:'userEditDialog',
+           href:'${ctx}/ucenter/user/edit',
+           url:'${ctx}/ucenter/user/getDetailByUuid?uuid={uuid}',
+           height:450,
+           buttonsGroup:[
+               {text:'保存',url:'${ctx}/ucenter/user/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'userDatagrid'}]}
+           ]
+       }">编辑</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'doAjax',
+	   iconCls:'fa fa-trash'">删除</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'doAjax',
+	   iconCls:'fa fa-cog',
+	   url:'${ctx}/ucenter/user/delete?uuid={uuid}&userNameId={userNameId}&userName={userName}',
+	   confirmMsg:'确定要删除选中的数据吗？',
+	   reload:[{type:'datagrid',id:'userDatagrid'}]">Ajax操作</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search'">查询</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="menu:'#exportSubMenu',
+       hasDownArrow:true,
+       iconCls:'icon-database_table'">导出</a>
+    <div id="exportSubMenu" style="width:150px;">
+        <div data-toggle="topjui-menubutton"
+             data-options="method:'export',
+             iconCls:'icon-pdf',
+             grid:{
+                 type:'datagrid',
+                 id:'userDatagrid'
+             }">导出 PDF 报表
+        </div>
+        <div data-toggle="topjui-menubutton"
+             data-options="method:'export',
+             iconCls:'icon-page_excel',
+             grid:{
+                 type:'datagrid',
+                 id:'userDatagrid'
+             }">导出EXCEL列表
+        </div>
+        <div data-toggle="topjui-menubutton"
+             data-options="method:'request',
+             iconCls:'icon-page_excel',
+             url:'${ctx}/system/freemarker/generateExcel?uuid={uuid}',
+             grid:{
+                 type:'datagrid',
+                 id:'userDatagrid'
+             }">导出EXCEL报表
+        </div>
+        <div data-toggle="topjui-menubutton"
+             data-options="method:'request',
+             iconCls:'icon-page_word',
+             url:'${ctx}/system/freemarker/generateDoc?uuid={uuid}',
+             grid:{
+                 type:'datagrid',
+                 id:'userDatagrid'
+             }">导出WORD报表
+        </div>
+    </div>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="menu:'#moreSubMenu',
+       hasDownArrow:true,
+       iconCls:'icon-application_view_tile'">更多</a>
+    <div id="moreSubMenu" style="width:150px;">
+        <div data-toggle="topjui-menubutton"
+             data-options="method:'export',
+             iconCls:'fa fa-cog',
+             grid:{
+                 type:'datagrid',
+                 id:'userDatagrid'
+             }">导出列表
+        </div>
+        <div data-toggle="topjui-menubutton"
+             data-options="method:'openDialog',
+             iconCls:'fa fa-cog',
+             grid:{
+                 type:'datagrid',
+                 id:'userDatagrid'
+             },
+             parentGrid:{
+                 type:'datagrid',
+                 id:'userDatagrid',
+                 param:'userNameId:userNameId,userName',
+                 unselectedMsg:'请先选中要编辑的用户！'
+             },
+             dialog:{
+                 id:'userEditDialog',
+                 href:'${ctx}/ucenter/user/edit?uuid={parent.uuid}',
+                 height:450,
+                 buttonsGroup:[
+                    {text:'保存',url:'${ctx}/ucenter/user/save',iconCls:'fa fa-save',handler:'ajaxForm'}
+                 ]
+             }">编辑用户
+        </div>
+    </div>
+</div>
+
+<form id="updatePasswordDialog"></form>
+
+<%@ include file="../../common/common/foot.jsp" %>
+<script type="text/javascript" src="${ctx}/static/topjui/core/extension/jquery-easyui-edatagrid/jquery.edatagrid.js" charset="utf-8"></script>

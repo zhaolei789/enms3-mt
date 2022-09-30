@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.MNormFeeMapper">
+	<select id="getMatAssessList" resultType="cn.ewsd.cost.model.MNormFee">
+		SELECT a.*, CASE WHEN @partition_by = a.result_id THEN @rownum := @rownum + 1 ELSE @rownum :=1 END AS frequ,
+               @partition_by := result_id AS partition_by
+        FROM (SELECT ma.*, mi.item_name, mi.if_enter
+			  FROM m_norm_fee ma
+		      LEFT JOIN m_fee_item mi ON ma.item_no=mi.item_no
+		      WHERE ma.occ_month=#{occMonth} AND ma.ass_type='m.assType.4' AND ma.team_no=#{teamNo}) a
+		INNER JOIN (SELECT @rownum :=0) r ON 1=1
+		INNER JOIN (SELECT @partition_by :='') p ON 1=1
+		ORDER BY a.result_id
+	</select>
+
+	<delete id="deleteNormFee">
+		DELETE FROM m_norm_fee
+		WHERE occ_month=#{occMonth} AND team_no=#{teamNo}
+		<if test="itemNo!=null">
+			AND item_no=#{itemNo}
+		</if>
+		<if test="prjNo!=null">
+			AND prj_no=#{prjNo}
+		</if>
+		<if test="assType!=null">
+			AND ass_type=#{assType}
+		</if>
+	</delete>
+
+	<insert id="insertNormFee" parameterType="cn.ewsd.cost.model.MNormFee">
+		INSERT INTO m_norm_fee (`assess_id`, `occ_month`, `ass_type`, `team_no`, `item_no`, `prj_no`, `prj_name`, `ass_price`, `norm_amount`, `ass_rate`, `norm_bala`, `up_item`, `result_id`,
+								`uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{assessId}, #{occMonth}, #{assType}, #{teamNo}, #{itemNo}, #{prjNo}, #{prjName}, #{assPrice}, #{normAmount}, #{assRate}, #{normBala}, #{upItem}, #{resultId},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<update id="updateNormFee" parameterType="cn.ewsd.cost.model.MNormFee">
+		UPDATE m_norm_fee
+		<set>
+			<if test="resultId!=null">`result_id`=#{resultId}</if>
+		</set>
+		WHERE 1=1
+		<if test="assessId!=null">
+		  AND assess_id=#{assessId}
+		</if>
+		<if test="occMonth!=null">
+		  AND occ_month=#{occMonth}
+		</if>
+		<if test="assType!=null">
+		  AND ass_type=#{assType}
+		</if>
+		<if test="teamNo!=null">
+		  AND team_no=#{teamNo}
+		</if>
+		<if test="upItem!=null">
+		  AND up_item=#{upItem}
+		</if>
+	</update>
+	
+	<select id="getMatAssessMulti" resultType="cn.ewsd.cost.model.MNormFee">
+		SELECT up_item, SUM(norm_bala) norm_bala
+		FROM m_norm_fee
+		WHERE occ_month=#{occMonth} AND ass_type=#{assType} AND team_no=#{teamNo} AND IFNULL(up_item,'')!=''
+		GROUP BY up_item
+	</select>
+
+	<select id="getMatAssTyList" resultType="cn.ewsd.cost.model.MNormFee">
+		SELECT mn.*, ma.occ_bala, ma.diff_bala, ma.diff_scale, mi.item_name, mi.out_type,
+			   (SELECT text FROM sys_organization WHERE id=mn.team_no) team_name
+		FROM m_norm_fee mn
+		LEFT JOIN m_assess ma ON mn.assess_id = ma.assess_id
+		LEFT JOIN m_fee_item mi ON mn.item_no=mi.item_no
+		WHERE mn.occ_month=#{occMonth} AND mn.ass_type=#{assType} AND mi.if_enter!=#{ifEnter}
+		ORDER BY mn.team_no, mn.prj_no
+	</select>
+	
+	<select id="getMatAssZhList" resultType="cn.ewsd.cost.model.MNormFee">
+		SELECT mn.*, mi.item_name, CASE WHEN @partition_by = mn.result_id THEN @rownum := @rownum + 1 ELSE @rownum :=1 END AS frequ,
+			   @partition_by := result_id AS partition_by, (SELECT text FROM sys_organization WHERE id=mn.team_no) team_name
+		FROM m_norm_fee mn
+		LEFT JOIN m_fee_item mi ON mn.item_no=mi.item_no
+		INNER JOIN (SELECT @rownum :=0) r ON 1=1
+		INNER JOIN (SELECT @partition_by :='') p ON 1=1
+		WHERE occ_month=#{occMonth} AND ass_type=#{assType} AND mi.item_name LIKE '%支护材料%'
+		ORDER BY mn.team_no, mn.result_id
+	</select>
+
+	<select id="getMatAssDcList" resultType="cn.ewsd.cost.model.MNormFee">
+		SELECT mn.team_no, CASE WHEN mn.up_item='' THEN mi.item_name ELSE td.text END item_name, mn.ass_price, mi.item_unit, mn.result_id,
+			   (SELECT text FROM sys_organization WHERE id=mn.team_no) team_name
+		FROM m_norm_fee mn
+		LEFT JOIN m_fee_item mi ON mn.item_no=mi.item_no
+		LEFT JOIN sys_dic_item td ON mn.up_item=td.value
+		WHERE mn.occ_month=#{occMonth} AND mn.ass_type=#{assType} AND mi.if_enter='1'
+		  AND mn.team_no IN (58, 59, 60)
+		GROUP BY mn.team_no, CASE WHEN mn.up_item='' THEN mi.item_name ELSE td.text END, mn.ass_price, mi.item_unit, mn.result_id
+		ORDER BY mn.team_no
+	</select>
+	
+	<select id="getMatAssItemList" resultType="cn.ewsd.cost.model.MNormFee">
+		SELECT mi.team_no, mi.item_no, IFNULL(mb.bud_bala, 0) norm_bala, IFNULL(mo.occ_bala, 0) norm_amount,
+			   (SELECT item_name FROM m_item WHERE item_no=mi.item_no) item_name,
+			   (SELECT text FROM sys_organization WHERE id=mi.team_no) team_name
+		FROM (SELECT b.team_no,a.item_no
+			  FROM m_prj_item a, m_prj b
+			  WHERE a.prj_no=b.prj_no
+		AND EXISTS (SELECT '1' FROM m_item
+					WHERE item_no=a.item_no AND item_use='m.itemUse.3')
+					GROUP BY b.team_no,a.item_no) mi
+		LEFT JOIN m_budget mb ON mi.item_no=mb.item_no AND mb.team_no=mi.team_no AND mb.occ_month=#{occMonth}
+		LEFT JOIN (SELECT team_no, item_no, SUM(out_amount*mat_price) occ_bala
+				   FROM m_out
+				   WHERE out_date &gt;= #{beginDate} AND out_date &lt;=#{endDate} AND draw_step='7202F' AND data_src='m.dataSrc.3'
+				   GROUP BY team_no,item_no) mo ON mo.team_no=mi.team_no AND mo.item_no=mi.item_no
+	</select>
+</mapper>

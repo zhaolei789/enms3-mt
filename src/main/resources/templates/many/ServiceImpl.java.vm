@@ -1,0 +1,69 @@
+package ${package1}.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+import ${basepackage1}.common.utils.BaseUtils;
+import ${basepackage1}.common.utils.easyui.PageParam;
+import ${basepackage1}.common.utils.easyui.PageSet;
+import ${basepackage1}.common.utils.easyui.PageUtils;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+
+import ${package1}.mapper.${className1}Mapper;
+import ${package1}.model.${className1};
+import ${package1}.service.${className1}Service;
+import ${package1}.service.impl.${SystemName1}BaseServiceImpl;
+
+@Service("${classname1}ServiceImpl")
+public class ${className1}ServiceImpl extends ${SystemName1}BaseServiceImpl<${className1}, String> implements ${className1}Service {
+	@Autowired
+	private ${className1}Mapper ${classname1}Mapper;
+
+    @Override
+    public PageSet<${className1}> getPageSet(PageParam pageParam, String filterSort) {
+        PageHelper.startPage(pageParam.getPage(), pageParam.getRows());
+        List<${className1}> list = ${classname1}Mapper.getPageSet(filterSort);
+        PageInfo<${className1}> pageInfo = new PageInfo<>(list);
+        return PageUtils.getPageSet(pageInfo);
+    }
+
+	@Override
+	public ${className1} queryObject(${pk1.attrType} ${pk1.attrname}){
+		return ${classname1}Mapper.queryObject(${pk1.attrname});
+	}
+
+	@Override
+	public List<${className1}> queryList(Map<String, Object> map){
+		return ${classname1}Mapper.queryList(map);
+	}
+
+	@Override
+	public int queryTotal(Map<String, Object> map){
+		return ${classname1}Mapper.queryTotal(map);
+	}
+
+	@Override
+	public int executeSave(${className1} ${classname1}){
+		return ${classname1}Mapper.executeSave(${classname1});
+	}
+
+	@Override
+	public int executeUpdate(${className1} ${classname1}){
+		return ${classname1}Mapper.executeUpdate(${classname1});
+	}
+
+	@Override
+	public int executeDelete(${pk1.attrType} ${pk1.attrname}){
+		return ${classname1}Mapper.executeDelete(${pk1.attrname});
+	}
+
+	@Override
+	public int executeDeleteBatch(${pk1.attrType}[] ${pk1.attrname}s){
+		return ${classname1}Mapper.executeDeleteBatch(${pk1.attrname}s);
+	}
+
+}

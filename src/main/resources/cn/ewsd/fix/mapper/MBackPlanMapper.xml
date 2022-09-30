@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.fix.mapper.MBackPlanMapper">
+    <delete id="deleteBackPlan">
+        DELETE FROM m_back_plan
+        WHERE plan_month=#{planMonth} AND team_no=#{teamNo} AND plan_team=#{planTeam} AND prj_no=#{prjNo} AND plan_step!='7700F'
+    </delete>
+
+    <insert id="insertBackPlan" parameterType="cn.ewsd.fix.model.MBackPlan">
+        INSERT INTO m_back_plan (`plan_no`, `plan_month`, `team_no`, `mat_no`, `plan_amount`, `mat_price`, `plan_step`, `check_no`, `back_amount`,
+                                 `back_norm`, `back_ratio`, `award_ratio`, `award_bala`, `prj_no`, `prj_name`, `bill_no`, `ass_month`,
+                                 `plan_team`, `fix_addr`, `end_date`, `fix_type`, `plan_date`, `plan_param`, `accept_team`, `accept_addr`, `remark`,
+                                 `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+        VALUES (#{planNo}, #{planMonth}, #{teamNo}, #{matNo}, #{planAmount}, #{matPrice}, #{planStep}, #{checkNo}, #{backAmount},
+                #{backNorm}, #{backRatio}, #{awardRatio}, #{awardBala}, #{prjNo}, #{prjName}, #{billNo}, #{assMonth},
+                #{planTeam}, #{fixAddr}, #{endDate}, #{fixType}, #{planDate}, #{planParam}, #{acceptTeam}, #{acceptAddr}, #{remark},
+                #{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+    </insert>
+
+    <update id="updateBackPlan">
+        UPDATE m_back_plan SET plan_amount=#{planAmount}, remark=#{remark}
+		WHERE plan_month=#{planMonth} AND team_no=#{teamNo} AND plan_team=#{planTeam} AND mat_no=#{matNo} AND fix_type=#{fixType} AND prj_no=#{prjNo}
+    </update>
+
+    <delete id="delBackPlan">
+        DELETE FROM m_back_plan WHERE plan_no=#{_parameter} AND plan_step='77000'
+    </delete>
+
+    <delete id="delBackPlan1">
+        DELETE FROM m_back_plan WHERE plan_no=#{_parameter}
+    </delete>
+
+    <update id="updBackPlan">
+        UPDATE m_back_plan
+        <set>
+            <if test="planStep!=null">`plan_step`=#{planStep},</if>
+            <if test="planDate!=null">`plan_date`=#{planDate},</if>
+            <if test="planAmount!=null">`plan_amount`=#{planAmount},</if>
+            <if test="remark!=null">`remark`=#{remark}</if>
+            <if test="checkNo!=null">`check_no`=#{checkNo}</if>
+        </set>
+        WHERE plan_no = #{planNo}
+    </update>
+
+    <select id="getBackPlan" resultType="cn.ewsd.fix.model.MBackPlan">
+        SELECT a.*, m.mat_code, m.mat_name, o.text plan_team_name, o1.text team_name, di.text fix_type_name
+        FROM m_back_plan a
+        LEFT JOIN m_material m ON a.mat_no=m.mat_no
+        LEFT JOIN sys_organization o ON o.id=a.plan_team
+        LEFT JOIN sys_organization o1 ON o1.id=a.team_no
+        LEFT JOIN sys_dic_item di ON di.value=a.fix_type
+        WHERE a.plan_no=#{_parameter}
+    </select>
+
+    <select id="getPageSet" resultType="cn.ewsd.fix.model.MBackPlan">
+        SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, hs.hs_amount, zz.zz_amount, o.text team_name, ap.process_name plan_step_name
+		FROM m_back_plan a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+        LEFT JOIN sys_audit_process ap ON ap.process_no=a.plan_step
+		LEFT JOIN sys_organization o ON o.id=a.team_no
+		LEFT JOIN (SELECT plan_no, IFNULL(SUM(bill_amount), 0) hs_amount
+		           FROM m_in
+			  	   WHERE data_src='m.dataSrc.A'
+			  	     AND in_type='r.inBillType.B'
+			  		 AND in_step='7701F'
+			  		 AND bill_date LIKE CONCAT(#{monthQry}, '%')
+			  	   GROUP BY plan_no) hs ON CAST(a.plan_no AS CHAR)=hs.plan_no
+		LEFT JOIN (SELECT plan_no, IFNULL(SUM(bill_amount), 0) zz_amount
+		           FROM m_in
+			  	   WHERE data_src='m.dataSrc.A'
+		  		     AND in_type='r.inBillType.A'
+			  		 AND in_step='7701F'
+			  		 AND bill_date LIKE CONCAT(#{monthQry}, '%')
+			  	   GROUP BY plan_no) zz ON CAST(a.plan_no AS CHAR)=zz.plan_no
+		WHERE a.plan_month LIKE CONCAT(#{monthQry}, '%') AND a.fix_type='m.fixType.1'
+		<if test="teamNoQry!=''">
+            AND a.team_no=#{teamNoQry}
+        </if>
+        <if test="matQry!=''">
+            AND (b.mat_code LIKE CONCAT('%', #{matQry}, '%') OR b.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+        </if>
+        <if test="ifZnks">
+            AND a.plan_team=#{userTeam}
+        </if>
+        <if test="!ifZnks">
+            AND a.team_no IN
+            <foreach collection="userDeptIds.split(',')" item="deptId" open="(" separator="," close=")">
+                #{deptId}
+            </foreach>
+        </if>
+        <if test="ksTeamQry!=''">
+            AND a.plan_team=#{ksTeamQry}
+        </if>
+    </select>
+
+    <select id="getBackPlanTeam" resultType="cn.ewsd.mdata.model.Organization">
+        SELECT a.plan_team id, (SELECT text FROM sys_organization WHERE id=a.plan_team) text
+		FROM m_back_plan a
+		GROUP BY a.plan_team
+    </select>
+    
+    <select id="getTurnRegList" resultType="cn.ewsd.fix.model.MBackPlan">
+        SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, mi.amount, o.text plan_team_name
+		FROM m_back_plan a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN sys_organization o ON o.id=a.plan_team
+		LEFT JOIN (SELECT plan_no, SUM(bill_amount) amount
+		           FROM m_in
+		           WHERE data_src='m.dataSrc.A'
+			  	   GROUP BY plan_no) mi ON CAST(a.plan_no AS CHAR)=mi.plan_no
+		WHERE a.plan_month LIKE CONCAT(#{monthQry}, '%')
+		  AND a.team_no=#{userTeam}
+		  AND a.fix_type='m.fixType.1'
+		  <!-- AND (a.plan_amount - IFNULL(mi.amount,0)) > 0 -->
+		<if test="addrQry!=''">
+            AND a.prj_name LIKE CONCAT('%', #{addrQry}, '%')
+        </if>
+        <if test="teamQry!=''">
+            AND a.plan_team=#{teamQry}
+        </if>
+        <if test="matQry!=''">
+            AND (b.mat_code LIKE CONCAT('%', #{matQry}, '%') OR b.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+        </if>
+        ORDER BY b.mat_code
+    </select>
+
+    <select id="getFixTaskList" resultType="cn.ewsd.fix.model.MBackPlan">
+        SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, o.text team_name
+		FROM m_back_plan a
+		LEFT JOIN sys_organization o ON o.id=a.team_no
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		WHERE a.plan_month LIKE CONCAT(#{monthQry}, '%')
+		  AND a.fix_type='m.fixType.2'
+		  AND a.plan_team=#{userTeam}
+		<if test="matQry!=''">
+            AND CONCAT(b.mat_code, b.mat_name) LIKE CONCAT('%', #{matQry}, '%')
+        </if>
+    </select>
+
+    <select id="getFixPlanList" resultType="cn.ewsd.fix.model.MBackPlan">
+        SELECT a.*, RIGHT(b.mat_code,8) mat_code, b.mat_name, b.mat_unit, (a.mat_price*a.plan_amount) mat_bala, ap.process_name plan_step_name,
+               c.text team_name, o.text plan_team_name, di1.text fix_type_name
+		FROM m_back_plan a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		INNER JOIN sys_organization c ON a.team_no=c.id
+		LEFT JOIN sys_organization o ON o.id=a.plan_team
+        LEFT JOIN sys_audit_process ap ON ap.process_no=a.plan_step
+        LEFT JOIN sys_dic_item di1 ON di1.value=a.fix_type
+		WHERE a.plan_month LIKE CONCAT(#{monthQry}, '%') AND a.fix_type!='m.fixType.1'
+		<if test="teamNoQry!=''">
+            AND a.team_no=#{teamNoQry}
+        </if>
+        <if test="mngTeamQry!=''">
+            AND a.plan_team=#{mngTeamQry}
+        </if>
+        <if test="ifZnks">
+            AND a.plan_team=#{userTeam}
+        </if>
+        <if test="!ifZnks">
+            AND a.team_no IN
+            <foreach collection="userDeptIds.split(',')" item="deptId" open="(" separator="," close=")">
+                #{deptId}
+            </foreach>
+        </if>
+        <if test="stepQry!=''">
+            AND a.plan_step=#{stepQry}
+        </if>
+        <if test="fixTypeQry!=''">
+            AND a.fix_type=#{fixTypeQry}
+        </if>
+        <if  test="matQry!=''">
+            AND CONCAT(b.mat_code, b.mat_name) LIKE CONCAT('%', #{matQry}, '%')
+        </if>
+    </select>
+
+    <select id="getBackPlanMngTeam" resultType="cn.ewsd.mdata.model.Organization">
+        SELECT b.id, b.text
+        FROM m_back_plan a
+        INNER JOIN sys_organization b ON a.plan_team=b.id
+	    WHERE a.plan_month LIKE CONCAT(#{_parameter}, '%') AND a.team_no!=a.plan_team
+	    GROUP BY b.id,b.text
+    </select>
+
+    <select id="getRepInStk" resultType="cn.ewsd.fix.model.MBackPlan">
+        SELECT a.*, b.mat_code, b.mat_name, b.mat_unit, b.mat_price, b.fix_price, IFNULL(a.plan_amount,0)-IFNULL(d.in_amount,0) apply_amount,
+               o.text plan_team_name, di1.text fix_team_name
+		FROM m_back_plan a
+		LEFT JOIN m_material b ON a.mat_no = b.mat_no
+		LEFT JOIN sys_organization o ON o.id=a.plan_team
+		LEFT JOIN sys_dic_item di1 ON di1.value=a.fix_type
+		LEFT JOIN (SELECT link_no, SUM(in_amount) in_amount
+		           FROM m_in
+			  	   WHERE data_src='m.dataSrc.B' AND in_step NOT IN ('7701X', '77010')
+			  	   GROUP BY link_no) d ON CAST(a.plan_no AS CHAR) = d.link_no
+		WHERE a.plan_step = '7701F' AND a.plan_month LIKE CONCAT(#{monthQry}, '%')
+		  AND a.plan_amount-IFNULL(d.in_amount,0) &gt; 0
+		  AND a.team_no=#{userTeam}
+          AND a.fix_type!='m.fixType.1'
+		ORDER BY b.mat_code ASC
+    </select>
+
+    <select id="getBackAssPrj" resultType="cn.ewsd.material.model.MPrj">
+        SELECT prj_no, prj_name
+        FROM m_back_plan
+        WHERE plan_month=#{planMonth} AND team_no=#{teamNo}
+        GROUP BY prj_no,prj_name
+    </select>
+    
+    <select id="getBackAssPlan" resultType="cn.ewsd.fix.model.MBackPlan">
+        SELECT a.team_no, a.prj_no, a.mat_no, SUM(a.plan_amount) plan_amount, SUM(a.zz_amount) zz_amount, SUM(a.hs_amount) hs_amount
+        FROM (SELECT team_no, prj_no, mat_no, SUM(plan_amount) plan_amount, 0 zz_amount, 0 hs_amount
+              FROM m_back_plan
+			  WHERE plan_month=#{monthQry} AND plan_team=#{userTeam} AND plan_step='7700F' AND fix_type='m.fixType.1'
+			  GROUP BY team_no,prj_no,mat_no
+			  UNION
+			  SELECT team_no, norm_no prj_no, mat_no, 0 plan_amount, SUM(bill_amount) zz_amount, 0 hs_amount
+			  FROM m_in
+			  WHERE LEFT(bill_date,6)=#{monthQry} AND offer_team=#{userTeam} AND in_step='7701F' AND data_src='m.dataSrc.A' AND in_type='r.inBillType.A'
+			  GROUP BY team_no,norm_no,mat_no
+			  UNION
+			  SELECT team_no, norm_no prj_no, mat_no, 0 plan_amount, 0 zz_amount, SUM(bill_amount) hs_amount
+			  FROM m_in
+			  WHERE LEFT(bill_date,6)=#{monthQry} AND offer_team=#{userTeam} AND in_step='7701F' AND data_src='m.dataSrc.A' AND in_type='r.inBillType.B'
+			  GROUP BY team_no,norm_no,mat_no) a
+        GROUP BY a.team_no,a.prj_no,a.mat_no
+    </select>
+</mapper>

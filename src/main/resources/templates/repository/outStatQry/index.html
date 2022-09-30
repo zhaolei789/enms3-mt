@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="outStatForm" style="height: 50%">
+		<div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false, height:'100%'">
+			<table id="outStatDg"></table>
+		</div>
+	</form>
+	<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+		<table id="detailDg"></table>
+	</div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="outStatDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'outStatDg'
+       }" style="display:none">
+
+	<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">日期：</label>
+	<input id="beginDateQry" name="beginDateQry" th:value="${beginDateQry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+	<label class="topjui-form-label" style="width:20px;float:none;display:inline-block">到</label>
+	<input id="endDateQry" name="endDateQry" th:value="${endDateQry}" type="text" data-toggle="topjui-datebox" data-options="width:'150px'">
+
+	<label class="topjui-form-label" style="width:100px;float:none;display:inline-block">编码：</label>
+	<input id="matCodeQry" data-toggle="topjui-textbox" name="matCodeQry" th:value="${matCodeQry}" data-options="width:'150px'">
+
+	<label class="topjui-form-label" style="width:100px;float:none;display:inline-block">描述：</label>
+	<input id="matNameQry" data-toggle="topjui-textbox" name="matNameQry" th:value="${matNameQry}" data-options="width:'150px'" >
+
+	<input id="teamNo" name="teamNo" value="" type="hidden">
+
+	<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">查询</span>
+            <span class="l-btn-icon fa fa-search">&nbsp;</span>
+        </span>
+	</a>
+
+	<a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+	</a>
+
+</div>
+	<div id="detailDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'detailDg'
+       }" style="display:none">
+
+		<a href="javascript:void(0)" id="downloadBtn1" class="l-btn topjui-btn-blue l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+		</a>
+
+	</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			var storeStr = [[${storeStr}]];
+			var col = [ { field:'team',title:'领料单位',sortable:false},
+					  	{ field:'total',title:'合计',sortable:false, align:'right', width:'120px', formatter: function(value, row, index){
+							if(value==0){
+								return ''
+							}else{
+								return value
+							}
+					  	}} ];
+			var storeArr = storeStr.split(',');
+			for(var i=0; i<storeArr.length; i++){
+				var store = storeArr[i];
+				var storeNo = store.split('_')[0];
+				var storeName = store.split('_')[1];
+				col.push({ field:storeNo, title:storeName, sortable:false, align:'right' , width:'120px', formatter: function(value, row, index){
+						if(value==0){
+							return ''
+						}else{
+							return value
+						}
+					}})
+			}
+			var columns = [ col ];
+
+			$('#outStatDg').iDatagrid({
+				queryParams:{
+					beginDateQry:$('#beginDateQry').iDatebox('getValue'),
+					endDateQry:$('#endDateQry').iDatebox('getValue'),
+					matNameQry:$('#matNameQry').iTextbox('getValue'),
+					matCodeQry:$('#matCodeQry').iTextbox('getValue')
+				},
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				pagination:false,
+				url:'/repository/outStatQry/getList',
+				columns: columns,
+				onSelect:function(index, row){
+					if(index != 0){
+						$('#teamNo').val(row.teamNo);
+						reloadDetail(row.teamNo);
+					}
+				},
+				rowStyler: function(index, row){
+					if(index == 0){
+						return 'background-color:lightBlue'
+					}
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				var bDate = $('#beginDateQry').iDatebox('getValue');
+				var eDate = $('#endDateQry').iDatebox('getValue');
+				var matName = $('#matNameQry').iTextbox('getValue');
+				var matCode = $('#matCodeQry').iTextbox('getValue');
+				location.href = '/repository/outStatQry/index?beginDateQry='+bDate+'&endDateQry='+eDate+'&matNameQry='+matName+'&matCodeQry='+matCode;
+			});
+
+			$('#downloadBtn').click(function(){
+				$('#outStatForm').iForm('submit', {
+					url:'/repository/outStatQry/export',
+					success:function(data){
+
+					}
+				});
+			});
+
+			$('#detailDg').iDatagrid({
+				queryParams:{
+					beginDateQry:$('#beginDateQry').iDatebox('getValue'),
+					endDateQry:$('#endDateQry').iDatebox('getValue'),
+					matNameQry:$('#matNameQry').iTextbox('getValue'),
+					matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+					teamNo:$('#teamNo').val()
+				},
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				pagination:false,
+				url:'/repository/outStatQry/getDetail',
+				columns: [ [{
+					field:'storeName',title:'仓库名称',sortable:false
+				},{
+					field:'erpType',title:'ERP分类',sortable:false
+				},{
+					field:'typeName',title:'分类描述',sortable:false
+				},{
+					field:'matCode',title:'物料编码',sortable:false, formatter:function(value, row, index){
+						if(value != null && value!='' && value!=undefined){
+							return value.substring(0, 1) == 'X' ? value.substring(1) : value
+						}else{
+							return ''
+						}
+					}
+				},{
+					field:'matName',title:'物料描述',sortable:false
+				},{
+					field:'matUnit',title:'单位',sortable:false
+				},{
+					field:'outType',title:'领用类别',sortable:false
+				},{
+					field:'outDate',title:'领用日期',sortable:false, formatter:function(value, row, index){
+						if(value!=null && value!='' && value!=undefined){
+							return value.substring(0, 4) + "-" + value.substring(4, 6) + "-" + value.substring(6, 8)
+						}
+					}
+				},{
+					field:'empName',title:'发料人',sortable:false
+				},{
+					field:'outAmount',title:'数量',sortable:false, align:'right'
+				},{
+					field:'matPrice',title:'单价',sortable:false, align:'right'
+				},{
+					field:'bala',title:'金额',sortable:false, align:'right'
+				},{
+					field:'applyInfo',title:'申请说明',sortable:false
+				},{
+					field:'sumBala',title:'小计',sortable:false, width:'130px', align:'right', formatter:function(value, row, index){
+						return 0
+					}
+				}] ],
+				onLoadSuccess:function(data){
+					var rows = $('#detailDg').iDatagrid('getRows');
+					var index = 0;
+					var bala = rows[0].bala;
+					var count = 0;
+					var total = rows[0].bala;
+					for(var i=1; i<rows.length; i++){
+						if(i==rows.length-1 || rows[i-1].storeName!=rows[i].storeName){
+							$('#detailDg').iDatagrid('mergeCells', {
+								index: index,
+								field: 'storeName',
+								rowspan: i==rows.length-1 ? i-index+1 : i-index,
+								colspan: 1});
+							$('#detailDg').iDatagrid('mergeCells', {
+								index: index,
+								field: 'sumBala',
+								rowspan: i==rows.length-1 ? i-index+1 : i-index,
+								colspan: 1});
+							if(i==rows.length-1){
+								bala += rows[i].bala
+							}
+							$($('[field="sumBala"]').get(index+1)).find('div').html(bala.toFixed(2))
+							index = i;
+							bala = rows[i].bala;
+						}else{
+							bala += rows[i].bala;
+						}
+						total += rows[i].bala;
+					}
+
+					var r = rows[0];
+					r.storeName = '合计';
+					$('#detailDg').iDatagrid('appendRow', r);
+					$('#detailDg').iDatagrid('mergeCells', {
+						index: rows.length-1,
+						field: 'storeName',
+						rowspan: 1,
+						colspan: 13});
+					$($('[field="sumBala"]').get(rows.length)).find('div').html(total.toFixed(2))
+				}
+			});
+
+			$('#downloadBtn1').click(function(){
+				$('#outStatForm').iForm('submit', {
+					url:'/repository/outStatQry/exportDetail',
+					success:function(data){
+
+					}
+				});
+			});
+		});
+
+		function reloadDetail(teamNo){
+			$('#detailDg').iDatagrid('reload',{
+				beginDateQry:$('#beginDateQry').iDatebox('getValue'),
+				endDateQry:$('#endDateQry').iDatebox('getValue'),
+				matNameQry:$('#matNameQry').iTextbox('getValue'),
+				matCodeQry:$('#matCodeQry').iTextbox('getValue'),
+				teamNo:teamNo
+			});
+		}
+	</script>
+</th:block>
+</body>
+</html>

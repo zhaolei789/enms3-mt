@@ -1,0 +1,149 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<div class="topjui-fluid">
+    <div class="topjui-row">
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">生产月份</label>
+            <div class="topjui-input-block">
+                <input type="text" name="workMonth"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'生产月份',required:true">
+            </div>
+        </div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">生产单位</label>
+			<div class="topjui-input-block">
+				<input type="text" name="teamNo" id="teamNo"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'生产单位',
+					required:true,
+					valueField:'id',
+                    textField:'text',
+                    panelHeight:'200',
+                      icons:[{
+                          iconCls:'fa fa-remove',
+                          handler: function(e){
+                              $(e.data.target).combobox('clear');
+                          }
+                      }],
+                    url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',
+					onSelect: function(rec){
+            			var url = '/cost/mWork/getPrjListByTeamNo?teamNo='+rec.id;
+            			$('#prjNo').iCombobox('reload', url);
+        			}">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">工程项目</label>
+			<div class="topjui-input-block">
+				<input type="hidden" name="workPrj">
+				<input type="text" name="prjNo" id="prjNo"
+					   data-toggle="topjui-combobox"
+					   data-options="prompt:'工程项目',
+                   	panelHeight:190,
+                   	valueField:'prj_no',
+    				textField:'prj_name',
+					param:'workPrj:prj_name'">
+			</div>
+		</div>
+	</div>
+	<div class="topjui-row">
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">计划原煤</label>
+			<div class="topjui-input-block">
+				<input type="text" name="planRawout"
+					   data-toggle="topjui-numberbox"
+					   data-options="prompt:'计划原煤',precision:2">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">实际原煤</label>
+			<div class="topjui-input-block">
+				<input type="text" name="occRawout"
+					   data-toggle="topjui-numberbox"
+					   data-options="prompt:'实际原煤',precision:2">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">计划商品煤</label>
+			<div class="topjui-input-block">
+				<input type="text" name="planSaleout"
+					   data-toggle="topjui-numberbox"
+					   data-options="prompt:'计划商品煤',precision:2">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">实际商品煤</label>
+			<div class="topjui-input-block">
+				<input type="text" name="occSaleout"
+					   data-toggle="topjui-numberbox"
+					   data-options="prompt:'实际商品煤',precision:2">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">计划进尺</label>
+			<div class="topjui-input-block">
+				<input type="text" name="planDig"
+					   data-toggle="topjui-numberbox"
+					   data-options="prompt:'计划进尺',precision:2">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">实际进尺</label>
+			<div class="topjui-input-block">
+				<input type="text" name="occDig"
+					   data-toggle="topjui-numberbox"
+					   data-options="prompt:'实际进尺',precision:2">
+			</div>
+		</div>
+		<div class="topjui-col-sm12">
+			<label class="topjui-form-label">备注信息</label>
+			<div class="topjui-input-block">
+				<input type="text" name="remark" data-toggle="topjui-textarea" data-options="prompt:'备注信息'">
+			</div>
+		</div>
+       <!-- <div class="topjui-col-sm6">
+            <label class="topjui-form-label">标识ID</label>
+            <div class="topjui-input-block">
+                <input type="text" name="workId"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'标识ID'">
+            </div>
+        </div>-->
+
+        <!--<div class="topjui-col-sm6">
+            <label class="topjui-form-label">工作项目</label>
+            <div class="topjui-input-block">
+                <input type="text" name="workPrj"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'工作项目'">
+            </div>
+        </div>
+
+        <div class="topjui-col-sm6">
+            <label class="topjui-form-label">上报产量</label>
+            <div class="topjui-input-block">
+                <input type="text" name="reportOut"
+                       data-toggle="topjui-textbox"
+                       data-options="prompt:'上报产量'">
+            </div>
+        </div>-->
+
+    </div>
+</div>
+<script>
+	/*$(function () {
+		$('#teamNo').iCombobox({
+			onChange: function(newValue,oldValue){
+				var url='/cost/mWork/getPrjListByTeamNo?teamNo='+newValue;
+				$('#prjNo').iCombobox('reload', url);
+			}
+		});
+	})*/
+
+
+</script>

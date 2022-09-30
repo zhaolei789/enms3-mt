@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content" th:with="type=${#httpServletRequest.getParameter('type')}">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'west',title:'',split:true,border:false,width:'20%',iconCls:'fa fa-sitemap',headerCls:'border_right',bodyCls:'border_right'">
+            <table data-toggle="topjui-treegrid"
+                   th:data-options="@{'
+                   id:\'oaTopicCategoryTg\',
+			   idField:\'id\',
+			   treeField:\'text\',
+			   fitColumns:true,
+			   singleSelect:true,
+			   url:\'/system/category/getCategorysByTypeAndLevelId?levelId=1&type='+${type}+'\',
+                expandUrl:\'/system/category/getListByPid?pid={id}&type='+${type}+'\',
+			   childGrid:{
+                   param:\'id:id,uuid:uuid\',
+                   grid:[
+                       {type:\'datagrid\',id:\'topicBaseDg\'},
+                   ]
+               }'}">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'UUID',checkbox:true"></th>
+                    <th data-options="field:'text',title:'栏目分类',width:100"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,bodyCls:'border_left_right'">
+            <table data-toggle="topjui-datagrid"
+                   data-options="id:'topicBaseDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/system/topicBase/getPageSet',
+                childTab: [{id:'eastTabs',param:'uuid'}]">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'标识',sortable:true,checkbox:true"></th>
+                        <!--<%&#45;&#45;<th data-options="field:'categoryId',title:'类型',sortable:true"></th>&#45;&#45;%>-->
+                    <th data-options="field:'title',title:'标题',sortable:true,formatter:openNewTab"></th>
+                    <th data-options="field:'createTime',title:'发布时间',sortable:true"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div data-options="region:'east',iconCls:'icon-chart_pie',title:'',split:true,border:false,width:'40%'">
+            <div data-toggle="topjui-tabs"
+                 data-options="id:'eastTabs',
+             fit:true,
+             border:true,
+             bodyCls:'border_right_none',
+             parentGrid:{
+                 type:'datagrid',
+                 id:'topicBaseDg',
+                 param:'topicUuid'
+             }">
+                <div title="文章详情"
+                     data-options="id:'eastTab0',iconCls:'fa fa-th',
+					 href:'/system/topicBase/detail?uuid={uuid}'"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 表格工具栏 -->
+    <div id="topicBaseDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'topicBaseDg'
+       }" style="display:none">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#topicBaseDg-toolbar',
+           btnCls:'topjui-btn-green',
+            parentGrid:{
+           type:'treegrid',
+           id:'oaTopicCategoryTg',
+           param:'categoryId:id',
+           unselectedMsg:'请先选择产品分类的左侧树形导航中的栏目'
+          },
+
+           dialog:{
+               id:'topicBaseAddDialog',
+               href:'/system/topicBase/edit?type=${param.type}',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/system/topicBase/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               th:data-options="@{'
+               method:\'openDialog\',
+           extend:\'#topicBaseDg-toolbar\',
+           btnCls:\'topjui-btn-blue\',
+           component:\'edit\',
+           iconCls:\'fa fa-pencil\',
+
+           dialog:{
+               id:\'topicBaseEditDialog\',
+               href:\'/system/topicBase/edit?type='+${type}+'\',
+               url:\'/system/topicBase/getDetailByUuid?uuid={uuid}\',
+               height:450,
+                editor:[
+			   {type:\'ueditor\',id:\'oaTopicAddContainer\',field:\'content\'}
+		   ],
+               buttonsGroup:[
+                   {text:\'更新\',url:\'/system/topicBase/update\',iconCls:\'fa fa-save\',handler:\'ajaxForm\',refresh:[{type:\'datagrid\',id:\'topicBaseDg\'}]}
+               ]
+           }'}">编辑</a>
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'doAjax',
+           extend:'#topicBaseDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/system/topicBase/deleteBatch'">删除</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#topicBaseDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#topicBaseDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        function openNewTab(value, row, index) {
+            return '<a style="color:blue" href="javascript:window.parent.addParentTab({href:\'/system/topicBase/detail?uuid=' + row.uuid + '\',title:\'' + row.title + '\'})\">' + value + '</a>'
+        }
+    </script>
+    <script type="text/javascript" src="/plugins/ueditor/ueditor.config.js"></script>
+    <script type="text/javascript" src="/plugins/ueditor/ueditor.all.min.js"></script>
+</th:block>
+</body>
+</html>

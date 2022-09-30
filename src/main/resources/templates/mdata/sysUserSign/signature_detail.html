@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+
+
+    <div class="topjui-fluid">
+        <div class="layui-row">
+            <div class="layui-col-md12">
+                <img th:src="${sysUserSign.signBase64}">
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+
+    </script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <title>Hello World!</title>
+    <script type="text/javascript" src="/jquery.min.js"></script>
+    <script type="text/javascript" src="/pageoffice.js" id="po_js_main"></script>
+    <script type="text/javascript">
+        function Save() {
+            document.getElementById("PageOfficeCtrl1").WebSave();
+        }
+
+        function SaveAndClose() {
+            document.getElementById("PageOfficeCtrl1").WebSave();
+            POBrowser.closeWindow();//关闭POBrowser窗口
+        }
+
+        function AddSeal() {
+            try {
+                document.getElementById("PageOfficeCtrl1").ZoomSeal.AddSeal();
+            } catch (e) {
+
+            }
+        }
+
+        function ShowPrintDlg() {
+            document.getElementById("PageOfficeCtrl1").ShowDialog(4); //打印对话框
+        }
+
+        function SwitchFullScreen() {//全屏
+            document.getElementById("PageOfficeCtrl1").FullScreen = !document
+                .getElementById("PageOfficeCtrl1").FullScreen;
+        }
+
+        function AddHandSign() {
+            document.getElementById("PageOfficeCtrl1").ZoomSeal.AddHandSign();
+        }
+
+        function VerifySeal() {
+            try {
+                document.getElementById("PageOfficeCtrl1").ZoomSeal.VerifySeal();
+            }
+            catch (e) {
+
+            }
+        }
+
+        function CloseWindow() {
+            POBrowser.closeWindow();//关闭POBrowser窗口
+        }
+
+        window.onload = function () {
+            setTimeout(function () {
+                document.getElementById("PageOfficeCtrl1").FullScreen = true;
+            }, 100);
+        }
+    </script>
+</head>
+<body style="text-align: center">
+<div style="margin: auto;width:1200px;height:800px;" th:utext="${pageoffice}"></div>
+</body>
+</html>

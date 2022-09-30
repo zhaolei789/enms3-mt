@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.FItemMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.cost.model.FItem" id="fItemMap">
+        <result property="item_id" column="item_id"/>
+        <result property="item_name" column="item_name"/>
+        <result property="warn_line" column="warn_line"/>
+        <result property="get_type" column="get_type"/>
+        <result property="get_sort" column="get_sort"/>
+        <result property="if_on" column="if_on"/>
+        <result property="link_store" column="link_store"/>
+        <result property="denom_type" column="denom_type"/>
+        <result property="order_no" column="order_no"/>
+        <result property="ass_period" column="ass_period"/>
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+		<result property="item_type" column="item_type"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 item_id
+		  ,  	  	     			 item_name
+		  ,  	  	     			 warn_line
+		  ,  	  	     			 get_type
+		  ,  	  	     			 get_sort
+		  ,  	  	     			 if_on
+		  ,  	  	     			 link_store
+		  ,  	  	     			 denom_type
+		  ,  	  	     			 order_no
+		  ,  	  	     			 ass_period
+		  ,  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		,item_type
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.cost.model.FItem">
+        select
+        <include refid="Base_Column_List"></include>
+        from f_item
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.cost.model.FItem">
+		select  <include refid="Base_Column_List" />  from f_item where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.cost.model.FItem">
+		select  <include refid="Base_Column_List" />  from f_item
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from f_item 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.cost.model.FItem">
+		insert into f_item
+		(
+			`item_id`, 
+			`item_name`, 
+			`warn_line`, 
+			`get_type`, 
+			`get_sort`, 
+			`if_on`, 
+			`link_store`, 
+			`denom_type`, 
+			`order_no`, 
+			`ass_period`, 
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`,
+		 	`item_type`
+		)
+		values
+		(
+			#{item_id}, 
+			#{item_name}, 
+			#{warn_line}, 
+			#{get_type}, 
+			#{get_sort}, 
+			#{if_on}, 
+			#{link_store}, 
+			#{denom_type}, 
+			#{order_no}, 
+			#{ass_period}, 
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time},
+		 	#{item_type}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.cost.model.FItem">
+		update f_item 
+		<set>
+			<if test="item_id != null">`item_id` = #{item_id}, </if>
+			<if test="item_name != null">`item_name` = #{item_name}, </if>
+			<if test="warn_line != null">`warn_line` = #{warn_line}, </if>
+			<if test="get_type != null">`get_type` = #{get_type}, </if>
+			<if test="get_sort != null">`get_sort` = #{get_sort}, </if>
+			<if test="if_on != null">`if_on` = #{if_on}, </if>
+			<if test="link_store != null">`link_store` = #{link_store}, </if>
+			<if test="denom_type != null">`denom_type` = #{denom_type}, </if>
+			<if test="order_no != null">`order_no` = #{order_no}, </if>
+			<if test="ass_period != null">`ass_period` = #{ass_period}, </if>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time},</if>
+			<if test="item_type != null">`item_type` = #{item_type}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from f_item where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from f_item where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.logistics.mapper.AuditLogMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.logistics.model.AuditLog" id="auditLogMap">
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+        <result property="business_type" column="business_type"/>
+        <result property="business_id" column="business_id"/>
+        <result property="direction" column="direction"/>
+        <result property="opinion" column="opinion"/>
+        <result property="attachment" column="attachment"/>
+        <result property="audit_process" column="audit_process"/>
+        <result property="audit_process_step" column="audit_process_step"/>
+		<result property="change_before" column="change_before"/>
+		<result property="change_after" column="change_after"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 business_type
+		  ,  	  	     			 business_id
+		  ,  	  	     			 direction
+		  ,  	  	     			 opinion
+		  ,  	  	     			 attachment
+		  ,  	  	     			 audit_process
+		  ,  	  	     			 audit_process_step
+			,change_before
+			,change_after
+
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.logistics.model.AuditLog">
+        select
+        <include refid="Base_Column_List"></include>
+        from audit_log
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.logistics.model.AuditLog">
+		select  <include refid="Base_Column_List" />  from audit_log where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.logistics.model.AuditLog">
+		select  <include refid="Base_Column_List" />  from audit_log
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryListAll" resultType="cn.ewsd.logistics.model.AuditLog">
+		select  <include refid="Base_Column_List" />  from audit_log
+	</select>
+
+	<select id="queryListByBusiness" resultType="cn.ewsd.logistics.model.AuditLog">
+		select
+			  f.uuid
+			 ,f.create_time
+			 ,f.creator
+			 ,f.creator_id
+			 ,f.creator_org_id
+			 ,f.modifier_id
+			 ,f.modifier
+			 ,f.modify_time
+			 ,f.business_type
+			 ,f.business_id
+			 ,f.direction
+			 ,f.opinion
+			 ,f.attachment
+			 ,f.audit_process
+			 ,f.audit_process_step
+			 ,f.change_before
+			 ,f.change_after
+		,p.process_name as audit_process_step_name
+		from audit_log f
+		left join sys_audit_process p on f.audit_process_step = p.uuid
+		where f.business_type = #{businessType}
+		and f.business_id = #{businessId}
+		order by f.create_time asc
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from audit_log 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.logistics.model.AuditLog">
+		insert into audit_log
+		(
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`, 
+			`business_type`, 
+			`business_id`, 
+			`direction`, 
+			`opinion`, 
+			`attachment`, 
+			`audit_process`,
+			`audit_process_step`,
+		 	`change_before`,
+		 	`change_after`
+		)
+		values
+		(
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time}, 
+			#{business_type}, 
+			#{business_id}, 
+			#{direction}, 
+			#{opinion}, 
+			#{attachment}, 
+			#{audit_process},
+			#{audit_process_step},
+		 	#{change_before},
+		 	#{change_after}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.logistics.model.AuditLog">
+		update audit_log 
+		<set>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}, </if>
+			<if test="business_type != null">`business_type` = #{business_type}, </if>
+			<if test="business_id != null">`business_id` = #{business_id}, </if>
+			<if test="direction != null">`direction` = #{direction}, </if>
+			<if test="opinion != null">`opinion` = #{opinion}, </if>
+			<if test="attachment != null">`attachment` = #{attachment}, </if>
+			<if test="audit_process != null">`audit_process` = #{audit_process}, </if>
+			<if test="audit_process_step != null">`audit_process_step` = #{audit_process_step},</if>
+			<if test="change_before != null">`change_before` = #{change_before}, </if>
+			<if test="change_after != null">`change_after` = #{change_after}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from audit_log where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from audit_log where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.MWorkMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.cost.model.MWork" id="mWorkMap">
+        <result property="work_id" column="work_id"/>
+        <result property="prj_no" column="prj_no"/>
+        <result property="work_prj" column="work_prj"/>
+        <result property="work_month" column="work_month"/>
+        <result property="team_no" column="team_no"/>
+        <result property="plan_rawout" column="plan_rawout"/>
+        <result property="plan_saleout" column="plan_saleout"/>
+        <result property="plan_dig" column="plan_dig"/>
+        <result property="occ_rawout" column="occ_rawout"/>
+        <result property="occ_saleout" column="occ_saleout"/>
+        <result property="occ_dig" column="occ_dig"/>
+        <result property="report_out" column="report_out"/>
+        <result property="remark" column="remark"/>
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 work_id
+		  ,  	  	     			 prj_no
+		  ,  	  	     			 work_prj
+		  ,  	  	     			 work_month
+		  ,  	  	     			 team_no
+		  ,  	  	     			 plan_rawout
+		  ,  	  	     			 plan_saleout
+		  ,  	  	     			 plan_dig
+		  ,  	  	     			 occ_rawout
+		  ,  	  	     			 occ_saleout
+		  ,  	  	     			 occ_dig
+		  ,  	  	     			 report_out
+		  ,  	  	     			 remark
+		  ,  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.cost.model.MWork">
+        select
+		work_id
+		,  	  	     			 prj_no
+		,o1.text as team_no_name
+		,  	  	     			 work_prj
+		,  	  	     			 work_month
+		,  	  	     			 team_no
+		,  	  	     			 plan_rawout
+		,  	  	     			 plan_saleout
+		,  	  	     			 plan_dig
+		,  	  	     			 occ_rawout
+		,  	  	     			 occ_saleout
+		,  	  	     			 occ_dig
+		,  	  	     			 report_out
+		,  	  	     			 m_work.remark
+		,  	  	     			 m_work.uuid
+		,  	  	     			 m_work.create_time
+		,  	  	     			 m_work.creator
+		,  	  	     			 m_work.creator_id
+		,  	  	     			 m_work.creator_org_id
+		,  	  	     			 m_work.modifier_id
+		,  	  	     			 m_work.modifier
+		,  	  	     			 m_work.modify_time
+        from m_work
+		LEFT JOIN sys_organization o1 ON m_work.team_no = o1.id
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.cost.model.MWork">
+		select  <include refid="Base_Column_List" />  from m_work where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.cost.model.MWork">
+		select  <include refid="Base_Column_List" />  from m_work
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from m_work 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.cost.model.MWork">
+		insert into m_work
+		(
+			`work_id`, 
+			`prj_no`, 
+			`work_prj`, 
+			`work_month`, 
+			`team_no`, 
+			`plan_rawout`, 
+			`plan_saleout`, 
+			`plan_dig`, 
+			`occ_rawout`, 
+			`occ_saleout`, 
+			`occ_dig`, 
+			`report_out`, 
+			`remark`, 
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`
+		)
+		values
+		(
+			#{work_id}, 
+			#{prj_no}, 
+			#{work_prj}, 
+			#{work_month}, 
+			#{team_no}, 
+			#{plan_rawout}, 
+			#{plan_saleout}, 
+			#{plan_dig}, 
+			#{occ_rawout}, 
+			#{occ_saleout}, 
+			#{occ_dig}, 
+			#{report_out}, 
+			#{remark}, 
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.cost.model.MWork">
+		update m_work 
+		<set>
+			<if test="work_id != null">`work_id` = #{work_id}, </if>
+			<if test="prj_no != null">`prj_no` = #{prj_no}, </if>
+			<if test="work_prj != null">`work_prj` = #{work_prj}, </if>
+			<if test="work_month != null">`work_month` = #{work_month}, </if>
+			<if test="team_no != null">`team_no` = #{team_no}, </if>
+			<if test="plan_rawout != null">`plan_rawout` = #{plan_rawout}, </if>
+			<if test="plan_saleout != null">`plan_saleout` = #{plan_saleout}, </if>
+			<if test="plan_dig != null">`plan_dig` = #{plan_dig}, </if>
+			<if test="occ_rawout != null">`occ_rawout` = #{occ_rawout}, </if>
+			<if test="occ_saleout != null">`occ_saleout` = #{occ_saleout}, </if>
+			<if test="occ_dig != null">`occ_dig` = #{occ_dig}, </if>
+			<if test="report_out != null">`report_out` = #{report_out}, </if>
+			<if test="remark != null">`remark` = #{remark}, </if>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from m_work where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from m_work where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+	
+	<select id="getMatAssessOutList" resultType="cn.ewsd.cost.model.MWork">
+		SELECT prj_no, occ_rawout, occ_saleout, occ_dig
+		FROM m_work
+		WHERE work_month &gt;= #{month1} AND work_month &lt;= #{month2} AND team_no=#{teamNo}
+	</select>
+	
+	<select id="getMatAssZhWorkList" resultType="cn.ewsd.cost.model.MWork">
+		SELECT prj_no, occ_dig
+		FROM m_work
+		WHERE work_month=#{workMonth} AND prj_no IN
+		<foreach collection="prjs.split(',')" item="prjNo" open="(" separator="," close=")">
+			#{prjNo}
+		</foreach>
+	</select>
+
+	<select id="getMatAssDcWorkList" resultType="cn.ewsd.cost.model.MWork">
+		SELECT team_no, CASE WHEN work_prj='' THEN '地坪' ELSE work_prj END work_prj, occ_dig
+		FROM m_work
+		WHERE work_month=#{occMonth} AND team_no IN
+		<foreach collection="teamNos.split(',')" item="teamNo" open="(" separator="," close=")">
+			#{teamNo}
+		</foreach>
+	</select>
+
+	<select id="getMatAssTyWorkList" resultType="cn.ewsd.cost.model.MWork">
+		SELECT team_no, prj_no, occ_rawout, occ_saleout, occ_dig
+		FROM m_work WHERE work_month=#{_parameter}
+	</select>
+	
+	<select id="getRationAnalWorkList" resultType="cn.ewsd.cost.model.MWork">
+		SELECT LEFT(work_month, 4) work_month, SUM(occ_saleout/10000) occ_saleout, SUM(plan_dig) plan_dig, SUM(occ_rawout/10000) occ_rawout
+		FROM m_work
+		WHERE team_no=18
+		GROUP BY LEFT(work_month, 4)
+	</select>
+</mapper>

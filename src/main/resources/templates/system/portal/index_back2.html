@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.w3.org/1999/xhtml" xmlns:ewsd="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <!-- 避免IE使用兼容模式 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+    <meta name="renderer" content="webkit">
+    <title></title>
+    <link type="text/css" href="/public/css/font.css" rel="stylesheet"/>
+    <link type="text/css" href="/public/css/main.css" rel="stylesheet"/>
+    <!-- TopJUI框架样式 -->
+    <!--<link type="text/css" href="${staticServer}/topjui/css/topjui.core.min.css" rel="stylesheet">
+    <link type="text/css" href="${staticServer}/topjui/themes/default/topjui.blue.css" rel="stylesheet" id="dynamicTheme"/>-->
+    <!-- FontAwesome字体图标 -->
+    <link type="text/css" href="/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
+    <!-- layui框架样式 -->
+    <link type="text/css" href="/plugins/layui/css/layui.css" rel="stylesheet"/>
+    <!-- jQuery相关引用 -->
+    <script type="text/javascript" src="/plugins/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/plugins/jquery/jquery.cookie.js"></script>
+    <!-- TopJUI框架配置 -->
+    <script type="text/javascript" src="/public/js/topjui.config.js"></script>
+    <!-- TopJUI框架核心-->
+    <script type="text/javascript" src="/topjui/js/topjui.core.min.js"></script>
+    <!-- TopJUI中文支持 -->
+    <script type="text/javascript" src="/topjui/js/locale/topjui.lang.zh_CN.js"></script>
+
+    <script type="text/javascript" src="/plugins/echarts/echarts.min.js"></script>
+
+    <!--<script type="text/javascript" src="/public/font_32ee7hlhta/iconfont.js"></script>
+
+    <link rel="stylesheet" href="/public/font_32ee7hlhta/iconfont.css">-->
+
+    <style>
+        body {
+            font: 12px/normal "microsoft yahei", "Times New Roman", "宋体", Times, serif;
+            margin: 5px;
+        }
+
+        blockquote p {
+            padding: 5px;
+        }
+
+        .layui-table {
+            margin-top: 0 !important;
+        }
+
+        .layui-elem-quote {
+            margin-bottom: 0 !important;
+        }
+
+        .layui-table {
+            margin-top: 0;
+            border-left: 5px solid #e2e2e2 !important;
+        }
+
+        .layui-table td, .layui-table th {
+            font-size: 12px;
+        }
+
+        .title .icon-new1 {
+            margin-left: 10px;
+            color: #f00;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="layui-container-fluid">
+
+    <div class="panel_box row">
+        <div class="panel col" style="width: 24%">
+            <a href="javascript:;">
+                <div class="panel_icon">
+                    <svg t="1622108306610" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6827" width="50" height="50"><path d="M490.666667 533.333333v256a64 64 0 0 1-64 64h-192a64 64 0 0 1-64-64v-192a64 64 0 0 1 64-64h256z m298.666666 0a64 64 0 0 1 64 64v192a64 64 0 0 1-64 64h-192a64 64 0 0 1-64-64V533.333333h256z m-362.666666 64h-192v192h192v-192z m362.666666 0h-192v192h192v-192zM426.666667 170.666667a64 64 0 0 1 64 64v256H234.666667a64 64 0 0 1-64-64v-192a64 64 0 0 1 64-64h192z m266.666666 0a160 160 0 1 1 0 320 160 160 0 0 1 0-320zM426.666667 234.666667h-192v192h192v-192z m266.666666 0a96 96 0 1 0 0 192 96 96 0 0 0 0-192z" p-id="6828" fill="#ffffff"></path></svg>
+                </div>
+                <div class="panel_word newMessage">
+                    <span>127.35元/吨</span>
+                    <cite>完全成本</cite>
+                </div>
+            </a>
+        </div>
+        <div class="panel col" style="width: 24%">
+            <a href="javascript:;">
+                <div class="panel_icon" style="background-color:#FF5722;">
+                    <svg t="1622108693801" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6993" width="50" height="50"><path d="M516.757333 149.333333a120.896 120.896 0 0 1 114.005334 161.173334h104.064a64 64 0 0 1 64 64V810.666667a64 64 0 0 1-64 64H298.666667a64 64 0 0 1-64-64v-87.104c0-15.701333 11.989333-28.629333 27.306666-30.08l2.922667-0.149334a90.666667 90.666667 0 0 0 4.394667-181.226666L264.896 512a30.229333 30.229333 0 0 1-30.08-27.306667L234.666667 481.749333v-107.242666a64 64 0 0 1 64-64h104.064a120.704 120.704 0 0 1-6.869334-40.32C395.861333 184.746667 431.274667 149.333333 516.757333 149.333333z m0 64a56.896 56.896 0 0 0-53.674666 75.861334l30.144 85.312H298.666667v77.184a154.730667 154.730667 0 0 1 5.162666 300.693333l-5.162666 1.258667V810.666667h436.16V374.528l-194.56-0.021333 30.144-85.333334A56.896 56.896 0 0 0 516.736 213.333333z" p-id="6994" fill="#ffffff"></path></svg>
+                </div>
+                <div class="panel_word newMessage">
+                    <span>15.75</span>
+                    <cite>吨煤材料单耗</cite>
+                </div>
+            </a>
+        </div>
+        <div class="panel col" style="width: 24%">
+            <a href="javascript:;">
+                <div class="panel_icon" style="background-color:#009688;">
+                    <svg t="1622108744099" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7228" width="50" height="50"><path d="M362.666667 149.333333v149.333334h149.333333V149.333333h64v149.333334h64a64 64 0 0 1 64 64v42.666666a64 64 0 0 1-64 64v149.333334a64 64 0 0 1-64 64l-105.472 0.021333C479.872 756.010667 522.581333 789.333333 608 789.333333c63.744 0 89.066667-27.584 106.666667-95.850666 1.066667-4.138667 2.133333-8.448 3.264-13.333334l1.173333-5.056 5.738667-25.386666c8.512-36.650667 15.210667-55.338667 28.842666-72.362667 32.96-41.216 75.370667-63.445333 125.12-65.237333L885.333333 512v64c-32.746667 0-59.2 13.226667-81.685333 41.322667-5.674667 7.104-10.304 20.330667-16.682667 47.786666l-1.216 5.333334-5.504 24.384-2.410666 9.962666-1.173334 4.672-1.621333 6.037334C750.506667 805.098667 704.128 853.333333 608 853.333333c-120.042667 0-190.762667-59.306667-201.877333-170.666666H298.666667a64 64 0 0 1-64-64v-149.333334a64 64 0 0 1-64-64v-42.666666a64 64 0 0 1 64-64h64V149.333333h64z m213.333333 320H298.666667v149.333334h277.333333v-149.333334z m64-106.666666H234.666667v42.666666h405.333333v-42.666666z" p-id="7229" fill="#ffffff"></path></svg>
+                </div>
+                <div class="panel_word newMessage">
+                    <span>0</span>
+                    <cite>吨煤电耗</cite>
+                </div>
+            </a>
+        </div>
+        <div class="panel col" style="width: 24%">
+            <a href="javascript:;">
+                <div class="panel_icon" style="background-color:#5FB878;">
+                    <svg t="1622108764090" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="7429" width="50" height="50"><path d="M675.861333 192l45.610667 44.906667-166.997333 169.6h237.525333v64H544v144.597333h248v64H544v176.597333h-64v-176.597333H232v-64H480v-144.597333H232v-64h237.482667l-166.954667-169.6L348.138667 192 512 358.464 675.861333 192z" p-id="7430" fill="#ffffff"></path></svg>
+                </div>
+                <div class="panel_word newMessage">
+                    <span>64825940.98</span>
+                    <cite>年度累计消耗</cite>
+                </div>
+            </a>
+        </div>
+        <!--<div class="panel col">
+            <a href="javascript:;" data-url="page/news/newsList.html">
+                <div class="panel_icon" style="background-color:#F7B824;">
+                    <i class="iconfont icon-wenben" data-icon="icon-wenben"></i>
+                </div>
+                <div class="panel_word waitNews">
+                    <span>26513396.84</span>
+                    <cite>当月消耗</cite>
+                </div>
+            </a>
+        </div>-->
+
+    </div>
+
+    <div class="layui-row layui-col-space10">
+        <div class="layui-col-md8">
+            <blockquote class="layui-elem-quote title">月度费用消耗</blockquote>
+            <table class="layui-table" lay-skin="line">
+                <tbody>
+                <tr>
+                    <td>
+                        <div id="ydfyxh" style="height:400px;width: 99%;"></div>
+                            <script type="text/javascript">
+                                var myChart = echarts.init(document.getElementById('ydfyxh'));
+                                var option = {
+                                    tooltip: {
+                                        trigger: 'axis'
+                                    },
+                                    xAxis: {
+                                        type: 'category',
+                                        data: ['202101', '202102', '202103', '202104', '202105', '202106', '202107', '202108', '202109', '202110', '202111', '202112']
+                                    },
+                                    yAxis: {
+                                        type: 'value'
+                                    },
+                                    series: [{
+                                        data: [150, 230, 224, 218, 135, 147, 260, 224, 218, 135, 147, 260],
+                                        type: 'line'
+                                    }]
+                                };
+                                myChart.setOption(option);
+                            </script>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="layui-col-md4">
+            <blockquote class="layui-elem-quote title">季度费用消耗</blockquote>
+            <table class="layui-table" lay-skin="line">
+                <tbody>
+                <tr>
+                    <td>
+                        <div id="jdfyxh" style="height:400px;width: 99%;"></div>
+                        <script type="text/javascript">
+                var myChart = echarts.init(document.getElementById('jdfyxh'));
+                var option = {
+                    tooltip: {
+                        trigger: 'item'
+                    },
+                    radar: {
+                        // shape: 'circle',
+                        indicator: [
+                            { name: '一季度', max: 5000},
+                            { name: '二季度', max: 5000},
+                            { name: '三季度', max: 5000},
+                            { name: '四季度', max: 5000}
+                        ]
+                    },
+                    series: [{
+                        name: '费用消耗',
+                        type: 'radar',
+                        data: [
+                            {
+                                value: [2335, 1267, 0, 0],
+                                name: '费用'
+                            }
+                        ]
+                    }]
+                };
+                myChart.setOption(option);
+            </script>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="layui-row layui-col-space10">
+        <div class="layui-col-md4">
+            <blockquote class="layui-elem-quote title">科室费用分析</blockquote>
+            <table class="layui-table" lay-skin="line">
+                <tbody>
+                <tr>
+                    <th style="text-align: center" >分管科室</th>
+                    <th style="text-align: center" >预算金额</th>
+                    <th style="text-align: center" >累计消耗</th>
+                    <th style="text-align: center" >剩余费用</th>
+                <tr>
+                <tr>
+                    <td style="text-align: center" rowspan="1" colspan="1">机电管理科</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">124,71.44</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">4,829.54</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">7,641.9</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center" rowspan="1" colspan="1">安全监察科（环保科）</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">854.07</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">15.45</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">838.62</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center" rowspan="1" colspan="1">生产技术科</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">68,095.91</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">8,522.21</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">59,573.7</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center" rowspan="1" colspan="1">地质测量科</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">854.07</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">15.45</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">838.62</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center" rowspan="1" colspan="1">调度室</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">854.07</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">15.45</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">838.62</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center" rowspan="1" colspan="1">通防科</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">854.07</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">15.45</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">838.62</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center" rowspan="1" colspan="1">综合办公室（党群工作科）</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">854.07</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">15.45</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">838.62</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center" rowspan="1" colspan="1">组织科</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">854.07</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">15.45</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">838.62</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center" rowspan="1" colspan="1">财务科</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">854.07</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">15.45</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">838.62</td>
+                </tr>
+                <tr>
+                    <td style="text-align: center" rowspan="1" colspan="1">经营管理科</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">854.07</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">15.45</td>
+                    <td style="text-align: right" rowspan="1" colspan="1">838.62</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="layui-col-md8">
+            <blockquote class="layui-elem-quote title">物资材料费用消耗情况</blockquote>
+            <table class="layui-table" lay-skin="line">
+                <tbody>
+                <tr>
+                    <td align="left">
+                        <div id="wzclfyxh" style="height:400px;width: 99%;"></div>
+                        <script type="text/javascript">
+                            var myChart = echarts.init(document.getElementById('wzclfyxh'));
+                            var option = {
+                                xAxis: {
+                                    type: 'category',
+                                    data: ['202101', '202102', '202103', '202104', '202105', '202106', '202107', '202108', '202109', '202110', '202111', '202112']
+                                },
+                                tooltip: {
+                                    trigger: 'axis',
+                                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                                    }
+                                },
+                                yAxis: {
+                                    type: 'value'
+                                },
+                                series: [{
+                                    data: [120, 200, 150, 80, 70, 110, 130, 150, 80, 70, 110, 130],
+                                    type: 'bar',
+                                    itemStyle: {
+                                        color: '#009688'
+                                    },
+                                }]
+                            };
+                            myChart.setOption(option);
+                        </script>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+<script type="text/javascript" src="/plugins/echarts/echarts.min.js"></script>
+
+
+<!--thymleaf js获取变量-->
+<script th:inline="javascript">
+    var userNameId = [[${userInfo.userNameId}]];
+</script>
+<!--建立websocket链接-->
+<!--<script src="/webjars/sockjs-client/1.1.2/sockjs.min.js"></script>-->
+<!--<script src="/webjars/stomp-websocket/2.3.3-1/stomp.min.js"></script>-->
+<!-- layui框架js -->
+<script src="/plugins/layui/layui.js" charset="utf-8"></script>
+<!--<script type="text/javascript" src="/public/js/topjui.im.js" charset="utf-8"></script>-->
+
+<!--<script type="text/javascript" src="/public/js/message.js"></script>-->
+
+
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <table data-toggle="topjui-datagrid"
+                   data-options="id:'sysUserSignDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/mdata/sysUserSign/getPageSet'">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'用户签名',sortable:true,checkbox:true"></th>
+					<th data-options="field:'operate',title:'操作',formatter:operateFormatter"></th>
+                    <th data-options="field:'createTime',title:'签名时间',sortable:true"></th>
+                    <th data-options="field:'userNameId',title:'用户编号',sortable:true"></th>
+                    <th data-options="field:'userName',title:'姓名',sortable:true"></th>
+                    <!--<th data-options="field:'signBase64',title:'',sortable:true"></th>
+                    <th data-options="field:'signPath',title:'',sortable:true"></th>
+                    <th data-options="field:'signUrl',title:'',sortable:true"></th>-->
+                    <th data-options="field:'note',title:'备注',sortable:true"></th>
+                    <th data-options="field:'type',title:'类型',sortable:true,
+                                formatter:function(value,row,index){
+                                if (value == '1') {
+                                 return '签名';
+                                } else if (value == '2') {
+                                    return '印章';
+                                } else {
+                                    return '--';
+                                }
+                            }"></th>
+                    <th data-options="field:'status',title:'状态',sortable:true,
+                                formatter:function(value,row,index){
+                                if (value == '0') {
+                                 return '历史';
+                                } else if (value == '1') {
+                                    return '在用';
+                                } else {
+                                    return '--';
+                                }
+                            }"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- 表格工具栏 -->
+    <div id="sysUserSignDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'sysUserSignDg'
+       }" style="display:none">
+        <ewsd:rbac str="sysUserSignAddDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#sysUserSignDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'sysUserSignAddDg',
+               href:'/mdata/sysUserSign/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/mdata/sysUserSign/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增签名</a>
+        </ewsd:rbac>
+
+        <!--<ewsd:rbac str="sysUserSignEditDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#sysUserSignDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'sysUserSignEditDg',
+               href:'/mdata/sysUserSign/edit',
+               url:'/mdata/sysUserSign/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/mdata/sysUserSign/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'sysUserSignDg'}]}
+               ]
+           }">编辑</a>
+        </ewsd:rbac>-->
+
+        <ewsd:rbac str="/mdata/sysUserSign/deleteBatch">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'doAjax',
+           extend:'#sysUserSignDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的数据',param:'uuid:uuid'},
+	       url:'/mdata/sysUserSign/deleteBatch'">删除</a>
+        </ewsd:rbac>
+        <!--<a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#sysUserSignDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#sysUserSignDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>-->
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script>
+		function operateFormatter(value, row, index) {
+			var htmlstr = '';
+            htmlstr += '<button class="layui-btn layui-btn-xs" onclick="showSignature(\'' + row.uuid + '\')">查看签名</button>';
+			return htmlstr;
+		}
+		//查看签名
+		function showSignature(uuid) {
+			var buttonsArr = [];
+			var closeBtnJson = {
+				text: '关闭',
+				iconCls: 'fa fa-close',
+				btnCls: 'topjui-btn-red',
+				handler: function () {
+					$('#' + opts.id).iDialog('close');
+				}
+			};
+			buttonsArr.push(closeBtnJson);
+			var opts = {
+				id: 'commentDialog',
+				title: ' 查看签名',
+				width: 750,
+				height: 300,
+				href:'/mdata/sysUserSign/goSignDetail?uuid=' + uuid,
+				buttons: buttonsArr
+			};
+			$('#' + opts.id).iDialog('openDialog', opts);
+		}
+	</script>
+</th:block>
+</body>
+</html>

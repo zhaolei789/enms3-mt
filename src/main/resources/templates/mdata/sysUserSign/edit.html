@@ -1,0 +1,56 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<script src="/public/sign/jSignature.min.js"></script>
+<input type="hidden" id="uuid" name="uuid">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+		<div class="topjui-col-sm12">
+			<label class="topjui-form-label">签字</label>
+			<div class="topjui-input-block">
+				<div id="signature"></div>
+			</div>
+		</div>
+		<div class="topjui-col-sm12">
+			<label class="topjui-form-label"></label>
+			<div class="topjui-input-block">
+				<a id="btn" data-toggle="topjui-linkbutton" data-options="iconCls:'fa fa-undo',onClick:signatureClean">清除</a>
+				<input type="hidden" name="signBase64" id="signBase64">
+			</div>
+		</div>
+	</div>
+    <div class="topjui-row">
+        <div class="topjui-col-sm12">
+            <label class="topjui-form-label">备注</label>
+            <div class="topjui-input-block">
+                <input type="text" name="note"
+                       data-toggle="topjui-textarea"
+                       data-options="prompt:'填写备注信息'">
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+	$(document).ready(function() {
+		$("#signature").jSignature({
+			"decor-color":"transparent"
+		})
+	})
+	function signatureClean(){
+		$("#signature").jSignature("reset");
+	}
+	$("#signature").bind('change', function(e){
+		var signBase64Str = "data:";
+		var signBase64 = $("#signature").jSignature("getData", "image");
+		for (let i = 0; i < signBase64.length; i++) {
+			if(i==0){
+				signBase64Str += signBase64[i];
+			}else {
+				signBase64Str += ","+signBase64[i];
+			}
+		}
+		$("#signBase64").val(signBase64Str);
+	})
+</script>

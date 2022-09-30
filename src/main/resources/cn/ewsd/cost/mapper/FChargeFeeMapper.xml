@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.FChargeFeeMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.cost.model.FChargeFee" id="fChargeFeeMap">
+        <result property="fee_id" column="fee_id"/>
+        <result property="leader" column="leader"/>
+        <result property="team_no" column="team_no"/>
+        <result property="if_office" column="if_office"/>
+        <result property="item_id" column="item_id"/>
+        <result property="item_name" column="item_name"/>
+        <result property="calc_way" column="calc_way"/>
+        <result property="year_bud" column="year_bud"/>
+        <result property="norm_price" column="norm_price"/>
+        <result property="f_month" column="f_month"/>
+        <result property="report_team" column="report_team"/>
+        <result property="month_bud" column="month_bud"/>
+        <result property="last_bala" column="last_bala"/>
+        <result property="month_bala" column="month_bala"/>
+        <result property="finance_bala" column="finance_bala"/>
+        <result property="month_assess" column="month_assess"/>
+        <result property="diff_bala" column="diff_bala"/>
+        <result property="diff_scale" column="diff_scale"/>
+        <result property="sum_bala" column="sum_bala"/>
+        <result property="surplus_bala" column="surplus_bala"/>
+        <result property="remark" column="remark"/>
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+		<result property="item_type" column="item_type"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 fee_id
+		  ,  	  	     			 leader
+		  ,  	  	     			 team_no
+		  ,  	  	     			 if_office
+		  ,  	  	     			 item_id
+		  ,  	  	     			 item_name
+		  ,  	  	     			 calc_way
+		  ,  	  	     			 year_bud
+		  ,  	  	     			 norm_price
+		  ,  	  	     			 f_month
+		  ,  	  	     			 report_team
+		  ,  	  	     			 month_bud
+		  ,  	  	     			 last_bala
+		  ,  	  	     			 month_bala
+		  ,  	  	     			 finance_bala
+		  ,  	  	     			 month_assess
+		  ,  	  	     			 diff_bala
+		  ,  	  	     			 diff_scale
+		  ,  	  	     			 sum_bala
+		  ,  	  	     			 surplus_bala
+		  ,  	  	     			 remark
+		  ,  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		,item_type
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.cost.model.FChargeFee">
+        select
+		a.fee_id
+		,  	  	     			 a.leader
+		,  	  	     			 a.team_no
+		,o1.text as team_no_name
+		,  	  	     			 a.if_office
+		,  	  	     			 a.item_id
+		,  	  	     			 a.item_name
+		,  	  	     			 a.calc_way
+		,  	  	     			 a.year_bud/10000 as year_bud
+		,  	  	     			 a.norm_price
+		,  	  	     			 a.f_month
+		,  	  	     			 a.report_team
+		,o2.text as report_team_name
+		,  	  	     			 a.month_bud
+		,  	  	     			 a.last_bala
+		,  	  	     			 a.month_bala
+		,  	  	     			 a.finance_bala
+		,  	  	     			 a.month_assess
+		,  	  	     			 a.diff_bala
+		,  	  	     			 a.diff_scale
+		,  	  	     			 a.sum_bala
+		,  	  	     			 a.surplus_bala
+		,  	  	     			 a.remark
+		,  	  	     			 a.uuid
+		,  	  	     			 a.create_time
+		,  	  	     			 a.creator
+		,  	  	     			 a.creator_id
+		,  	  	     			 a.creator_org_id
+		,  	  	     			 a.modifier_id
+		,  	  	     			 a.modifier
+		,  	  	     			 a.modify_time
+        ,fi.ass_period
+        ,a.item_type
+        from f_charge_fee a
+		LEFT JOIN f_item fi ON a.item_id=fi.uuid
+		JOIN sys_organization o1 ON a.team_no = o1.id
+		JOIN sys_organization o2 ON a.report_team = o2.id
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="getPageSetSbCw" resultType="cn.ewsd.cost.model.FChargeFee">
+		select
+		a.fee_id
+		,  	  	     			 a.leader
+		,  	  	     			 a.team_no
+		,o1.text as team_no_name
+		,  	  	     			 a.if_office
+		,  	  	     			 a.item_id
+		,  	  	     			 a.item_name
+		,  	  	     			 a.calc_way
+		,  	  	     			 a.year_bud/10000 as year_bud
+		,  	  	     			 a.norm_price
+		,  	  	     			 a.f_month
+		,  	  	     			 a.report_team
+		,o2.text as report_team_name
+		,  	  	     			 a.month_bud
+		,  	  	     			 a.last_bala
+		,  	  	     			 a.month_bala
+		<if test="queryMonth != null">
+		,(select a2.finance_bala FROM f_charge_fee a2 where a2.f_month = ${queryMonth} and a2.team_no = a.team_no and a2.item_id = a.item_id and a2.leader = a.leader)/10000 as finance_bala
+		</if>
+		,  	  	     			 a.month_assess
+		,  	  	     			 a.diff_bala
+		,  	  	     			 a.diff_scale
+		,  	  	     			 a.sum_bala
+		,  	  	     			 a.surplus_bala
+		,  	  	     			 a.remark
+		,  	  	     			 a.uuid
+		,  	  	     			 a.create_time
+		,  	  	     			 a.creator
+		,  	  	     			 a.creator_id
+		,  	  	     			 a.creator_org_id
+		,  	  	     			 a.modifier_id
+		,  	  	     			 a.modifier
+		,  	  	     			 a.modify_time
+		,fi.ass_period
+		,a.item_type
+		from f_charge_fee a
+		LEFT JOIN f_item fi ON a.item_id=fi.uuid
+		JOIN sys_organization o1 ON a.team_no = o1.id
+		JOIN sys_organization o2 ON a.report_team = o2.id
+		<where>
+			<if test="filterSort != null">
+				${filterSort}
+			</if>
+		</where>
+	</select>
+
+	<select id="getPageSetSbFs" resultType="cn.ewsd.cost.model.FChargeFee">
+		select
+		a.fee_id
+		,  	  	     			 a.leader
+		,  	  	     			 a.team_no
+		,o1.text as team_no_name
+		,  	  	     			 a.if_office
+		,  	  	     			 a.item_id
+		,  	  	     			 a.item_name
+		,  	  	     			 a.calc_way
+		,  	  	     			 a.year_bud/10000 as year_bud
+		,  	  	     			 a.norm_price
+		,  	  	     			 a.f_month
+		,  	  	     			 a.report_team
+		,o2.text as report_team_name
+		,  	  	     			 a.month_bud
+		,  	  	     			 a.last_bala
+		,  	  	     			 a.finance_bala
+		<if test="queryMonth != null">
+			,(select a2.month_bala FROM f_charge_fee a2 where a2.f_month = ${queryMonth} and a2.team_no = a.team_no and a2.item_id = a.item_id and a2.leader = a.leader)/10000 as month_bala
+		</if>
+		,  	  	     			 a.month_assess
+		,  	  	     			 a.diff_bala
+		,  	  	     			 a.diff_scale
+		,  	  	     			 a.sum_bala
+		,  	  	     			 a.surplus_bala
+		,  	  	     			 a.remark
+		,  	  	     			 a.uuid
+		,  	  	     			 a.create_time
+		,  	  	     			 a.creator
+		,  	  	     			 a.creator_id
+		,  	  	     			 a.creator_org_id
+		,  	  	     			 a.modifier_id
+		,  	  	     			 a.modifier
+		,  	  	     			 a.modify_time
+		,fi.ass_period
+		,a.item_type
+		from f_charge_fee a
+		LEFT JOIN f_item fi ON a.item_id=fi.uuid
+		LEFT JOIN sys_organization o1 ON a.team_no = o1.id
+		LEFT JOIN sys_organization o2 ON a.report_team = o2.id
+		<where>
+			<if test="filterSort != null">
+				${filterSort}
+			</if>
+		</where>
+	</select>
+
+	<select id="getPageSetSettle" resultType="cn.ewsd.cost.model.FChargeFee">
+		select
+		a.fee_id
+		,  	  	     			 a.leader
+		,(select user_name FROM bar_master WHERE a.leader=uuid) leader_name
+		,  	  	     			 a.team_no
+		,o1.text as team_no_name
+		,  	  	     			 a.if_office
+		,  	  	     			 a.item_id
+		,  	  	     			 fi.item_name
+		,  	  	     			 fy.calc_way
+		,  	  	     			 IFNULL(fy.norm_price, 0) norm_price
+		,  	  	     			 a.f_month
+		,  	  	     			 a.report_team
+		,  	  	     			 IFNULL(a.month_bud/10000, 0) as month_bud
+		,  	  	     			 IFNULL(a.last_bala/10000, 0) as last_bala
+		,						 IFNULL(a.month_bala/10000, 0) as month_bala
+		,  	  	     			 IFNULL(a.finance_bala/10000, 0) as finance_bala
+		,  	  	     			 IFNULL(a.month_assess/10000, 0) as month_assess
+		,  	  	     			 IFNULL(a.diff_bala/10000, 0) as diff_bala
+		,  	  	     			 IFNULL(a.diff_scale, 0) diff_scale
+		,  	  	     			 IFNULL(a.sum_bala/10000, 0) as sum_bala
+		,  	  	     			 IFNULL(a.surplus_bala/10000, 0) as surplus_bala
+		,						 IFNULL(fy.year_bud/10000, 0) as year_bud
+		, fy.remark
+		,  	  	     			 a.uuid
+		,  	  	     			 a.create_time
+		,  	  	     			 a.creator
+		,  	  	     			 a.creator_id
+		,  	  	     			 a.creator_org_id
+		,  	  	     			 a.modifier_id
+		,  	  	     			 a.modifier
+		,  	  	     			 a.modify_time
+		,fi.ass_period
+		,a.item_type
+		from f_charge_fee a
+		LEFT JOIN f_item fi ON a.item_id=fi.uuid
+		LEFT JOIN sys_organization o1 ON a.team_no = o1.id
+		LEFT JOIN f_charge_fee fy ON a.leader=fy.leader AND a.item_id=fy.item_id AND a.team_no=fy.team_no AND fy.f_month=${fMonth}
+		<where>
+			<if test="filterSort != null">
+				${filterSort}
+			</if>
+		</where>
+	</select>
+	
+	<select id="getSettleSum" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT a.leader, a.team_no, a.item_id, SUM(a.month_bala)/10000 sum_bala, SUM(a.finance_bala)/10000 sum_finc
+		FROM f_charge_fee a
+		WHERE a.f_month LIKE CONCAT(#{_parameter}, '%') AND LENGTH(a.f_month)=6
+		GROUP BY a.leader, a.team_no, a.item_id
+	</select>
+
+	<select id="queryObject" resultType="cn.ewsd.cost.model.FChargeFee">
+		select  <include refid="Base_Column_List" />  from f_charge_fee where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.cost.model.FChargeFee">
+		select  <include refid="Base_Column_List" />  from f_charge_fee
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from f_charge_fee 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.cost.model.FChargeFee">
+		insert into f_charge_fee
+		(
+			`fee_id`, 
+			`leader`, 
+			`team_no`, 
+			`if_office`, 
+			`item_id`, 
+			`item_name`, 
+			`calc_way`, 
+			`year_bud`, 
+			`norm_price`, 
+			`f_month`, 
+			`report_team`, 
+			`month_bud`, 
+			`last_bala`, 
+			`month_bala`, 
+			`finance_bala`, 
+			`month_assess`, 
+			`diff_bala`, 
+			`diff_scale`, 
+			`sum_bala`, 
+			`surplus_bala`, 
+			`remark`, 
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`,
+		 	`item_type`
+		)
+		values
+		(
+			#{fee_id}, 
+			#{leader}, 
+			#{team_no}, 
+			#{if_office}, 
+			#{item_id}, 
+			#{item_name}, 
+			#{calc_way}, 
+			#{year_bud}, 
+			#{norm_price}, 
+			#{f_month}, 
+			#{report_team}, 
+			#{month_bud}, 
+			#{last_bala}, 
+			#{month_bala}, 
+			#{finance_bala}, 
+			#{month_assess}, 
+			#{diff_bala}, 
+			#{diff_scale}, 
+			#{sum_bala}, 
+			#{surplus_bala}, 
+			#{remark}, 
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time},
+		 	#{item_type}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.cost.model.FChargeFee">
+		update f_charge_fee 
+		<set>
+			<if test="fee_id != null">`fee_id` = #{fee_id}, </if>
+			<if test="leader != null">`leader` = #{leader}, </if>
+			<if test="team_no != null">`team_no` = #{team_no}, </if>
+			<if test="if_office != null">`if_office` = #{if_office}, </if>
+			<if test="item_id != null">`item_id` = #{item_id}, </if>
+			<if test="item_name != null">`item_name` = #{item_name}, </if>
+			<if test="calc_way != null">`calc_way` = #{calc_way}, </if>
+			<if test="year_bud != null">`year_bud` = #{year_bud}, </if>
+			<if test="norm_price != null">`norm_price` = #{norm_price}, </if>
+			<if test="f_month != null">`f_month` = #{f_month}, </if>
+			<if test="report_team != null">`report_team` = #{report_team}, </if>
+			<if test="month_bud != null">`month_bud` = #{month_bud}, </if>
+			<if test="last_bala != null">`last_bala` = #{last_bala}, </if>
+			<if test="month_bala != null">`month_bala` = #{month_bala}, </if>
+			<if test="finance_bala != null">`finance_bala` = #{finance_bala}, </if>
+			<if test="month_assess != null">`month_assess` = #{month_assess}, </if>
+			<if test="diff_bala != null">`diff_bala` = #{diff_bala}, </if>
+			<if test="diff_scale != null">`diff_scale` = #{diff_scale}, </if>
+			<if test="sum_bala != null">`sum_bala` = #{sum_bala}, </if>
+			<if test="surplus_bala != null">`surplus_bala` = #{surplus_bala}, </if>
+			<if test="remark != null">`remark` = #{remark}, </if>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time},</if>
+			<if test="item_type != null">`item_type` = #{item_type}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from f_charge_fee where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from f_charge_fee where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+	<select id="getLeaderSumYearBudList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.leader, (SELECT user_name FROM bar_master WHERE fy.leader=uuid) leader_name, SUM(fy.year_bud)/10000 year_bud
+		FROM f_charge_fee fy
+		WHERE fy.f_month=#{yearQry} AND EXISTS (SELECT '1' FROM sys_user_bar_master WHERE master_id=fy.leader AND user_id=#{userId})
+		GROUP BY fy.leader
+	</select>
+
+	<select id="getLeaderSumMonthBudList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT a.leader, SUM(a.month_bala)/10000 month_bala, SUM(a.month_assess)/10000 assess_bala, SUM(a.month_bud)/10000 month_bud
+		FROM f_charge_fee a
+		WHERE a.f_month &gt;= #{month1} AND a.f_month &lt;= #{month2}
+		GROUP BY a.leader
+	</select>
+
+	<select id="getLeaderSumLJFS" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT a.leader, SUM(a.month_bala)/10000 bala
+		FROM f_charge_fee a
+		WHERE a.f_month &gt;= #{month1} AND a.f_month &lt;= #{month2} AND LEFT(a.f_month,4)=#{yearQry} AND CHAR_LENGTH(a.f_month)=6
+		GROUP BY a.leader
+	</select>
+	
+	<select id="getLeaderSumDetailYearList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.team_no, SUM(fy.year_bud)/10000 year_bud, (SELECT text FROM sys_organization WHERE id=fy.team_no) team_name
+		FROM f_charge_fee fy
+		WHERE fy.f_month=#{yearQry} AND fy.leader=#{leader}
+		GROUP BY fy.team_no
+	</select>
+
+	<select id="getLeaderSumDeptYearList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.item_id, fy.calc_way, fy.item_name,
+			   SUM(fy.year_bud)/10000 year_bud,
+			   (SELECT text FROM sys_dic_item WHERE value=fy.calc_way) calc_way_name
+		FROM f_charge_fee fy
+		WHERE fy.f_month=#{yearQry} AND fy.leader=#{leader} AND fy.team_no=#{teamNo}
+		GROUP BY fy.item_id, fy.calc_way, fy.item_name
+	</select>
+
+	<select id="getLeaderSumDetailMonthList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.team_no, SUM(fy.month_bud)/10000 month_bud,
+			   SUM(fy.month_bala)/10000 month_bala, SUM(fy.finance_bala)/10000 finance_bala
+		FROM f_charge_fee fy
+		WHERE fy.f_month &gt;= #{month1} AND fy.f_month &lt;= #{month2} AND fy.leader=#{leader}
+		GROUP BY fy.team_no
+	</select>
+
+	<select id="getLeaderSumDeptMonthList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.item_id, SUM(fy.month_bud)/10000 month_bud,
+			   SUM(fy.month_bala)/10000 month_bala, SUM(fy.finance_bala)/10000 finance_bala
+		FROM f_charge_fee fy
+		WHERE fy.f_month &gt;= #{month1} AND fy.f_month &lt;= #{month2} AND fy.leader=#{leader} AND fy.team_no=#{teamNo}
+		GROUP BY fy.item_id
+	</select>
+
+	<select id="getDeptSumYearList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.team_no, SUM(fy.year_bud)/10000 year_bud, (SELECT text FROM sys_organization WHERE id=fy.team_no) team_name
+		FROM f_charge_fee fy
+		WHERE fy.f_month=#{yearQry} AND fy.if_office='1' AND fy.team_no IN
+		<foreach collection="userDeptIds.split(',')" item="userDept" open="(" separator="," close=")">
+			#{userDept}
+		</foreach>
+		GROUP BY fy.team_no
+	</select>
+
+	<select id="getDeptSumMonthList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.team_no,  IFNULL(SUM(a.month_bala), 0) month_bala, IFNULL(SUM(a.assess_bala), 0) assess_bala, IFNULL(SUM(a.month_bud), 0) month_bud
+		FROM f_charge_fee fy
+		LEFT JOIN (SELECT team_no, leader, item_id, SUM(month_bala)/10000 month_bala, SUM(month_assess)/10000 assess_bala, SUM(month_bud)/10000 month_bud
+				   FROM f_charge_fee
+				   WHERE f_month &gt;= #{month1} AND f_month &lt;= #{month2} AND CHAR_LENGTH(f_month)=6 AND LEFT(f_month,4)=#{yearQry} AND if_office='1'
+				   GROUP BY team_no, leader, item_id) a ON fy.leader=a.leader AND fy.item_id=a.item_id AND fy.team_no=a.team_no
+		WHERE fy.f_month=#{yearQry} AND fy.if_office='1' AND fy.team_no IN
+		<foreach collection="userDeptIds.split(',')" item="userDept" open="(" separator="," close=")">
+			#{userDept}
+		</foreach>
+		GROUP BY fy.team_no
+	</select>
+
+	<select id="getDeptSumLJFSList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.team_no, IFNULL(SUM(a.month_bala)/10000, 0) bala
+		FROM f_charge_fee fy
+		LEFT JOIN (SELECT team_no, leader, item_id, SUM(month_assess) month_bala
+				   FROM f_charge_fee
+				   WHERE f_month &lt;= #{month2} AND CHAR_LENGTH(f_month)=6 AND LEFT(f_month,4)=#{yearQry} AND if_office='1'
+				   GROUP BY team_no, leader, item_id) a ON fy.leader=a.leader AND fy.item_id=a.item_id AND fy.team_no=a.team_no
+		WHERE fy.f_month=#{yearQry} AND fy.if_office='1' AND fy.team_no IN
+		<foreach collection="userDeptIds.split(',')" item="userDept" open="(" separator="," close=")">
+			#{userDept}
+		</foreach>
+		GROUP BY fy.team_no
+	</select>
+
+	<select id="getDeptSumDetailYearList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.leader, fy.item_id, fy.calc_way, fy.item_name,
+			   SUM(fy.year_bud)/10000 year_bud, (SELECT user_name FROM bar_master WHERE fy.leader=uuid) leader_name
+		FROM f_charge_fee fy
+		WHERE fy.f_month=#{yearQry} AND fy.team_no=#{teamNo} AND fy.if_office='1'
+		GROUP BY fy.leader,fy.item_id,fy.calc_way
+	</select>
+
+	<select id="getDeptSumDetailMonthList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.leader, fy.item_id, SUM(fy.month_bud)/10000 month_bud,
+			   SUM(fy.month_bala)/10000 month_bala, SUM(fy.finance_bala)/10000 finance_bala
+		FROM f_charge_fee fy
+		WHERE fy.f_month &gt;= #{month1} AND fy.f_month &lt;= #{month2} AND fy.team_no=#{teamNo} AND fy.if_office='1'
+		GROUP BY fy.leader, fy.item_id
+	</select>
+
+	<select id="getCostAnalysisYearList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.team_no, SUM(fy.year_bud)/10000 year_bud, (SELECT text FROM sys_organization WHERE id=fy.team_no) team_name
+		FROM f_charge_fee fy
+		WHERE fy.f_month=#{yearQry} AND fy.team_no IN
+		<foreach collection="userDeptIds.split(',')" item="userDept" open="(" separator="," close=")">
+			#{userDept}
+		</foreach>
+		GROUP BY fy.team_no
+	</select>
+
+	<select id="getCostAnalysisMonthList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.team_no,  IFNULL(SUM(a.month_bala), 0) month_bala, IFNULL(SUM(a.assess_bala), 0) assess_bala, IFNULL(SUM(a.month_bud), 0) month_bud
+		FROM f_charge_fee fy
+		LEFT JOIN (SELECT team_no, leader, item_id, SUM(month_bala)/10000 month_bala, SUM(month_assess)/10000 assess_bala, SUM(month_bud)/10000 month_bud
+		FROM f_charge_fee
+		WHERE f_month &gt;= #{month1} AND f_month &lt;= #{month2} AND CHAR_LENGTH(f_month)=6 AND LEFT(f_month,4)=#{yearQry}
+		GROUP BY team_no, leader, item_id) a ON fy.leader=a.leader AND fy.item_id=a.item_id AND fy.team_no=a.team_no
+		WHERE fy.f_month=#{yearQry} AND fy.if_office='1' AND fy.team_no IN
+		<foreach collection="userDeptIds.split(',')" item="userDept" open="(" separator="," close=")">
+			#{userDept}
+		</foreach>
+		GROUP BY fy.team_no
+	</select>
+
+	<select id="getCostAnalysisLJFSList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.team_no, IFNULL(SUM(a.month_bala)/10000, 0) bala
+		FROM f_charge_fee fy
+		LEFT JOIN (SELECT team_no, leader, item_id, SUM(month_assess) month_bala
+		FROM f_charge_fee
+		WHERE f_month &lt;= #{month2} AND CHAR_LENGTH(f_month)=6 AND LEFT(f_month,4)=#{yearQry}
+		GROUP BY team_no, leader, item_id) a ON fy.leader=a.leader AND fy.item_id=a.item_id AND fy.team_no=a.team_no
+		WHERE fy.f_month=#{yearQry} AND fy.if_office='1' AND fy.team_no IN
+		<foreach collection="userDeptIds.split(',')" item="userDept" open="(" separator="," close=")">
+			#{userDept}
+		</foreach>
+		GROUP BY fy.team_no
+	</select>
+
+	<select id="getCostAnalysisDetailYearList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.leader, fy.item_id, fy.calc_way, fy.item_name,
+			   SUM(fy.year_bud)/10000 year_bud, (SELECT user_name FROM bar_master WHERE fy.leader=uuid) leader_name
+		FROM f_charge_fee fy
+		WHERE fy.f_month=#{yearQry} AND fy.team_no=#{teamNo}
+		GROUP BY fy.leader,fy.item_id,fy.calc_way
+	</select>
+
+	<select id="getCostAnalysisDetailMonthList" resultType="cn.ewsd.cost.model.FChargeFee">
+		SELECT fy.leader, fy.item_id, SUM(fy.month_bud)/10000 month_bud,
+			   SUM(fy.month_bala)/10000 month_bala, SUM(fy.finance_bala)/10000 finance_bala
+		FROM f_charge_fee fy
+		WHERE fy.f_month &gt;= #{month1} AND fy.f_month &lt;= #{month2} AND fy.team_no=#{teamNo}
+		GROUP BY fy.leader, fy.item_id
+	</select>
+</mapper>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+
+<div data-toggle="topjui-layout" data-options="fit:true">
+	<form id="backAssForm">
+		<div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+			<table id="backAssDg"></table>
+		</div>
+	</form>
+</div>
+
+<!-- 表格工具栏 -->
+	<div id="backAssDg-toolbar" class="topjui-toolbar"
+		 data-options="grid:{
+           type:'datagrid',
+           id:'backAssDg'
+       }" style="display:none">
+
+		<label class="topjui-form-label" style="width:60px">月份：</label>
+		<select id="yearQry" data-toggle="topjui-combobox" name="yearQry" data-options="width:80" >
+			<option th:each="i:${#numbers.sequence(2015, endYear)}" th:value="${i}" th:text="${i}" th:selected="${i==currentYear}"></option>
+		</select>
+		<select id="monQry" data-toggle="topjui-combobox" name="monQry" data-options="width:80" >
+			<option th:each="i:${#numbers.sequence(1, 12)}" th:value="${i<10 ? '0'.toString()+i : i}" th:text="${i<10 ? '0'.toString()+i : i}" th:selected="${i==currentMonth}"></option>
+		</select>
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">回收单位：</label>
+		<input id="teamQry" name="teamQry" th:value="${teamQry}">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">工程：</label>
+		<input id="prjQry" name="prjQry" th:value="${prjQry}" >
+
+		<a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+			<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+				<span class="l-btn-text">查询</span>
+				<span class="l-btn-icon fa fa-search">&nbsp;</span>
+			</span>
+		</a>
+
+		<a href="javascript:void(0)" id="downloadBtn" class="l-btn topjui-btn-brown l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+        <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+            <span class="l-btn-text">下载</span>
+            <span class="l-btn-icon fa fa-download">&nbsp;</span>
+        </span>
+		</a>
+
+		<ewsd:rbac str="/fix/backAss/calc">
+		<a href="javascript:void(0)" id="calcBtn" class="l-btn topjui-btn-green l-btn-green" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+			<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+				<span class="l-btn-text">提取</span>
+				<span class="l-btn-icon fa fa-download">&nbsp;</span>
+			</span>
+		</a>
+		</ewsd:rbac>
+
+		<br />
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">生产情况：</label>
+		<input id="workValue" data-toggle="topjui-textbox" name="workValue" data-options="width:'140px'" value="">
+
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">考核说明：</label>
+		<input id="assRemark" data-toggle="topjui-textbox" name="assRemark" data-options="width:'150px'" value="">
+
+		<ewsd:rbac str="/fix/backAss/back">
+		<label class="topjui-form-label" style="width:80px;float:none;display:inline-block">管理单位：</label>
+		<input id="mngTeamQry" name="mngTeamQry" />
+		</ewsd:rbac>
+
+		<ewsd:rbac str="/fix/backAss/save">
+		<a href="javascript:void(0)" id="saveBtn" class="l-btn topjui-btn-blue l-btn-green" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+			<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+				<span class="l-btn-text">保存</span>
+				<span class="l-btn-icon fa fa-save">&nbsp;</span>
+			</span>
+		</a>
+		</ewsd:rbac>
+
+		<ewsd:rbac str="/fix/backAss/submit">
+		<a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-purple l-btn-green" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+			<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+				<span class="l-btn-text">发布</span>
+				<span class="l-btn-icon fa fa-check">&nbsp;</span>
+			</span>
+		</a>
+		</ewsd:rbac>
+
+		<ewsd:rbac str="/fix/backAss/back">
+		<a href="javascript:void(0)" id="backBtn" class="l-btn topjui-btn-red l-btn-red" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+			<span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+				<span class="l-btn-text">退回</span>
+				<span class="l-btn-icon fa fa-reply">&nbsp;</span>
+			</span>
+		</a>
+		</ewsd:rbac>
+
+	</div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+	<script type="text/javascript" th:inline="javascript">
+		$(document).ready(function(){
+			var currentYear = [[${currentYear}]];
+			var currentMonth = [[${currentMonth}]];
+			var teamQry = [[${teamQry}]];
+
+			$('#prjQry').iCombobox({
+				valueField:'prjNo',
+				textField:'prjName',
+				url:'/fix/backAss/getPrj?planMonth='+currentYear+currentMonth+'&teamNo='+teamQry,
+				width:'150px',
+				loadFilter:function(data){
+					data.unshift({prjNo:'', prjName:'--全部--'});
+					return data
+				}
+			})
+
+			$('#teamQry').iCombobox({
+				valueField:'id',
+				textField:'text',
+				url:'/fix/mFixAssess/getFixAssessTeam?assMonth='+currentYear+currentMonth,
+				width:'150px',
+				loadFilter:function(data){
+					data.unshift({id:'', text:'--全部--'});
+					return data
+				},
+				onChange:function(newValue, oldValue){
+					$('#prjQry').iCombobox('reload', '/fix/backAss/getPrj?planMonth='+$('#yearQry').iCombobox('getValue')+$('#monQry').iCombobox('getValue')+'&teamNo='+newValue)
+				},
+				onLoadSuccess:function(){
+					$('#prjQry').iCombobox('reload', '/fix/backAss/getPrj?planMonth='+$('#yearQry').iCombobox('getValue')+$('#monQry').iCombobox('getValue')+'&teamNo='+$('#teamQry').iCombobox('getValue'))
+				}
+			})
+
+			$('#mngTeamQry').iCombobox({
+				valueField:'id',
+				textField:'text',
+				url:'/fix/backAss/getMngTeam',
+				width:'150px',
+				loadFilter:function(data){
+					data.unshift({id:'', text:'--全部--'});
+					return data
+				}
+			})
+
+			$('#yearQry').iCombobox({
+				onChange:function(newValue, oldValue){
+					$('#teamQry').iCombobox('reload', '/fix/mFixAssess/getFixAssessTeam?assMonth='+newValue+$('#monQry').iCombobox('getValue'))
+				}
+			})
+
+			$('#monQry').iCombobox({
+				onChange:function(newValue, oldValue){
+					$('#teamQry').iCombobox('reload', '/fix/mFixAssess/getFixAssessTeam?assMonth='+$('#yearQry').iCombobox('getValue')+newValue)
+				}
+			})
+
+			$('#backAssDg').iDatagrid({
+				singleSelect:true,
+				selectOnCheck:false,
+				checkOnSelect:false,
+				url:'/fix/backAss/getList',
+				pagination:false,
+				queryParams:{
+					yearQry:$('#yearQry').iCombobox('getValue'),
+					monQry:$('#monQry').iCombobox('getValue'),
+					teamQry:$('#teamQry').iCombobox('getValue'),
+					prjQry:$('#prjQry').iCombobox('getValue'),
+					mngTeamQry:$('#mngTeamQry').length<1 ? '' : $('#mngTeamQry').iCombobox('getValue')
+				},
+				columns:[ [
+					{
+						field:'detailId', sortable:false, title:'', checkbox:true
+					},{
+						field:'matCode', sortable:false, title:'物料编码', formatter:function(value, row, index){
+							if(row.prjRow!="1"){
+								return value.substring(0, 1) == 'X' ? value.substring(1) : value;
+							}else{
+								return row.prjName
+							}
+						}
+					},{
+						field:'matName', sortable:false, title:'物料描述', formatter:function(value, row, index){
+							return value
+						}
+					},{
+						field:'matUnit', sortable:false, title:'单位', formatter:function(value, row, index){
+							return value
+						}
+					},{
+						field:'backNorm', sortable:false, title:'每米回收量', align:'right', formatter:function(value, row, index){
+							if(row.prjRow!="1"){
+								return '<span class="textbox"><input class="textbox-text" style="text-align: right" type="text" id="norm_' + row.detailId + '" name="norm_' + row.detailId + '" value="'+ value +'" disabled /></span>'
+							}else{
+								return ''
+							}
+						}
+					},{
+						field:'backAmount', sortable:false, title:'考核数量', align:'right', formatter:function(value, row, index){
+							if(row.prjRow!="1"){
+								return '<span class="textbox"><input class="textbox-text" style="text-align: right" type="text" id="ass_' + row.detailId + '" name="ass_' + row.detailId + '" value="'+ value +'" disabled /></span>'
+							}else{
+								return ''
+							}
+						}
+					},{
+						field:'matAmount', sortable:false, title:'实际数量', align:'right', formatter:function(value, row, index){
+							return value
+						}
+					},{
+						field:'overScale', sortable:false, title:'完成率', align:'right', formatter:function(value, row, index){
+							return value+'%'
+						}
+					},{
+						field:'matPrice', sortable:false, title:'单价', align:'right', formatter:function(value, row, index){
+							return value
+						}
+					},{
+						field:'matBala', sortable:false, title:'金额', align:'right', formatter:function(value, row, index){
+							return (parseFloat(row.matPrice) * parseFloat(row.matAmount)).toFixed(2)
+						}
+					},{
+						field:'result', sortable:false, title:'考核结果', formatter:function(value, row, index){
+							if(row.prjRow!="1"){
+								return '<input id="result_'+ row.detailId +'" name="result_'+ row.detailId +'" value="'+ value +'" />'
+							}else{
+								return ''
+							}
+						}
+					},{
+						field:'remark', sortable:false, title:'备注', formatter:function(value, row, index){
+							if(row.prjRow!="1"){
+								return '<span class="textbox"><input class="textbox-text" type="text" id="remark_' + row.detailId + '" name="remark_' + row.detailId + '" value="'+ value +'" disabled /></span>'
+							}else{
+								return ''
+							}
+						}
+					},{
+						field:'assStatus', sortable:false, title:'考核状态', formatter:function(value, row, index){
+							if(value=='0'){
+								return '草稿'
+							}else{
+								return '完成'
+							}
+						}
+					}
+				] ],
+				onLoadSuccess:function(data){
+					for(var i=0; i<data.rows.length; i++){
+						var detailId = data.rows[i].detailId;
+						var prjRow = data.rows[i].prjRow;
+						if(i==1){
+							$('#workValue').iTextbox('setValue', data.rows[i].workValue);
+							$('#assRemark').iTextbox('setValue', data.rows[i].assRemark);
+						}
+						if(prjRow=='1'){
+							$('#backAssDg').iDatagrid("mergeCells", {
+								index: i,
+								field: 'matCode',
+								rowspan:1,
+								colspan:11
+							})
+						}else{
+							$('#result_'+detailId).iCombobox({
+								valueField:'value',
+								textField:'text',
+								data:[{
+									value:'N', text:'未完成'
+								},{
+									value:'Y', text:'完成'
+								}],
+								disabled:true
+							})
+						}
+					}
+					$('[name="detailId"]').each(function(){
+						if($(this).val()==''){
+							$(this).css('display', 'none')
+						}
+					})
+				},
+				onCheck:function(index, row){
+					var detailId = row.detailId;
+					$('#norm_' + detailId + ', #ass_' + detailId + ', #remark_'+ detailId).removeAttr('disabled');
+					$('#result_' + detailId).iCombobox('enable');
+				},
+				onUncheck:function(index, row){
+					var detailId = row.detailId;
+					$('#norm_' + detailId + ', #ass_' + detailId + ', #remark_'+ detailId).attr('disabled', 'disabled');
+					$('#result_' + detailId).iCombobox('disable');
+				},
+				onCheckAll:function(rows){
+					$('[name^="norm_"], [name^="ass_"], [name^="remark_"]').removeAttr("disabled");
+					for(var i=0; i<rows.length; i++){
+						var row = rows[i];
+						var detailId = row.detailId;
+						$('#result_'+detailId).iCombobox('enable');
+					}
+				},
+				onUncheckAll:function(rows){
+					$('[name^="norm_"], [name^="ass_"], [name^="remark_"]').attr("disabled", 'disabled');
+					for(var i=0; i<rows.length; i++){
+						var row = rows[i];
+						var detailId = row.detailId;
+						$('#result_'+detailId).iCombobox('disable');
+					}
+				},
+				rowStyler:function(index, row){
+					if(row.prjRow=="1"){
+						return 'background-color:lightblue'
+					}
+				}
+			});
+
+			$('#searchBtn').click(function(){
+				reloadData();
+			});
+
+			$('#downloadBtn').click(function(){
+				$('#backAssForm').iForm('submit', {
+					url:'/fix/backAss/download',
+					success:function(data){
+
+					}
+				});
+			});
+
+			$('#calcBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '您确定提取考核结果吗？', function (r) {
+					if (r) {
+						$('#backAssForm').iForm('submit', {
+							url: '/fix/backAss/calc',
+							success: function (data) {
+								data = $.parseJSON(data);
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadData();
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				})
+			});
+
+			$('#saveBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '您确定保存数据吗？', function (r) {
+					if (r) {
+						$.ajax({
+							url: '/fix/backAss/save',
+							dataType:'json',
+							type:'post',
+							data: $("#backAssForm").serialize(),
+							success: function (data, textStatus, jqXHR) {
+								console.log(data);
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadData();
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				})
+			});
+
+			$('#submitBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '您确定发送考核结果吗？', function (r) {
+					if (r) {
+						$.ajax({
+							url: '/fix/backAss/submit',
+							dataType:'json',
+							type:'post',
+							data: $("#backAssForm").serialize(),
+							success: function (data, textStatus, jqXHR) {
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadData();
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				})
+			});
+
+			$('#backBtn').click(function(){
+				$.iMessager.confirm('确认对话框', '您确定退回考核结果吗？', function (r) {
+					if (r) {
+						$.ajax({
+							url: '/fix/backAss/back',
+							dataType:'json',
+							type:'post',
+							data: $("#backAssForm").serialize(),
+							success: function (data, textStatus, jqXHR) {
+								if (data.statusCode == 200) {
+									$.iMessager.show({
+										title: data.title,
+										msg: data.message
+									})
+									reloadData();
+								} else {
+									$.iMessager.alert({
+										icon: 'messager-error',
+										title: data.title,
+										msg: data.message
+									});
+								}
+							}
+						});
+					}
+				})
+			});
+		});
+
+		function reloadData(){
+			$('#backAssDg').iDatagrid('reload',{
+				yearQry:$('#yearQry').iCombobox('getValue'),
+				monQry:$('#monQry').iCombobox('getValue'),
+				teamQry:$('#teamQry').iCombobox('getValue'),
+				prjQry:$('#prjQry').iCombobox('getValue'),
+				mngTeamQry:$('#mngTeamQry').length<1 ? '' : $('#mngTeamQry').iCombobox('getValue')
+			});
+		}
+	</script>
+</th:block>
+</body>
+</html>

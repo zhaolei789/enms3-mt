@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.FAccountMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.cost.model.FAccount" id="fAccountMap">
+        <result property="account_id" column="account_id"/>
+        <result property="account_month" column="account_month"/>
+        <result property="mng_team" column="mng_team"/>
+        <result property="credit_team" column="credit_team"/>
+        <result property="work_team" column="work_team"/>
+        <result property="work_addr" column="work_addr"/>
+        <result property="work_type" column="work_type"/>
+        <result property="workload" column="workload"/>
+        <result property="account_date1" column="account_date1"/>
+        <result property="account_date2" column="account_date2"/>
+        <result property="credit_date" column="credit_date"/>
+        <result property="work_unit" column="work_unit"/>
+        <result property="account_no" column="account_no"/>
+        <result property="fund_type" column="fund_type"/>
+        <result property="account_type" column="account_type"/>
+        <result property="account_bala" column="account_bala"/>
+        <result property="pay_scale" column="pay_scale"/>
+        <result property="keep_bala" column="keep_bala"/>
+        <result property="reten_bala" column="reten_bala"/>
+        <result property="cut_bala" column="cut_bala"/>
+        <result property="contract_id" column="contract_id"/>
+        <result property="sum_pay" column="sum_pay"/>
+        <result property="contract_diff" column="contract_diff"/>
+        <result property="remark" column="remark"/>
+        <result property="check_date" column="check_date"/>
+        <result property="check_user" column="check_user"/>
+        <result property="modi_date" column="modi_date"/>
+        <result property="modi_user" column="modi_user"/>
+        <result property="status" column="status"/>
+        <result property="check_no" column="check_no"/>
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 account_id
+		  ,  	  	     			 account_month
+		  ,  	  	     			 mng_team
+		  ,  	  	     			 credit_team
+		  ,  	  	     			 work_team
+		  ,  	  	     			 work_addr
+		  ,  	  	     			 work_type
+		  ,  	  	     			 workload
+		  ,  	  	     			 account_date1
+		  ,  	  	     			 account_date2
+		  ,  	  	     			 credit_date
+		  ,  	  	     			 work_unit
+		  ,  	  	     			 account_no
+		  ,  	  	     			 fund_type
+		  ,  	  	     			 account_type
+		  ,  	  	     			 account_bala
+		  ,  	  	     			 pay_scale
+		  ,  	  	     			 keep_bala
+		  ,  	  	     			 reten_bala
+		  ,  	  	     			 cut_bala
+		  ,  	  	     			 contract_id
+		  ,  	  	     			 sum_pay
+		  ,  	  	     			 contract_diff
+		  ,  	  	     			 remark
+		  ,  	  	     			 check_date
+		  ,  	  	     			 check_user
+		  ,  	  	     			 modi_date
+		  ,  	  	     			 modi_user
+		  ,  	  	     			 status
+		  ,  	  	     			 check_no
+		  ,  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.cost.model.FAccount">
+        select
+		account_id
+		,  	  	     			 account_month
+		,  	  	     			 mng_team
+		,  	  	     			 credit_team
+    	,(select text from sys_organization where f_account.credit_team = sys_organization.id) as credit_team_name
+		,  	  	     			 work_team
+		,(select text from sys_organization where f_account.work_team = sys_organization.id) as work_team_name
+		,  	  	     			 work_addr
+		,  	  	     			 work_type
+		,  	  	     			 workload
+		,  	  	     			 account_date1
+		,  	  	     			 account_date2
+		,  	  	     			 credit_date
+		,  	  	     			 work_unit
+		,  	  	     			 account_no
+		,  	  	     			 fund_type
+		,  	  	     			 account_type
+		,  	  	     			 account_bala
+		,  	  	     			 pay_scale
+		,  	  	     			 keep_bala
+		,  	  	     			 reten_bala
+		,  	  	     			 cut_bala
+		,  	  	     			 contract_id
+		,  	  	     			 sum_pay
+		,  	  	     			 contract_diff
+		,  	  	     			 remark
+		,  	  	     			 check_date
+		,  	  	     			 check_user
+		,  	  	     			 modi_date
+		,  	  	     			 modi_user
+		,  	  	     			 status
+		,  	  	     			 check_no
+		,  	  	     			 uuid
+		,  	  	     			 create_time
+		,  	  	     			 creator
+		,  	  	     			 creator_id
+		,  	  	     			 creator_org_id
+		,  	  	     			 modifier_id
+		,  	  	     			 modifier
+		,  	  	     			 modify_time
+        from f_account
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.cost.model.FAccount">
+		select  <include refid="Base_Column_List" />  from f_account where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.cost.model.FAccount">
+		select  <include refid="Base_Column_List" />  from f_account
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from f_account 
+	</select>
+	 
+	<insert id="executeSave" parameterType="cn.ewsd.cost.model.FAccount">
+		insert into f_account
+		(
+			`account_id`, 
+			`account_month`, 
+			`mng_team`, 
+			`credit_team`, 
+			`work_team`, 
+			`work_addr`, 
+			`work_type`, 
+			`workload`, 
+			`account_date1`, 
+			`account_date2`, 
+			`credit_date`, 
+			`work_unit`, 
+			`account_no`, 
+			`fund_type`, 
+			`account_type`, 
+			`account_bala`, 
+			`pay_scale`, 
+			`keep_bala`, 
+			`reten_bala`, 
+			`cut_bala`, 
+			`contract_id`, 
+			`sum_pay`, 
+			`contract_diff`, 
+			`remark`, 
+			`check_date`, 
+			`check_user`, 
+			`modi_date`, 
+			`modi_user`, 
+			`status`, 
+			`check_no`, 
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier_id`, 
+			`modifier`, 
+			`modify_time`
+		)
+		values
+		(
+			#{account_id}, 
+			#{account_month}, 
+			#{mng_team}, 
+			#{credit_team}, 
+			#{work_team}, 
+			#{work_addr}, 
+			#{work_type}, 
+			#{workload}, 
+			#{account_date1}, 
+			#{account_date2}, 
+			#{credit_date}, 
+			#{work_unit}, 
+			#{account_no}, 
+			#{fund_type}, 
+			#{account_type}, 
+			#{account_bala}, 
+			#{pay_scale}, 
+			#{keep_bala}, 
+			#{reten_bala}, 
+			#{cut_bala}, 
+			#{contract_id}, 
+			#{sum_pay}, 
+			#{contract_diff}, 
+			#{remark}, 
+			#{check_date}, 
+			#{check_user}, 
+			#{modi_date}, 
+			#{modi_user}, 
+			#{status}, 
+			#{check_no}, 
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier_id}, 
+			#{modifier}, 
+			#{modify_time}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.cost.model.FAccount">
+		update f_account 
+		<set>
+			<if test="account_id != null">`account_id` = #{account_id}, </if>
+			<if test="account_month != null">`account_month` = #{account_month}, </if>
+			<if test="mng_team != null">`mng_team` = #{mng_team}, </if>
+			<if test="credit_team != null">`credit_team` = #{credit_team}, </if>
+			<if test="work_team != null">`work_team` = #{work_team}, </if>
+			<if test="work_addr != null">`work_addr` = #{work_addr}, </if>
+			<if test="work_type != null">`work_type` = #{work_type}, </if>
+			<if test="workload != null">`workload` = #{workload}, </if>
+			<if test="account_date1 != null">`account_date1` = #{account_date1}, </if>
+			<if test="account_date2 != null">`account_date2` = #{account_date2}, </if>
+			<if test="credit_date != null">`credit_date` = #{credit_date}, </if>
+			<if test="work_unit != null">`work_unit` = #{work_unit}, </if>
+			<if test="account_no != null">`account_no` = #{account_no}, </if>
+			<if test="fund_type != null">`fund_type` = #{fund_type}, </if>
+			<if test="account_type != null">`account_type` = #{account_type}, </if>
+			<if test="account_bala != null">`account_bala` = #{account_bala}, </if>
+			<if test="pay_scale != null">`pay_scale` = #{pay_scale}, </if>
+			<if test="keep_bala != null">`keep_bala` = #{keep_bala}, </if>
+			<if test="reten_bala != null">`reten_bala` = #{reten_bala}, </if>
+			<if test="cut_bala != null">`cut_bala` = #{cut_bala}, </if>
+			<if test="contract_id != null">`contract_id` = #{contract_id}, </if>
+			<if test="sum_pay != null">`sum_pay` = #{sum_pay}, </if>
+			<if test="contract_diff != null">`contract_diff` = #{contract_diff}, </if>
+			<if test="remark != null">`remark` = #{remark}, </if>
+			<if test="check_date != null">`check_date` = #{check_date}, </if>
+			<if test="check_user != null">`check_user` = #{check_user}, </if>
+			<if test="modi_date != null">`modi_date` = #{modi_date}, </if>
+			<if test="modi_user != null">`modi_user` = #{modi_user}, </if>
+			<if test="status != null">`status` = #{status}, </if>
+			<if test="check_no != null">`check_no` = #{check_no}, </if>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from f_account where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from f_account where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.AuthAccessViewMapper">
+
+    <sql id="Base_Column_List">*</sql>
+
+    <resultMap id="BaseResultMap" type="cn.ewsd.system.model.AuthAccessView">
+        <id property="uuid" jdbcType="VARCHAR" column="uuid"/>
+        <result property="codeSetId" jdbcType="BIGINT" column="code_set_id"/>
+        <result property="resourceType" jdbcType="VARCHAR" column="resource_type"/>
+        <result property="levelId" jdbcType="BIGINT" column="level_id"/>
+        <result property="id" jdbcType="BIGINT" column="id"/>
+        <result property="pid" jdbcType="VARCHAR" column="pid"/>
+        <result property="state" jdbcType="VARCHAR" column="state"/>
+        <result property="iconCls" jdbcType="VARCHAR" column="icon_cls"/>
+        <result property="text" jdbcType="VARCHAR" column="text"/>
+        <result property="url" jdbcType="VARCHAR" column="url"/>
+        <result property="sort" jdbcType="VARCHAR" column="sort"/>
+        <result property="isDel" jdbcType="BIGINT" column="is_del"/>
+        <result property="roleId" jdbcType="BIGINT" column="role_id"/>
+        <result property="accessAuth" jdbcType="BIGINT" column="access_auth"/>
+        <result property="ct" jdbcType="BIGINT" column="ct"/>
+    </resultMap>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.AuthAccessView">
+        select
+        <include refid="Base_Column_List"></include>
+        from v_sys_auth_access
+        <where>
+            <if test="filterSort != null">
+                ${filterSort}
+            </if>
+        </where>
+    </select>
+    <select id="getListByJdbc" resultMap="BaseResultMap">
+        SELECT
+        id,text,url,sort,icon_cls,pid,code_set_id,resource_type,level_id,state,is_del,uuid,role_id,access_auth,COUNT(DISTINCT
+        id) FROM v_sys_auth_access a WHERE
+        role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND access_auth = 1 AND resource_type = 'menu' AND code_set_id =${codeSetId}
+        AND status = 1 AND level_id = #{levelId} AND pid = #{pid} GROUP BY
+        id,text,url,sort,icon_cls,pid,code_set_id,resource_type,level_id,state,is_del,uuid,role_id,access_auth ORDER BY
+        sort ASC
+    </select>
+
+    <select id="getListByRoleIdAndCodeSetIdAndLevelId3" resultMap="BaseResultMap">
+        SELECT id,text,url,sort,icon_cls,pid,code_set_id,resource_type,level_id,state,is_del,uuid,role_id,access_auth
+        FROM v_sys_auth_access a WHERE role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND access_auth = 1 AND resource_type = 'menu' AND code_set_id = #{codeSetId}
+        AND level_id = #{levelId}
+        AND status =1 AND
+        uuid in (
+        SELECT min( uuid ) FROM v_sys_auth_access
+        WHERE role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND access_auth = 1
+        AND STATUS = 1
+        AND resource_type = 'menu'
+        AND code_set_id = #{codeSetId}
+        AND level_id = #{levelId}
+        GROUP BY id
+        )
+        ORDER BY sort ASC
+    </select>
+    <select id="getListByRoleIdAndPid" resultMap="BaseResultMap">
+        <!-- SELECT id,text,url,sort,icon_cls,pid,code_set_id,resource_type,level_id,state,is_del,uuid,role_id,access_auth,COUNT(DISTINCT id) FROM v_sys_auth_access  WHERE
+             role_id IN
+     <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+         #{id}
+     </foreach>
+              AND pid = #{pid} GROUP BY id,text,url,sort,icon_cls,pid,code_set_id,resource_type,level_id,state,is_del,uuid,role_id,access_auth ORDER BY sort ASC-->
+
+        SELECT uuid, id, pid, mstate as state, icon_cls, text, url, role_id, access_auth,sort,COUNT(DISTINCT id) FROM
+        v_sys_auth_access WHERE
+        role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND pid = #{pid} GROUP BY uuid, id, pid, mstate, icon_cls, text, url, role_id,access_auth,sort ORDER BY sort ASC
+    </select>
+
+    <select id="getListByRoleId" resultMap="BaseResultMap">
+        SELECT
+        id,text,url,sort,icon_cls,pid,code_set_id,resource_type,level_id,state,is_del,uuid,role_id,access_auth,COUNT(DISTINCT
+        id) as ct FROM v_sys_auth_access WHERE
+        role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND access_auth = 1 AND code_set_id = 'menu' GROUP BY
+        id,text,url,sort,icon_cls,pid,code_set_id,resource_type,level_id,state,is_del,uuid,role_id,access_auth ORDER BY
+        sort ASC
+    </select>
+
+    <select id="getListByRoleIdAndCodeSetIdAndMenuId2" resultMap="BaseResultMap">
+        SELECT id,text,url,sort,icon_cls,pid,code_set_id,resource_type,level_id,state,is_del,uuid,role_id,access_auth
+        FROM v_sys_auth_access WHERE role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND access_auth = 1 AND resource_type = 'menu' AND code_set_id = #{codeSetId}
+        AND status = 1 AND pid = #{menuId} AND
+        uuid in (
+        SELECT min( uuid ) FROM v_sys_auth_access
+        WHERE role_id IN
+        <foreach collection="list" index="index" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        AND access_auth = 1
+        AND STATUS = 1
+        AND resource_type = 'menu'
+        AND code_set_id = #{codeSetId}
+        AND pid = #{menuId}
+        GROUP BY id
+        )
+        ORDER BY sort ASC
+    </select>
+    <select id="getListByRoleIdAllMenu" resultType="cn.ewsd.system.model.AuthAccess">
+         SELECT
+a.uuid,
+m.id as id,
+m.pid as pid,
+m.state as state,
+m.icon_cls,
+m.text,
+m.url,
+a.role_id,
+a.access_auth
+FROM sys_menu m LEFT JOIN sys_auth_access a ON m.id=a.id
+WHERE a.role_id=#{roleId}
+    </select>
+
+
+</mapper>
+        <!--<foreach collection="roleId" index="index" item="id" open="(" close=")" separator=",">-->
+        <!--#{id}-->
+        <!--</foreach>-->

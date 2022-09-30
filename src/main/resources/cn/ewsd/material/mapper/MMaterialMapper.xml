@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.MMaterialMapper">
+    <select id="getPageSet" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT m.uuid, m.erp_type, m.type_name, m.mat_code, m.mat_name,  m.mat_price, m.pay_fee, m.other_fee, m.erp_code, m.ins_date, m.mat_no,
+			m.mat_unit,
+			(select text from sys_dic_item where value=m.real_flag) real_flag,
+			(select text from sys_dic_item where value=m.offen_flag) offen_flag
+        FROM m_material m
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<insert id="executeSave" parameterType="cn.ewsd.material.model.MMaterial">
+		insert into m_material (`mat_no`, `mat_code`, `mat_name`, `new_old`, `mat_type`, `mat_unit`, `mat_price`, `old_rebate`, `real_flag`, `re_flag`, `offen_flag`, `use_info`, `ins_date`, `erp_code`, `abc_type`, `if_send`, `pack_scale`, `goods_type`,
+								`pay_fee`, `other_fee`, `erp_type`, `type_name`, `plan_price`, `fix_price`, `fix_content`, `jf_price`, `arrive_period`, `qa_period`,
+								`uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`
+		) values ( 	#{matNo}, #{matCode}, #{matName}, #{newOld}, #{matType}, #{matUnit}, #{matPrice}, #{oldRebate}, #{realFlag}, #{reFlag}, #{offenFlag}, #{useInfo}, #{insDate}, #{erpCode}, #{abcType}, #{ifSend}, #{packScale}, #{goodsType},
+					#{payFee}, #{otherFee}, #{erpType}, #{typeName}, #{planPrice}, #{fixPrice}, #{fixContent}, #{jfPrice}, #{arrivePeriod}, #{qaPeriod},
+					#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime}
+		)
+	</insert>
+
+	<select id="getFactoryAddr" resultType="cn.ewsd.material.model.MFactoryAddr">
+		SELECT *, CONCAT_WS('', addr_code, '(', factory_code, ')') text FROM (
+		SELECT *, SUBSTRING_INDEX(factory_no, '.', -1) factory_code, SUBSTRING_INDEX(mat_addr, '.', -1) addr_code FROM m_factory_addr) a
+	</select>
+
+	<select id="getFactoryAddr1" resultType="cn.ewsd.material.model.MFactoryAddr">
+		SELECT * FROM m_factory_addr
+		WHERE factory_no=#{factoryNo} AND mat_addr=#{matAddr}
+	</select>
+
+	<select id="getOldTeamForSelect" resultType="cn.ewsd.system.model.DicItem">
+		SELECT SUBSTRING_INDEX(value, '.', -1) value, (SELECT text FROM sys_organization WHERE id=SUBSTRING_INDEX(value, '.', -1)) text
+		FROM sys_dic_item WHERE puuid IN (SELECT uuid FROM sys_dic_set WHERE code='m.oldTeam')
+	</select>
+
+	<select id="getFixTeamForSelect" resultType="cn.ewsd.system.model.DicItem">
+		SELECT SUBSTRING_INDEX(di.value,'.',-1) value, o.text
+		FROM sys_dic_item di
+		LEFT JOIN sys_organization o ON o.id=SUBSTRING_INDEX(di.value,'.',-1)
+		WHERE puuid IN (SELECT uuid FROM sys_dic_set WHERE code='m.fixTeam')
+		ORDER BY o.sort
+	</select>
+
+	<select id="queryObject" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT m.*, em.factory_no, em.mat_addr
+		FROM m_material m
+		LEFT JOIN (SELECT factory_no, mat_addr, mat_no FROM m_erp_material) em ON em.mat_no=m.mat_no
+		WHERE m.uuid = #{uuid}
+		LIMIT 1
+	</select>
+
+	<update id="updateMaterialByMatCode">
+		UPDATE m_material SET mat_code=#{matCode}, mat_name=#{matName}, mat_type=#{matType}, re_flag=#{reFlag}, abc_type=#{abcType}, pack_scale=#{packScale}, use_info=#{useInfo}
+		WHERE mat_code=#{matCode1}
+	</update>
+
+	<update id="executeUpdate" parameterType="cn.ewsd.material.model.MMaterial">
+		update m_material
+		<set>
+			<if test="matNo != null">`mat_no` = #{matNo}, </if>
+			<if test="matCode != null">`mat_code` = #{matCode}, </if>
+			<if test="matName != null">`mat_name` = #{matName}, </if>
+			<if test="newOld != null">`new_old` = #{newOld}, </if>
+			<if test="matType != null">`mat_type` = #{matType}, </if>
+			<if test="matUnit != null">`mat_unit` = #{matUnit}, </if>
+			<if test="matPrice != null">`mat_price` = #{matPrice}, </if>
+			<if test="oldRebate != null">`old_rebate` = #{oldRebate}, </if>
+			<if test="realFlag != null">`real_flag` = #{realFlag}, </if>
+			<if test="reFlag != null">`re_flag` = #{reFlag}, </if>
+			<if test="offenFlag != null">`offen_flag` = #{offenFlag}, </if>
+			<if test="useInfo != null">`use_info` = #{useInfo}, </if>
+			<if test="insDate != null">`ins_date` = #{insDate}, </if>
+			<if test="erpCode != null">`erp_code` = #{erpCode}, </if>
+			<if test="abcType != null">`abc_type` = #{abcType}, </if>
+			<if test="ifSend != null">`if_send` = #{ifSend}, </if>
+			<if test="packScale != null">`pack_scale` = #{packScale}, </if>
+			<if test="goodsType != null">`goods_type` = #{goodsType}, </if>
+			<if test="payFee != null">`pay_fee` = #{payFee}, </if>
+			<if test="otherFee != null">`other_fee` = #{otherFee}, </if>
+			<if test="erpType != null">`erp_type` = #{erpType}, </if>
+			<if test="typeName != null">`type_name` = #{typeName}, </if>
+			<if test="planPrice != null">`plan_price` = #{planPrice}, </if>
+			<if test="fixPrice != null">`fix_price` = #{fixPrice}, </if>
+			<if test="fixContent != null">`fix_content` = #{fixContent}, </if>
+			<if test="jfPrice != null">`jf_price` = #{jfPrice}, </if>
+			<if test="arrivePeriod != null">`arrive_period` = #{arrivePeriod}, </if>
+			<if test="qaPeriod != null">`qa_period` = #{qaPeriod}, </if>
+			<if test="createTime != null">`create_time` = #{createTime}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creatorId != null">`creator_id` = #{creatorId}, </if>
+			<if test="creatorOrgId != null">`creator_org_id` = #{creatorOrgId}, </if>
+			<if test="modifierId != null">`modifier_id` = #{modifierId}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modifyTime != null">`modify_time` = #{modifyTime}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDeleteBatch">
+		delete from m_material where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+	<select id="getMatSequenceByMatCode" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT DISTINCT SUBSTRING(mat_code,6,4) mat_code
+        FROM m_material WHERE SUBSTRING(mat_code,1,5)=#{matCode}
+	</select>
+
+	<select id="getMatList1" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT * FROM (
+			SELECT em.mat_no, m.mat_code, m.mat_name, m.mat_price, em.mat_addr, m.erp_type, m.type_name, st.amount mat_amount, so.amount old_amount, IFNULL(tm.type_code, '') sb_type, m.abc_type,
+				   em.mat_unit, (SELECT text FROM sys_dic_item WHERE value=em.mat_addr) mat_addr_name
+			FROM m_erp_material em
+			INNER JOIN m_material m ON em.mat_no=m.mat_no
+			LEFT JOIN m_type_mat tm ON m.erp_type=tm.mat_code AND tm.type_code='m.TypeCode.40'
+			LEFT JOIN (SELECT mat_no, SUM(stock_amount) amount FROM m_stock GROUP BY mat_no) st ON em.mat_no=st.mat_no
+			LEFT JOIN (SELECT mat_no, SUM(stock_amount) amount FROM vo_stock GROUP BY mat_no) so ON em.mat_no=so.mat_no
+			WHERE em.factory_no=#{factoryNo} AND m.offen_flag='m.offenFlag.1'
+			<if test='itemFlag'>
+				AND EXISTS (SELECT '1' FROM m_item_mat WHERE mat_no=m.mat_no AND item_no=#{itemNo})
+			</if>
+			<if test='"m.planType.1"==planType'>
+				AND NOT EXISTS (SELECT '1' FROM m_plan WHERE mat_no=m.mat_no AND prj_no=#{prjNo} AND plan_month=#{planMonth} AND item_no=#{itemNo} AND plan_step!='7105X' AND if_urgent!='1')
+			</if>
+			<if test='""!=matCodeQry'>
+				AND (m.mat_code LIKE CONCAT('_', #{matCodeQry}, '%') OR m.mat_code LIKE CONCAT(#{matCodeQry}, '%'))
+			</if>
+			<if test='""!=matTypeQry'>
+				AND (m.erp_type LIKE CONCAT(#{matTypeQry}, '%') OR m.type_name LIKE CONCAT('%', #{matTypeQry}, '%'))
+			</if>
+			<if test='""!=matNameQry'>
+				AND m.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+			</if>
+			<if test='"1"==lastPlan'>
+				AND EXISTS (SELECT '1' FROM m_plan WHERE mat_no=m.mat_no AND prj_no=#{prjNo} AND plan_month=#{lastMonth} AND item_no=#{itemNo})
+			</if>
+			LIMIT 100
+		) a
+	</select>
+
+	<select id="getMatList2" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT * FROM (
+			SELECT m.mat_no, m.mat_code, m.mat_name, m.mat_unit, m.mat_price, m.erp_type, m.type_name, st.amount mat_amount, so.amount old_amount, '' sb_type, m.abc_type, '' mat_addr
+			FROM m_material m
+			LEFT JOIN (SELECT mat_no, SUM(stock_amount) amount FROM m_stock GROUP BY mat_no) st ON m.mat_no=st.mat_no
+			LEFT JOIN (SELECT mat_no, SUM(stock_amount) amount FROM vo_stock GROUP BY mat_no) so ON m.mat_no=so.mat_no
+			WHERE m.offen_flag='m.offenFlag.1' AND (m.mat_type>'99' OR m.new_old='J')
+			<if test='itemFlag'>
+				AND EXISTS (SELECT '1' FROM m_item_mat WHERE mat_no=m.mat_no AND item_no=#{itemNo})
+			</if>
+			<if test='"m.planType.1"==planType'>
+				AND NOT EXISTS (SELECT '1' FROM m_plan WHERE mat_no=m.mat_no AND prj_no=#{prjNo} AND plan_month=#{planMonth} AND item_no=#{itemNo} AND plan_step!='7105X' AND if_urgent!='1')
+			</if>
+			<if test='""!=matCodeQry'>
+				AND (m.mat_code LIKE CONCAT('_', #{matCodeQry}, '%') OR m.mat_code LIKE CONCAT(#{matCodeQry}, '%'))
+			</if>
+			<if test='""!=matTypeQry'>
+				AND (m.erp_type LIKE CONCAT(#{matTypeQry}, '%') OR m.type_name LIKE CONCAT('%', #{matTypeQry}, '%'))
+			</if>
+			<if test='""!=matNameQry'>
+				AND m.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+			</if>
+			<if test='"1"==lastPlan'>
+				AND EXISTS (SELECT '1' FROM m_plan WHERE mat_no=m.mat_no AND prj_no=#{prjNo} AND plan_month=#{lastMonth} AND item_no=#{itemNo})
+			</if>
+			LIMIT 100
+		) a
+	</select>
+
+	<select id="getMatByNo" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT m.*, m.mat_unit mat_unit_name
+		FROM m_material m
+		WHERE m.mat_no=#{matNo}
+	</select>
+
+	<select id="getMatByCode" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT * FROM m_material WHERE mat_code=#{matCode}
+	</select>
+
+	<select id="getMatListForSel" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT mat_no, mat_name, mat_code, mat_price, m.mat_unit
+		FROM m_material m
+		WHERE 1=1
+		<if test="newOld!=''">
+			AND new_old=#{newOld}
+		</if>
+		<if test="q!=''">
+			AND (mat_code LIKE CONCAT('_', #{q}, '%') OR mat_code LIKE CONCAT(#{q}, '%') OR mat_name LIKE CONCAT('%', #{q}, '%') OR erp_code LIKE CONCAT('%', #{q}, '%'))
+		</if>
+		ORDER BY mat_code LIMIT 50
+	</select>
+
+	<select id="getNewMatNo" resultType="java.lang.String">
+		SELECT mat_no FROM m_material WHERE mat_code=(SELECT erp_code FROM m_material WHERE mat_code=#{_parameter})
+	</select>
+
+	<select id="getOldMatNo" resultType="java.lang.String">
+		SELECT mat_no FROM m_material WHERE erp_code=#{_parameter} AND new_old='J' LIMIT 1
+	</select>
+	
+	<select id="getReturnMatList" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT a.*, IFNULL(bp.plan_amount, 0) plan_amount, CONCAT(a.mat_no, '_', IFNULL(bp.plan_no, '0')) plan_no, bp.prj_name, bp.prj_no, b.amount mat_amount, c.amount old_amount, o.text team_name, a.mat_unit mat_unit_name
+		FROM m_material a
+		LEFT JOIN sys_organization o ON a.fix_content=o.id
+		INNER JOIN m_back_plan bp ON a.mat_no=bp.mat_no AND bp.plan_month=#{month} AND bp.team_no=#{teamQry}
+		LEFT JOIN (SELECT plan_no, IFNULL(SUM(in_amount), 0) amount
+				   FROM m_in
+				   WHERE data_src='m.dataSrc.A' AND in_step='77013' AND in_date LIKE CONCAT(#{curMonth}, '%')
+				   GROUP BY plan_no) b ON b.plan_no=CAST(bp.plan_no AS CHAR)
+		LEFT JOIN (SELECT plan_no, IFNULL(SUM(in_amount), 0) amount
+				   FROM m_in
+				   WHERE data_src='m.dataSrc.A' AND in_step='7701F' AND in_date LIKE CONCAT(#{curMonth}, '%')
+				   GROUP BY plan_no) c ON c.plan_no=CAST(bp.plan_no AS CHAR)
+		WHERE a.new_old='J'
+		<if test="matQry!=''">
+			AND (a.mat_code LIKE CONCAT('%', #{matQry}, '%') OR a.mat_name LIKE CONCAT('%', #{matQry}, '%'))
+		</if>
+		ORDER BY a.mat_code
+	</select>
+
+	<select id="getFixTaskList" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT a.*, b.stock_amount, CONCAT(CASE WHEN IFNULL(b.store_no,'')='' THEN '0' ELSE b.store_no END, '_', a.mat_no) store_no, a.mat_unit mat_unit_name
+		FROM m_material a
+		LEFT JOIN m_stock b ON a.mat_no=b.mat_no AND b.store_no IN (SELECT store_no FROM m_store WHERE store_type='r.storeType2.21')
+		WHERE a.new_old='J'
+		<if test="userTeam!=''">
+			AND EXISTS (SELECT '1' FROM sys_dic_item WHERE value=CONCAT('m.oldTeam.', a.fix_content) AND value=#{userTeam})
+		</if>
+		<if test="matQry!=''">
+			AND CONCAT(a.mat_code, a.mat_name) LIKE CONCAT('%', #{matQry}, '%')
+		</if>
+	</select>
+
+	<select id="getOldMatList" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT mat_code, erp_code
+		FROM m_material
+		WHERE erp_code!='' AND mat_code LIKE '_930%'
+	</select>
+	
+	<select id="getMaterialName" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT CONCAT(mat_code, '|', mat_name) mat_code
+		FROM m_material
+		WHERE new_old='X' AND mat_type=#{matType} AND offen_flag!='m.offenFlag.2'
+		<if test="query!=''">
+			AND (mat_name LIKE CONCAT('%', #{query}, '%') OR mat_code LIKE CONCAT('%', #{query}, '%'))
+		</if>
+		ORDER BY CONCAT(mat_code, '|', mat_name)
+		LIMIT 20
+	</select>
+
+	<select id="getMaterialByNameOrCode" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT * FROM m_material WHERE mat_code=#{matCode} OR mat_name=#{matName} LIMIT 1
+	</select>
+
+	<update id="updateMaterial" parameterType="cn.ewsd.material.model.MMaterial">
+		UPDATE m_material
+		<set>
+			<if test="matPrice!=null">`mat_price`=#{matPrice},</if>
+			<if test="payFee!=null">`pay_fee`=#{payFee},</if>
+			<if test="otherFee!=null">`other_fee`=#{otherFee}</if>
+		</set>
+		WHERE mat_no=#{matNo}
+	</update>
+
+	<select id="getFBMaterial" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT * FROM m_material WHERE mat_type = 'FB' AND (mat_name=#{matName} OR mat_no=#{matNo}) LIMIT 1
+	</select>
+
+	<select id="getPlanSrc" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT 'm.planSrc.O1' plan_no
+		FROM m_material a
+		WHERE a.mat_no=#{_parameter} AND a.mat_type&gt;='01' AND a.mat_type&lt;='99' AND a.new_old='X' AND a.abc_type!='m.abcType.A'
+		UNION
+		SELECT 'm.planSrc.I2' plan_no
+		FROM m_material
+		WHERE mat_no=#{_parameter} AND mat_type='m.matType.FB' AND new_old='X'
+		UNION
+		SELECT 'm.planSrc.I3' plan_no
+		FROM m_material
+		WHERE mat_no=#{_parameter} AND new_old='J'
+	</select>
+</mapper>

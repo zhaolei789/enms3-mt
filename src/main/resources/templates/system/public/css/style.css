@@ -1,0 +1,365 @@
+html, body {
+    font-family: "Helvetica Neue", Helvetica, Arial, "Hiragino Sans GB", "Hiragino Sans GB W3", "WenQuanYi Micro Hei", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+    font-size: 14px;
+    color: #000;
+    line-height: 16px;
+    font-weight: 400;
+    overflow-x: hidden;
+    background-color: #f6f6f6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Helvetica Neue", Helvetica, Arial, "Hiragino Sans GB", "Hiragino Sans GB W3", "WenQuanYi Micro Hei", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+    /* line-height: 40px; */
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* 优化bootstrap列内边距 */
+.row > [class*="col-"] {
+    padding: 0 10px;
+}
+
+.main-top-margin {
+    margin-top: 120px;
+}
+
+a, a:hover {
+    text-decoration: none;
+}
+
+p {
+    line-height: 30px;
+}
+
+/* 佐佑科技 定制CSS开始 */
+.min-height {
+    min-height: 400px;
+}
+
+.container-min-height {
+    min-height: 542.656px;
+}
+
+.container-bottom-padding {
+    padding-bottom: 400px;
+}
+
+.recommendTitle {
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 15px;
+    color: red;
+}
+
+.recommendSummary {
+    padding: 0 15px 0 15px;
+    height: 60px;
+    line-height: 20px;
+    text-indent: 2em;
+    overflow: hidden;
+}
+
+/* 文章列表 */
+.articleList {
+    border-bottom: dashed 1px #666;
+    font-size: 12px;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.articleList .title {
+    font-size: 16px;
+    line-height: 30px;
+    margin-top: 10px;
+}
+
+.articleList .title a {
+    color: #337AB7;
+}
+
+.articleList img {
+    width: 200px;
+    height: 140px;
+    border: none;
+}
+
+.articleList .description {
+    font-size: 13px;
+    line-height: 30px;
+    min-height: 80px;
+}
+
+.articleList .description:last-child {
+    border-bottom: 0px;
+}
+
+.banner-text {
+    margin-top: 100px;
+    color: #fff;
+}
+
+.banner-description {
+    line-height: 30px;
+}
+
+/* 文章详情页文章发布信息*/
+.article_detail_publish {
+    color: #999;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    border-bottom: solid 1px #eee;
+}
+
+.article_detail_publish > span {
+    margin-right: 15px;
+}
+
+.article_detail_publish > span > a {
+    color: #999;
+}
+
+.textFriendLink {
+    margin: 10px 0 5px 0;
+    padding: 0;
+    text-align: left;
+    display: block;
+    height: 20px;
+}
+
+.textFriendLink li {
+    list-style-type: none;
+    color: #000000;
+    float: left;
+    padding-right: 20px;
+}
+
+.logoFriendLink {
+    margin: 10px 0 30px 0;
+    padding: 0;
+    text-align: left;
+    display: block;
+    height: 20px;
+}
+
+.logoFriendLink li {
+    list-style-type: none;
+    float: left;
+    padding-right: 20px;
+}
+
+/* 佐佑科技 定制CSS结束 */
+
+.color-red {
+    color: #ff0000;
+}
+
+.color-green {
+    color: #07BB00;
+}
+
+.color-light-blue {
+    color: #BB00BB;
+}
+
+.color-blue {
+    color: #0052FF;
+}
+
+.color-brown {
+    color: #EB8F2D;
+
+}
+
+.color-black {
+    color: #000000;
+}
+
+.section {
+    background-color: #4E63D1;
+    color: #fff;
+}
+
+.circle-body {
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 14px auto;
+    border: 5px solid #ADA2EB;
+    border-radius: 100%;
+    background-color: #FFFFFF;
+}
+
+.icon-set {
+    position: relative;
+    padding: 30px;
+}
+
+.color-facebook {
+    color: #3B5998;
+}
+
+.color-twitter {
+    color: #00aced;
+}
+
+.color-google-plus {
+    color: #dd4b39;
+}
+
+.color-linkedin {
+    color: #007bb6;
+}
+
+.color-pinterest {
+    color: #cb2027;
+}
+
+.footer {
+    background-color: #387FC2;
+    color: #fff;
+}
+
+.footer {
+    padding-bottom: 10px;
+    background: #405060;
+    color: #FFF;
+}
+
+.footer .navbar {
+    margin-bottom: 0;
+}
+
+ul {
+    padding-left: 20px;
+}
+
+.footer li {
+    line-height: 1.8em;
+}
+
+.footer a {
+    color: #ffffff;
+}
+
+.footer hr {
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #405090;
+    margin: 10px 0;
+}
+
+h2 {
+    font-size: 16px;
+}
+
+h1, .h1, h2, .h2, h3, .h3 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.margin-top-70 {
+    margin-top: 70px;
+}
+
+.container .row {
+    /*margin-top: 5px;*/
+}
+
+.container-fluid .row {
+    margin-top: 5px;
+}
+
+.container-fluid .btn-toolbar {
+    margin-top: 5px;
+}
+
+.table > tbody > tr > td, .table > tbody > tr > th, .table > tfoot > tr > td, .table > tfoot > tr > th, .table > thead > tr > td, .table > thead > tr > th {
+    vertical-align: middle;
+}
+
+.ewsd-margin-top-10 {
+    margin-top: 10px;
+}
+
+.ewsd_white_font {
+    color: #fff;
+}
+
+.navbar {
+    border-radius: 0px;
+}
+
+.navbar-brand {
+    padding: 5px 15px;
+}
+
+.ewsd-navbar-blue {
+    background-color: #387FC2;
+    border-color: #387FC2;
+}
+
+.ewsd-navbar .navbar-header {
+    height: 60px;
+}
+
+.ewsd-navbar a {
+    color: #fff;
+    /*height:60px;*/
+}
+
+.ewsd-navbar ul {
+    padding-top: 0px;
+}
+
+.ewsd-navbar li a:hover {
+    background: #387FC2;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.ewsd-navbar-footer {
+    background-color: #387FC2;
+    border-color: #387FC2;
+    color: #ffffff;
+}
+
+.navbar-toggle {
+    position: relative;
+    float: right;
+    padding: 9px 10px;
+    margin-right: 15px;
+    margin-bottom: 8px;
+    background-color: #fff;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+
+.navbar-toggle .icon-bar {
+    display: block;
+    border: solid 1px #666;
+    width: 22px;
+    height: 2px;
+    border-radius: 1px;
+}
+
+/* 用户头像 */
+.user_avatar {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background-size: cover;
+    vertical-align: middle;
+}
+
+.navbar-nav>li>a {
+    line-height: 30px;
+}
+
+.breadcrumb {
+    margin-bottom: 10px;
+    padding-left:0px;
+}

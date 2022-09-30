@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.fix.mapper.MAssessDetailMapper">
+	<select id="getBackAssessList" resultType="cn.ewsd.fix.model.MAssessDetail">
+		SELECT ad.*, fa.work_value, fa.remark ass_remark, mm.mat_code, mm.mat_name, mm.mat_unit, p.prj_name, fa.ass_status
+		FROM m_assess_detail ad
+		LEFT JOIN m_fix_assess fa ON ad.assess_id=fa.assess_id
+		LEFT JOIN m_material mm ON ad.mat_no=mm.mat_no
+		LEFT JOIN m_prj p ON p.prj_no=fa.prj_no
+		WHERE fa.ass_month=#{assMonth} AND fa.ass_type='m.fixType.1'
+		<if test="userTeam!='25'.toString()">
+			AND fa.mng_team=#{userTeam}
+		</if>
+		<if test="teamQry!=''">
+			AND fa.team_no=#{teamQry}
+		</if>
+		<if test="prjQry!=''">
+			AND fa.prj_no=#{prjQry}
+		</if>
+		<if test="mngTeamQry!=''">
+			AND fa.mng_team=#{mngTeamQry}
+		</if>
+		ORDER BY fa.team_no, p.prj_no
+	</select>
+	
+	<delete id="deleteAssessDetail">
+		DELETE FROM m_assess_detail
+		WHERE assess_id IN (SELECT assess_id FROM m_fix_assess WHERE ass_type='m.fixType.1' AND ass_month=#{monthQry} AND mng_team=#{userTeam} AND ass_status='0')
+	</delete>
+
+	<insert id="insertAssessDetail" parameterType="cn.ewsd.fix.model.MAssessDetail">
+		INSERT INTO m_assess_detail (`detail_id`, `assess_id`, `mat_no`, `plan_amount`, `mat_price`, `back_norm`, `back_amount`, `back_ratio`,
+									 `mat_amount`, `over_scale`, `account_scale`, `account_bala`, `result`, `remark`,
+									 `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{detailId}, #{assessId}, #{matNo}, #{planAmount}, #{matPrice}, #{backNorm}, #{backAmount}, #{backRatio},
+				#{matAmount}, #{overScale}, #{accountScale}, #{accountBala}, #{result}, #{remark},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<update id="updateAssessDetail" parameterType="cn.ewsd.fix.model.MAssessDetail">
+		UPDATE m_assess_detail
+		<set>
+			<if test="backNorm!=null">`back_norm`=#{backNorm},</if>
+			<if test="backAmount!=null">`back_amount`=#{backAmount},</if>
+			<if test="result!=null">`result`=#{result},</if>
+			<if test="remark!=null">`remark`=#{remark},</if>
+			<if test="overScale!=null">`over_scale`=#{overScale}</if>
+		</set>
+		WHERE detail_id=#{detailId}
+	</update>
+
+	<select id="getAssessDetailByDetailId" resultType="cn.ewsd.fix.model.MAssessDetail">
+		SELECT * FROM m_assess_detail WHERE detail_id=#{_parameter}
+	</select>
+</mapper>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'north',iconCls:'icon-reload',title:'',split:true,border:false,height:'30%'">
+            <div data-toggle="topjui-layout" data-options="fit:true">
+                <div data-options="region:'west',iconCls:'icon-reload',title:'',split:true,border:false,width:'50%'">
+                    <table id="mPlanChkIdxDg"></table>
+                </div>
+                <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+                    <div id="logTabs">
+                        <div title="审批日志" data-options="id:'tab4',iconCls:'fa fa-th'">
+                            <table data-toggle="topjui-datagrid"
+                                   data-options="id:'checkLogDg',
+										     singleSelect:true,
+										     selectOnCheck:false,
+										     checkOnSelect:false,
+										     pagination:false,
+										     url:'/system/tCheck/getCheck'">
+                                <thead>
+                                <tr>
+                                    <th data-options="field:'stepCodeName',title:'步骤',sortable:false"></th>
+                                    <th data-options="field:'userName',title:'审批人员',sortable:false"></th>
+                                    <th data-options="field:'occDate',title:'审批时间',sortable:false, formatter:function(value, row, index){
+									var date = value.substring(0, 4)+'-'+value.substring(4, 6)+'-'+value.substring(6, 8)
+									var time = row.occTime.substring(0, 2)+':'+row.occTime.substring(2, 4)+':'+row.occTime.substring(4, 6)
+									return date + ' ' + time
+								}"></th>
+                                    <th data-options="field:'direct',title:'审批方向',sortable:false, formatter:function(value, row, index){
+									if('sys.checkDirect.0'==row.direct){
+										return '---'
+									}else{
+										return '退稿'
+									}
+								}"></th>
+                                    <th data-options="field:'idea',title:'审批意见',sortable:false"></th>
+                                    <th data-options="field:'logInfo',title:'备注',sortable:false"></th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form id="planForm" method="post" style="height:70%">
+            <input type="hidden" id="prjNo" name="prjNo" />
+            <input type="hidden" id="planStep" name="planStep" />
+            <input type="hidden" id="planMonth" name="planMonth" />
+            <input type="hidden" id="planType" name="planType" />
+            <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false,height:'100%'">
+                <table id="mPlanChkListDg"></table>
+            </div>
+        </form>
+    </div>
+
+    <div id="mPlanChkListDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'datagrid',
+           id:'mPlanChkListDg'
+       }" style="display:none">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料编码：</label>
+        <input id="matCodeQry" data-toggle="topjui-textbox" name="matCodeQry" data-options="width:'150px'">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">物料描述：</label>
+        <input id="matNameQry" data-toggle="topjui-textbox" name="matNameQry" data-options="width:'150px'">
+
+        <label class="topjui-form-label" style="width:80px;float:none;display:inline-block">材料科目：</label>
+        <select id="itemQry" name="itemQry"></select>
+
+        <a href="javascript:void(0)" id="searchBtn" class="l-btn topjui-btn-orange l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">查询</span>
+                <span class="l-btn-icon fa fa-search">&nbsp;</span>
+            </span>
+        </a>
+
+        <a href="javascript:void(0)" id="backBtn" class="l-btn topjui-btn-red l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">退回草稿</span>
+                <span class="l-btn-icon fa fa-reply">&nbsp;</span>
+            </span>
+        </a>
+
+        <a href="javascript:void(0)" id="submitBtn" class="l-btn topjui-btn-green l-btn-small" group="" style="position: static; display: inline-block; left: auto; height: 30px;">
+            <span class="l-btn-left l-btn-icon-left" style="margin-top: 3px;">
+                <span class="l-btn-text">提交通过</span>
+                <span class="l-btn-icon fa fa-check">&nbsp;</span>
+            </span>
+        </a>
+
+        <span id="planText"></span>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+    <script type="text/javascript" th:inline="javascript">
+        $(document).ready(function(){
+            $('#mPlanChkIdxDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                url: '/material/planCheck/getIndexData',
+                columns:[ [
+                    {
+                        field:'planStepName', sortable:false, title:'审批步骤'
+                    },{
+                        field:'planMonth',title:'计划月份',sortable:false,formatter:function(value, row, index){
+                            var mon = parseInt(row.planMonth.substring(4, 6));
+                            if('m.planType.1'==row.planType){
+                                return mon+'月计划'
+                            }else{
+                                return mon+'月追加'
+                            }
+                        }
+                    },{
+                        field:'cnt',title:'计划数',sortable:false
+                    },{
+                        field:'bala',title:'计划金额',sortable:false
+                    },{
+                        field:'teamName',title:'编制单位',sortable:false
+                    },{
+                        field:'upName',title:'总工程',sortable:false
+                    },{
+                        field:'prjName',title:'工程名称',sortable:false
+                    },{
+                        field:'prjType2Name',title:'工程类型',sortable:false
+                    }
+                ] ],
+                onSelect:function(index, row){
+                    var prjNo = row.prjNo;
+                    var planStep = row.planStep;
+                    var planMonth = row.planMonth;
+                    var planType = row.planType;
+                    $('#prjNo').val(prjNo);
+                    $('#planStep').val(planStep);
+                    $('#planMonth').val(planMonth);
+                    $('#planType').val(planType);
+                    reloadPlan();
+                    var url = '/material/planCheck/getPlanItem?prjNo='+prjNo+'&planStep='+planStep+'&planMonth='+planMonth+'&planType='+planType
+                    $('#itemQry').iCombobox("reload", url);
+                },
+                onLoadSuccess:function(data){
+                    if(data.rows!==null && data.rows.length>0){
+                        $('#mPlanChkIdxDg').iDatagrid('selectRow', 0)
+                    }else{
+                        reloadPlan();
+                    }
+                }
+            });
+
+            $('#mPlanChkListDg').iDatagrid({
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                url: '/material/planCheck/getPlanList',
+                columns:[ [
+                    {
+                        field:'planNo', sortable:false, title:'', checkbox:true
+                    },{
+                        field:'abcType', sortable:false, title:'帮助', formatter:function(value, row, index){
+                            return '帮助'
+                        }
+                    },{
+                        field:'costCenter',title:'成本中心',sortable:false,formatter:function(value, row, index){
+                            return row.costCenter+' '+row.centerName
+                        }
+                    },{
+                        field:'itemName',title:'材料科目',sortable:false
+                    },{
+                        field:'matUse',title:'用途',sortable:false
+                    },{
+                        field:'ifUrgent',title:'是否应急',sortable:false
+                    },{
+                        field:'erpType',title:'材料分类',sortable:false
+                    },{
+                        field:'matCode',title:'物料编码',sortable:false, width:'100px', formatter:function(value, row, index){
+                            return value.substring(0, 1) == 'X' ? value.substring(1) : value
+                        }
+                    },{
+                        field:'matName',title:'物料描述',sortable:false, width:'150px'
+                    },{
+                        field:'matUnitName',title:'单位',sortable:false
+                    },{
+                        field:'matAddr',title:'库存地',sortable:false, align:'right'
+                    },{
+                        field:'sumAmount',title:'新库存',sortable:false, align:'right'
+                    },{
+                        field:'usableAmount',title:'历史可用',sortable:false, align:'right'
+                    },{
+                        field:'matAmount',title:'计划数',sortable:false, width:'100px', formatter:function(value, row, index) {
+                            return '<span class="textbox"><input style="width:100%;text-align:right" class="textbox-text" type="number" name="amount_'+row.planNo+'" id="amount_'+row.planNo+'" disabled value="'+(value==0 ? '' : value)+'" /></span>'
+                        }
+                    },{
+                        field:'matPrice',title:'价格',sortable:false, align:'right'
+                    },{
+                        field:'matBala',title:'金额',sortable:false, align:'right'
+                    },{
+                        field:'typeName',title:'分类描述',sortable:false
+                    },{
+                        field:'offerNo',title:'供应商',sortable:false, formatter:function(value, row, index){
+                            return '<input matNo="'+ row.matNo +'" name="offer_'+ row.planNo +'" id="offer_'+ row.planNo +'" value="'+ value +'">'
+                        }
+                    },{
+                        field:'reason',title:'审批意见',sortable:false, formatter:function(value, row, index){
+                            return '<span class="textbox"><input class="textbox-text" type="text" name="reason_'+row.planNo+'" id="reason_'+row.planNo+'" disabled value="'+(value==undefined?"":value)+'" /></span>';
+                        }
+                    },{
+                        field:'planDate',title:'编制时间',sortable:false, formatter:function(value, row, index) {
+                            return row.planDate.substring(4, 6)+'-'+row.planDate.substring(6, 8)+' '+row.planTime.substring(0,2)+":"+row.planTime.substring(2,4)+':'+row.planTime.substring(4,6);
+                        }
+                    },{
+                        field:'wbsElement',title:'WBS',sortable:false
+                    },{
+                        field:'remark',title:'备注',sortable:false
+                    },{
+                        field:'useDate',title:'使用日期',sortable:false
+                    }
+                ] ],
+                onLoadSuccess:function(data){
+                    planText();
+                    $('[name^="offer_"]').each(function(){
+                        var matNo = $(this).attr('matNo');
+                        $(this).iCombobox({
+                            url:'/material/mOffer/getOfferByMatNo?matNo='+matNo,
+                            valueField:'offerNo',
+                            textField:'offerName',
+                            disabled:true
+                        })
+                    });
+                },
+                onCheck:function(index, row){
+                    var planNo = row.planNo;
+                    $('#amount_'+ planNo +', #reason_'+ planNo).removeAttr('disabled');
+                    $('#offer_'+planNo).iCombobox('enable');
+                },
+                onUncheck:function(index, row){
+                    var planNo = row.planNo;
+                    $('#amount_'+ planNo +', #reason_'+ planNo).attr('disabled', 'disabled');
+                    $('#offer_'+planNo).iCombobox('disable');
+                },
+                onCheckAll:function(rows){
+                    $('[name^="amount_"], [name^="reason_"]').removeAttr("disabled");
+                    $('[id^="offer_"]').each(function(){
+                        $(this).iCombobox('enable')
+                    })
+                },
+                onUncheckAll:function(rows){
+                    $('[name^="amount_"], [name^="reason_"]').attr("disabled", 'disabled');
+                    $('[id^="offer_"]').each(function(){
+                        $(this).iCombobox('disable')
+                    })
+                },
+                onSelect:function(index, row){
+                    reloadCheck(row.checkNo);
+                }
+            });
+
+            $('#itemQry').iCombobox({
+                valueField:'itemNo',
+                textField:'itemName',
+                width:'120px',
+                url:'/material/planCheck/getPlanItem',
+                queryParam:{
+                    prjNo:'',
+                    planMonth:'',
+                    planType:'',
+                    planStep:''
+                }
+            });
+
+            $('#searchBtn').click(function(){
+                reloadPlan();
+            });
+
+            $('#submitBtn').click(function(){
+                $.iMessager.confirm('确认对话框', '您确定提交审核选择的计划吗？', function (r) {
+                    if (r) {
+                        $('#planForm').iForm('submit', {
+                            url: '/material/planCheck/submit',
+                            success: function (data) {
+                                data = $.parseJSON(data);
+                                if (data.statusCode == 200) {
+                                    $.iMessager.show({
+                                        title: data.title,
+                                        msg: data.message
+                                    })
+                                    $('#mPlanChkIdxDg').iDatagrid('reload');
+                                    reloadPlan();
+                                } else {
+                                    $.iMessager.alert({
+                                        icon: 'messager-error',
+                                        title: data.title,
+                                        msg: data.message
+                                    });
+                                }
+                            }
+                        });
+                    }
+                })
+            });
+
+            $('#backBtn').click(function(){
+                $.iMessager.confirm('确认对话框', '您确定退回选择的计划吗？', function (r) {
+                    if (r) {
+                        $('#planForm').iForm('submit', {
+                            url: '/material/planCheck/back',
+                            success: function (data) {
+                                data = $.parseJSON(data);
+                                if (data.statusCode == 200) {
+                                    $.iMessager.show({
+                                        title: data.title,
+                                        msg: data.message
+                                    })
+                                    reloadPlan();
+                                } else {
+                                    $.iMessager.alert({
+                                        icon: 'messager-error',
+                                        title: data.title,
+                                        msg: data.message
+                                    });
+                                }
+                            }
+                        });
+                    }
+                })
+            });
+
+            $('#logTabs').iTabs({
+                fit:true,
+                border:false
+            })
+        });
+
+        function reloadPlan(){
+            $('#mPlanChkListDg').iDatagrid('reload',{
+                prjNo:$('#prjNo').val(),
+                planMonth:$('#planMonth').val(),
+                planType:$('#planType').val(),
+                planStep:$('#planStep').val(),
+                matCodeQry:$('#matCodeQry').val(),
+                matNameQry:$('#matNameQry').val(),
+                itemQry:$('#itemQry').iCombobox('getValue')
+            });
+        }
+
+        function planText(){
+            $.getJSON('/material/planCheck/planText', {
+                prjNo:$('#prjNo').val(),
+                planMonth:$('#planMonth').val(),
+                planStep:$('#planStep').val()
+            },function(data){
+                $('#planText').html('【'+data.prjNo+'】【'+ data.planMonth +'】【'+ data.planStep +'】');
+            });
+        }
+
+        function reloadCheck(checkNo){
+            $('#checkLogDg').iDatagrid('reload', {
+                checkNo:checkNo==null ? $('#checkNo').val():checkNo
+            })
+        }
+    </script>
+</th:block>
+</body>
+</html>

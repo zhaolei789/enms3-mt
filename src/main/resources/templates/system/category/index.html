@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content" th:with="type=${#httpServletRequest.getParameter('type')}">
+    <div data-toggle="topjui-layout" data-options="fit:true">
+        <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+            <table data-toggle="topjui-treegrid"
+                   th:data-options="@{'
+                   id:\'categoryDg\',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+                url:\'/system/category/getCategorysByTypeAndLevelId?levelId=1&type='+${type}+'\',
+                expandUrl:\'/system/category/getListByPid?pid={id}&type='+${type}+'\',
+               '}">
+                <thead>
+                <tr>
+                    <th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+                    <th data-options="field:'text',title:'栏目名称',sortable:true"></th>
+                    <th data-options="field:'levelId',title:'层级',sortable:true,
+                                            formatter: function(value,row,index){
+                                                if (value == 0){
+                                                    return '顶级';
+                                                } else if (value == 1){
+                                                    return '子级一层';
+                                                } else if (value == 2){
+                                                    return '子级二层';
+                                                } else if (value == 3){
+                                                    return '子级三层';
+                                                } else if (value == 4){
+                                                    return '子级四层';
+                                                } else if (value == 5){
+                                                    return '子级五层';
+                                                } else {
+                                                    return '子级N层';
+                                                }
+                                            }"></th>
+                    <th data-options="field:'sort',title:'排序',sortable:true"></th>
+                    <th data-options="field:'portalDisplay',title:'是否首页显示',sortable:true,
+                                            formatter: function(value,row,index){
+                                                if (value == 0){
+                                                    return '否';
+                                                } else if (value == 1){
+                                                    return '是';
+                                                }
+                                            }"></th>
+                    <th data-options="field:'creator',title:'创建人',sortable:true"></th>
+                    <th data-options="field:'createTime',title:'创建时间',sortable:true"></th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+
+    <!-- 表格工具栏 -->
+    <div id="categoryDg-toolbar" class="topjui-toolbar"
+         data-options="grid:{
+           type:'treegrid',
+           id:'categoryDg'
+       }" style="display:none">
+        <ewsd:rbac str="categoryDgAddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="menu:'#moreSubMenu',
+           btnCls:'topjui-btn-green',
+           iconCls:'fa fa-plus',
+           hasDownArrow:true">新增</a>
+        </ewsd:rbac>
+    <div id="moreSubMenu" class="topjui-toolbar" style="width:100px;">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'openDialog',
+           extend:'#categoryDg-toolbar',
+           iconCls:'fa fa-plus',
+           dialog:{
+               id:'categoryDgAddDialog',
+               width:700,
+               height:300,
+               href:'/system/category/editRoot?type=${param.type}',
+               buttonsGroup:[
+                   {text:'保存',url:'/system/category/saveRoot',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增根栏目</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#categoryDg-toolbar',
+          iconCls:'fa fa-plus',
+            grid:{
+	       type:'treegrid',
+           id:'categoryDg',
+           parentIdField:'pid'
+       },
+           parentGrid:{
+               type:'treegrid',
+               id:'categoryDg',
+               param:'codeSetId,pid:id,levelId',
+               unselectedMsg:'请先选中要添加菜单的上级菜单'
+           },
+           dialog:{
+               id:'oaTopicCategoryAddDg',
+               width:700,
+               height:300,
+               href:'/system/category/edit?type=${param.type}',
+               buttonsGroup:[
+                   {text:'保存',url:'/system/category/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增子栏目</a>
+    </div>
+        <ewsd:rbac str="categoryDgEditDialog">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               th:data-options="@{'
+               method:\'openDialog\',
+           extend:\'#categoryDg-toolbar\',
+           btnCls:\'topjui-btn-blue\',
+           component:\'edit\',
+           iconCls:\'fa fa-pencil\',
+           dialog:{
+               width:700,
+               height:300,
+               id:\'categoryDgEditDialog\',
+               href:\'/system/category/edit?type='+${type}+'\',
+               url:\'/system/category/getDetailByUuid?uuid={uuid}\',
+               buttonsGroup:[
+                   {text:\'更新\',url:\'/system/category/update\',iconCls:\'fa fa-save\',handler:\'ajaxForm\',refresh:[{type:\'treegrid\',id:\'categoryDg\'}]}
+               ]
+           }'}">编辑</a>
+        </ewsd:rbac>
+        <ewsd:rbac str="/system/category/delete">
+            <a href="javascript:void(0)"
+               data-toggle="topjui-menubutton"
+               data-options="method:'doAjax',
+           extend:'#categoryDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/system/category/deleteBatch'">删除</a>
+        </ewsd:rbac>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'filter',
+       extend:'#categoryDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'search',
+       extend:'#categoryDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+    </div>
+</th:block>
+
+<th:block layout:fragment="js">
+</th:block>
+</body>
+</html>

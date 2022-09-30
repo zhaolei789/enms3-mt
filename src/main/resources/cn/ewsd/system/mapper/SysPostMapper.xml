@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.system.mapper.SysPostMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.system.model.SysPost" id="sysPostMap">
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modify_time" column="modify_time"/>
+        <result property="post_code" column="post_code"/>
+        <result property="post_name" column="post_name"/>
+        <result property="post_type" column="post_type"/>
+        <result property="post_type_name" column="post_type_name"/>
+        <result property="is_del" column="is_del"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			  create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 post_code
+		  ,  	  	     			 post_name
+		  ,  	  	     			 post_type
+		  ,  	  	     			 post_type_name
+		  ,  	  	     			 is_del
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.system.model.SysPost">
+        select
+        <include refid="Base_Column_List"></include>
+        from sys_post
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.system.model.SysPost">
+		select  <include refid="Base_Column_List" />  from sys_post where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.system.model.SysPost">
+		select  <include refid="Base_Column_List" />  from sys_post
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+
+	<select id="queryTotal" resultType="int">
+		select count(*) from sys_post
+	</select>
+
+	<select id="queryTotalByFS" resultType="int">
+		select count(*) from sys_post
+		<where>
+			<if test="filterSort != null">
+				${filterSort}
+			</if>
+		</where>
+	</select>
+
+	<insert id="executeSave" parameterType="cn.ewsd.system.model.SysPost">
+		insert into sys_post
+		(
+			`uuid`,
+			`create_time`,
+			`creator`,
+			`creator_id`,
+			`creator_org_id`,
+			`modifier_id`,
+			`modifier`,
+			`modify_time`,
+			`post_code`,
+			`post_name`,
+			`post_type`,
+			`post_type_name`,
+			`is_del`
+		)
+		values
+		(
+			#{uuid},
+			#{create_time},
+			#{creator},
+			#{creator_id},
+			#{creator_org_id},
+			#{modifier_id},
+			#{modifier},
+			#{modify_time},
+			#{post_code},
+			#{post_name},
+			#{post_type},
+			#{post_type_name},
+			#{is_del}
+		)
+	</insert>
+
+	<update id="executeUpdate" parameterType="cn.ewsd.system.model.SysPost">
+		update sys_post
+		<set>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}, </if>
+			<if test="post_code != null">`post_code` = #{post_code}, </if>
+			<if test="post_name != null">`post_name` = #{post_name}, </if>
+			<if test="post_type != null">`post_type` = #{post_type}, </if>
+			<if test="post_type_name != null">`post_type_name` = #{post_type_name}, </if>
+			<if test="is_del != null">`is_del` = #{is_del}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+
+	<delete id="executeDelete">
+		delete from sys_post where uuid = #{value}
+	</delete>
+
+
+	<delete id="executeDeleteBatch">
+		delete from sys_post where uuid in
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

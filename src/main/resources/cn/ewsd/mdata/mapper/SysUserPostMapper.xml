@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.mdata.mapper.SysUserPostMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.ewsd.mdata.model.SysUserPost" id="sysUserPostMap">
+        <result property="uuid" column="uuid"/>
+        <result property="create_time" column="create_time"/>
+        <result property="creator" column="creator"/>
+        <result property="creator_id" column="creator_id"/>
+        <result property="creator_org_id" column="creator_org_id"/>
+        <result property="modifier" column="modifier"/>
+        <result property="modifier_id" column="modifier_id"/>
+        <result property="modify_time" column="modify_time"/>
+        <result property="is_del" column="is_del"/>
+        <result property="remark" column="remark"/>
+        <result property="puuid" column="puuid"/>
+        <result property="unit" column="unit"/>
+        <result property="company" column="company"/>
+        <result property="department" column="department"/>
+        <result property="office" column="office"/>
+        <result property="group" column="group"/>
+        <result property="post" column="post"/>
+        <result property="user_name_id" column="user_name_id"/>
+    </resultMap>
+    
+  <sql id="Base_Column_List" > 
+  	  	     			 uuid
+		  ,  	  	     			 create_time
+		  ,  	  	     			 creator
+		  ,  	  	     			 creator_id
+		  ,  	  	     			 creator_org_id
+		  ,  	  	     			 modifier
+		  ,  	  	     			 modifier_id
+		  ,  	  	     			 modify_time
+		  ,  	  	     			 is_del
+		  ,  	  	     			 remark
+		  ,  	  	     			 puuid
+		  ,  	  	     			 unit
+		  ,  	  	     			 company
+		  ,  	  	     			 department
+		  ,  	  	     			 office
+		  ,  	  	     			 post
+		  ,  	  	     			 user_name_id
+		  ,org_id
+		    	  </sql>
+
+    <select id="getPageSet" resultType="cn.ewsd.mdata.model.SysUserPost">
+		select
+		sup.user_name_id,sup.org_id,sup.uuid,text as post
+		from sys_user_post sup LEFT JOIN sys_dic_item sdi
+		on sup.post = sdi.value and sdi.puuid = '40288aca6223be' ||
+		 'ea016224206a2d0115'
+        <where>
+            <if test="filterSort != null">
+				${filterSort}
+            </if>
+        </where>
+    </select>
+
+	<select id="queryObject" resultType="cn.ewsd.mdata.model.SysUserPost">
+		select  user_name_id,org_id,uuid,post  from sys_user_post where uuid = #{value}
+	</select>
+
+	<select id="queryList" resultType="cn.ewsd.mdata.model.SysUserPost">
+		select  <include refid="Base_Column_List" />  from sys_user_post
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by uuid desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from sys_user_post 
+	</select>
+<!--	<select id="getGroupConcat" resultType="java.lang.String">-->
+<!--		SELECT group_concat(text separator '/') as text from sys_organization where FIND_IN_SET(id,#{ids})-->
+<!--	</select>-->
+	<select id="getGroupConcat" resultType="cn.ewsd.mdata.model.Organization">
+		SELECT * from sys_organization where id in
+		<foreach item="item" collection="ids" index="index" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+    <select id="isExistence" resultType="java.lang.Integer">
+		SELECT count(1) from  sys_user_post where user_name_id=#{userNameId} and post=#{post} and org_id=#{orgId}
+	</select>
+	<select id="getPostText" resultType="java.lang.String">
+		select text from sys_dic_item where puuid='4028804863ede3960163ee2cc35301fe' and value=#{post}
+	</select>
+
+	<insert id="executeSave" parameterType="cn.ewsd.mdata.model.SysUserPost">
+		insert into sys_user_post
+		(
+			`uuid`, 
+			`create_time`, 
+			`creator`, 
+			`creator_id`, 
+			`creator_org_id`, 
+			`modifier`, 
+			`modifier_id`, 
+			`modify_time`, 
+			`is_del`, 
+			`remark`, 
+			`puuid`, 
+			`unit`, 
+			`company`, 
+			`department`, 
+			`office`, 
+			`group`, 
+			`post`, 
+			`user_name_id`
+		)
+		values
+		(
+			#{uuid}, 
+			#{create_time}, 
+			#{creator}, 
+			#{creator_id}, 
+			#{creator_org_id}, 
+			#{modifier}, 
+			#{modifier_id}, 
+			#{modify_time}, 
+			#{is_del}, 
+			#{remark}, 
+			#{puuid}, 
+			#{unit}, 
+			#{company}, 
+			#{department}, 
+			#{office}, 
+			#{group}, 
+			#{post}, 
+			#{user_name_id}
+		)
+	</insert>
+	 
+	<update id="executeUpdate" parameterType="cn.ewsd.mdata.model.SysUserPost">
+		update sys_user_post 
+		<set>
+			<if test="create_time != null">`create_time` = #{create_time}, </if>
+			<if test="creator != null">`creator` = #{creator}, </if>
+			<if test="creator_id != null">`creator_id` = #{creator_id}, </if>
+			<if test="creator_org_id != null">`creator_org_id` = #{creator_org_id}, </if>
+			<if test="modifier != null">`modifier` = #{modifier}, </if>
+			<if test="modifier_id != null">`modifier_id` = #{modifier_id}, </if>
+			<if test="modify_time != null">`modify_time` = #{modify_time}, </if>
+			<if test="is_del != null">`is_del` = #{is_del}, </if>
+			<if test="remark != null">`remark` = #{remark}, </if>
+			<if test="puuid != null">`puuid` = #{puuid}, </if>
+			<if test="unit != null">`unit` = #{unit}, </if>
+			<if test="company != null">`company` = #{company}, </if>
+			<if test="department != null">`department` = #{department}, </if>
+			<if test="office != null">`office` = #{office}, </if>
+			<if test="group != null">`group` = #{group}, </if>
+			<if test="post != null">`post` = #{post}, </if>
+			<if test="user_name_id != null">`user_name_id` = #{user_name_id}</if>
+		</set>
+		where uuid = #{uuid}
+	</update>
+	
+	<delete id="executeDelete">
+		delete from sys_user_post where uuid = #{value}
+	</delete>
+	
+	<delete id="executeDeleteBatch">
+		delete from sys_user_post where uuid in 
+		<foreach item="uuid" collection="array" open="(" separator="," close=")">
+			#{uuid}
+		</foreach>
+	</delete>
+
+</mapper>

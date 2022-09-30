@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'mMaterialDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/material/mMaterial/getPageSet'">
+            <thead>
+				<tr>
+					<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+					<th data-options="field:'erpType',title:'物资分类',sortable:true"></th>
+					<th data-options="field:'typeName',title:'分类名称',sortable:true"></th>
+					<th data-options="field:'matCode',title:'材料代码',sortable:true,width:'100px',formatter:function(value, row, index){
+						return value.substring(0, 1) == 'X' ? value.substring(1) : value
+					}"></th>
+					<th data-options="field:'matName',title:'材料名称',sortable:true"></th>
+					<th data-options="field:'matUnit',title:'数量单位',sortable:true"></th>
+					<th data-options="field:'matPrice',title:'ERP价格',sortable:true,align:'right',formatter:function(value, row, index){
+						return parseFloat(value).toFixed(2)
+					}"></th>
+					<th data-options="field:'payFee',title:'人工费用',sortable:true,align:'right',formatter:function(value, row, index){
+						return parseFloat(value).toFixed(2)
+					}"></th>
+					<th data-options="field:'otherFee',title:'其他费用',sortable:true,align:'right',formatter:function(value, row, index){
+						return parseFloat(value).toFixed(2)
+					}"></th>
+					<th data-options="field:'realFlag',title:'暂估标识',sortable:true"></th>
+					<th data-options="field:'erpCode',title:'接口代码',sortable:true"></th>
+					<th data-options="field:'insDate',title:'增加日期',sortable:true,formatter:function(value, row, index){
+						return value.substring(0, 4) + '-' + value.substring(4, 6) + '-' + value.substring(6, 8)
+					}"></th>
+					<th data-options="field:'offenFlag',title:'状态',sortable:true"></th>
+				</tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="mMaterialDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'mMaterialDg'
+       }" style="display:none">
+		<ewsd:rbac str="mMaterialAddDialog">
+        <a href="javascript:void(0)"
+			data-toggle="topjui-menubutton"
+			data-options="method:'openDialog',
+			extend:'#mMaterialDg-toolbar',
+			btnCls:'topjui-btn-green',
+			dialog:{
+			id:'mMaterialAddDg',
+			href:'/material/mMaterial/edit',
+			height:450,
+			width:800,
+			buttonsGroup:[
+			{text:'保存',url:'/material/mMaterial/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+			]
+			}">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="mMaterialEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#mMaterialDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'mMaterialEditDg',
+               href:'/material/mMaterial/edit',
+               url:'/material/mMaterial/getDetailByUuid?uuid={uuid}',
+               height:450,
+               width:800,
+               buttonsGroup:[
+                   {text:'更新',url:'/material/mMaterial/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'mMaterialDg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/material/mMaterial/deleteBatch">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#mMaterialDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的物料',param:'uuid:uuid'},
+	       url:'/material/mMaterial/deleteBatch'">删除</a>
+		</ewsd:rbac>
+
+	<ewsd:rbac str="mMaterialAddDialog">
+		<a href="javascript:void(0)"
+	   data-toggle="topjui-menubutton"
+	   data-options="
+           extend:'#mMaterialDg-toolbar',
+           btnCls:'topjui-btn-orange',
+           iconCls:'fa fa-cloud-upload',
+           onClick:selectImport
+         ">导入Excel</a>
+	</ewsd:rbac>
+
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#mMaterialDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#mMaterialDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+	<script>
+		function selectImport() {
+			var $editDialog = $('<form id="importDialog"></form>'); // 创建form表单元素
+			$editDialog.iDialog({
+				title: '导入Excel',
+				width: 950,
+				height: 450,
+				closed: false,
+				cache: false,
+				href: '/material/mMaterial/goImport',//增加页面
+				modal: true
+			});
+		}
+	</script>
+</th:block>
+</body>
+</html>

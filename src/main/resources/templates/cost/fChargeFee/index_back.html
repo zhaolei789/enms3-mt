@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:ewsd="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+<div data-toggle="topjui-layout" data-options="fit:true">
+    <div data-options="region:'center',iconCls:'icon-reload',title:'',split:true,border:false">
+        <table data-toggle="topjui-datagrid"
+               data-options="id:'fChargeFeeDg',
+               singleSelect:true,
+               selectOnCheck:false,
+               checkOnSelect:false,
+               url:'/cost/fChargeFee/getPageSet'">
+            <thead>
+            <tr>
+				<th data-options="field:'uuid',title:'',sortable:true,checkbox:true"></th>
+				<th data-options="field:'feeId',title:'费用ID',sortable:true"></th>
+				<th data-options="field:'leader',title:'领导ID',sortable:true"></th>
+				<th data-options="field:'teamNo',title:'部门编号',sortable:true"></th>
+				<th data-options="field:'ifOffice',title:'是否科室;是科室，则自动汇总成部门汇总表',sortable:true"></th>
+				<th data-options="field:'itemId',title:'科目ID',sortable:true"></th>
+				<th data-options="field:'itemName',title:'科目名称',sortable:true"></th>
+				<th data-options="field:'calcWay',title:'测算依据;1周期  2商品煤  3原煤  4进尺',sortable:true"></th>
+				<th data-options="field:'yearBud',title:'年度指标',sortable:true"></th>
+				<th data-options="field:'normPrice',title:'单价',sortable:true"></th>
+				<th data-options="field:'fMonth',title:'财务月份;年预算、月发生',sortable:true"></th>
+				<th data-options="field:'reportTeam',title:'上报部门',sortable:true"></th>
+				<th data-options="field:'monthBud',title:'月度定额',sortable:true"></th>
+				<th data-options="field:'lastBala',title:'上期结余',sortable:true"></th>
+				<th data-options="field:'monthBala',title:'月度费用',sortable:true"></th>
+				<th data-options="field:'financeBala',title:'财务统计额',sortable:true"></th>
+				<th data-options="field:'monthAssess',title:'月度考核;根据科目的测算方式，非时间的均按月考核；季度，半年，年度根据周期来；',sortable:true"></th>
+				<th data-options="field:'diffBala',title:'节超金额',sortable:true"></th>
+				<th data-options="field:'diffScale',title:'节超比例',sortable:true"></th>
+				<th data-options="field:'sumBala',title:'累计金额',sortable:true"></th>
+				<th data-options="field:'surplusBala',title:'剩余金额',sortable:true"></th>
+				<th data-options="field:'remark',title:'备注',sortable:true"></th>
+			</tr>
+            </thead>
+        </table>
+    </div>
+</div>
+
+<!-- 表格工具栏 -->
+<div id="fChargeFeeDg-toolbar" class="topjui-toolbar"
+     data-options="grid:{
+           type:'datagrid',
+           id:'fChargeFeeDg'
+       }" style="display:none">
+		<ewsd:rbac str="fChargeFeeAddDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#fChargeFeeDg-toolbar',
+           btnCls:'topjui-btn-green',
+           dialog:{
+               id:'fChargeFeeAddDg',
+               href:'/cost/fChargeFee/edit',
+               height:450,
+               buttonsGroup:[
+                   {text:'保存',url:'/cost/fChargeFee/save',iconCls:'fa fa-plus',handler:'ajaxForm'}
+               ]
+           }">新增</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="fChargeFeeEditDialog">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'openDialog',
+           extend:'#fChargeFeeDg-toolbar',
+           btnCls:'topjui-btn-blue',
+           component:'edit',
+           iconCls:'fa fa-pencil',
+           dialog:{
+               id:'fChargeFeeEditDg',
+               href:'/cost/fChargeFee/edit',
+               url:'/cost/fChargeFee/getDetailByUuid?uuid={uuid}',
+               height:450,
+               buttonsGroup:[
+                   {text:'更新',url:'/cost/fChargeFee/update',iconCls:'fa fa-save',handler:'ajaxForm',refresh:[{type:'datagrid',id:'fChargeFeeDg'}]}
+               ]
+           }">编辑</a>
+		</ewsd:rbac>
+
+        <ewsd:rbac str="/cost/fChargeFee/deleteBatch">
+        <a href="javascript:void(0)"
+           data-toggle="topjui-menubutton"
+           data-options="method:'doAjax',
+           extend:'#fChargeFeeDg-toolbar',
+           btnCls:'topjui-btn-red',
+	       iconCls:'fa fa-trash',
+	       grid:{uncheckedMsg:'请先勾选要删除的用户',param:'uuid:uuid'},
+	       url:'/cost/fChargeFee/deleteBatch'">删除</a>
+		</ewsd:rbac>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'filter',
+       extend:'#fChargeFeeDg-toolbar',
+       btnCls:'topjui-btn-orange'">过滤</a>
+    <a href="javascript:void(0)"
+       data-toggle="topjui-menubutton"
+       data-options="method:'search',
+       extend:'#fChargeFeeDg-toolbar',
+       btnCls:'topjui-btn-purple'">查询</a>
+</div>
+</th:block>
+
+<th:block layout:fragment="js">
+
+</th:block>
+</body>
+</html>

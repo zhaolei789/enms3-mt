@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.cost.mapper.MAssessMapper">
+	<select id="getMatAssessAssList" resultType="cn.ewsd.cost.model.MAssess">
+		SELECT ma.*, mn.cnt
+		FROM m_assess ma
+		LEFT JOIN (SELECT result_id, COUNT(result_id) cnt
+				   FROM m_norm_fee
+				   GROUP BY result_id) mn ON ma.assess_id=mn.result_id
+		WHERE ma.occ_month=#{occMonth} AND ma.ass_type='m.assType.4' AND ma.team_no=#{teamNo}
+	</select>
+
+	<delete id="deleteAssess">
+		DELETE FROM m_assess
+		WHERE occ_month=#{occMonth} AND team_no=#{teamNo}
+		<if test="itemNo!=null">
+		  AND item_no=#{itemNo}
+		</if>
+		<if test="assType!=null">
+		  AND ass_type=#{assType}
+		</if>
+		<if test="prjNo!=null">
+		  AND prj_no=#{prjNo}
+		</if>
+	</delete>
+	
+	<select id="getAssessList" resultType="cn.ewsd.cost.model.MAssess">
+		SELECT * FROM m_assess
+		WHERE 1=1
+		<if test="occMonth!=''">
+			AND occ_month=#{occMonth}
+		</if>
+		<if test="assType!=''">
+			AND ass_type=#{assType}
+		</if>
+		<if test="teamNo!=''">
+			AND team_no=#{teamNo}
+		</if>
+		<if test="itemNo!=''">
+			AND item_no=#{itemNo}
+		</if>
+	</select>
+
+	<insert id="insertAssess" parameterType="cn.ewsd.cost.model.MAssess">
+		INSERT INTO m_assess (`assess_id`, `occ_month`, `ass_type`, `team_no`, `item_no`, `prj_no`, `prj_name`, `norm_bala`, `last_stock`, `in_bala`, `stock_bala`,
+							  `occ_bala`, `add_bala`, `award_ratio`, `punish_ratio`, `diff_bala`, `diff_scale`, `award_bala`, `ass_team`, `modi_date`, `modi_emp`, `remark`, `up_item`,
+							  `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{assessId}, #{occMonth}, #{assType}, #{teamNo}, #{itemNo}, #{prjNo}, #{prjName}, #{normBala}, #{lastStock}, #{inBala}, #{stockBala},
+				#{occBala}, #{addBala}, #{awardRatio}, #{punishRatio}, #{diffBala}, #{diffScale}, #{awardBala}, #{assTeam}, #{modiDate}, #{modiEmp}, #{remark}, #{upItem},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<select id="getAwardBala" resultType="java.lang.Double">
+		SELECT IFNULL(SUM(award_bala), 0)
+		FROM m_assess
+		WHERE occ_month=#{occMonth} AND team_no=#{teamNo}
+	</select>
+	
+	<select id="getAssess" resultType="cn.ewsd.cost.model.MAssess">
+		SELECT ma.*, mi.if_enter
+		FROM m_assess ma
+		LEFT JOIN m_fee_item mi ON ma.item_no=mi.item_no
+		WHERE ma.assess_id=#{_parameter}
+	</select>
+
+	<update id="updateAssess" parameterType="cn.ewsd.cost.model.MAssess">
+		UPDATE m_assess
+		<set>
+			<if test="lastStock!=null">`last_stock`=#{lastStock},</if>
+			<if test="inBala!=null">`in_bala`=#{inBala},</if>
+			<if test="stockBala!=null">`stock_bala`=#{stockBala},</if>
+			<if test="addBala!=null">`add_bala`=#{addBala},</if>
+			<if test="occBala!=null">
+				`occ_bala`=#{occBala},
+				`diff_bala`=norm_bala-#{occBala},
+				`award_bala`=norm_bala-#{occBala},
+			</if>
+			<if test="remark!=null">`remark`=#{remark}</if>
+		</set>
+		WHERE assess_id=#{assessId}
+	</update>
+
+	<select id="getMatAssZhAssList" resultType="cn.ewsd.cost.model.MAssess">
+		SELECT ma.*, mn.cnt
+		FROM m_assess ma
+		LEFT JOIN (SELECT result_id, COUNT(*) cnt
+				   FROM m_norm_fee
+				   WHERE result_id IN
+		<foreach collection="results.split(',')" item="resultId" open="(" separator="," close=")">
+			#{resultId}
+		</foreach>
+			  	   GROUP BY result_id) mn ON ma.assess_id=mn.result_id
+		WHERE ma.assess_id IN
+		<foreach collection="results.split(',')" item="resultId" open="(" separator="," close=")">
+			#{resultId}
+		</foreach>
+	</select>
+
+    <select id="getMatAssDcAssList" resultType="cn.ewsd.cost.model.MAssess">
+        SELECT ma.*, mn.cnt, CASE WHEN mi.item_name IS NULL THEN td.text ELSE mi.item_name END item_name
+		FROM m_assess ma
+		LEFT JOIN m_fee_item mi ON ma.item_no=mi.item_no
+		LEFT JOIN sys_dic_item td ON ma.up_item=td.value
+		LEFT JOIN (SELECT result_id, COUNT(*) cnt
+				   FROM m_norm_fee
+				   WHERE result_id IN
+		<foreach collection="results.split(',')" item="resultId" open="(" separator="," close=")">
+			#{resultId}
+		</foreach>
+			  		GROUP BY result_id) mn ON ma.assess_id=mn.result_id
+		WHERE ma.assess_id IN
+		<foreach collection="results.split(',')" item="resultId" open="(" separator="," close=")">
+			#{resultId}
+		</foreach>
+    </select>
+</mapper>

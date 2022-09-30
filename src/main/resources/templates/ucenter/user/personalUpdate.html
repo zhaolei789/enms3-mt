@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+
+    <input type="hidden" id="uuid" name="uuid" th:value="${user.uuid}">
+    <div class="topjui-fluid">
+        <fieldset>
+            <legend>个人基础信息</legend>
+        </fieldset>
+        <div class="topjui-row">
+            <div class="topjui-col-sm4" style="text-align: center">
+                <img th:src="${user.avatar}" id="avatar" style="  margin-left: 80px;width: 168px;height: 168px;display: block">
+            </div>
+            <div class="topjui-col-sm8">
+                <div class="topjui-row"><div class="topjui-col-sm12"><label class="topjui-form-label">用户名</label>
+                    <div class="topjui-input-block">
+                        <input type="text" name="userNameId" data-toggle="topjui-textbox" th:value="${user.userNameId}"
+                               data-options="readonly:true,required:true,prompt:'必填'">
+                    </div>
+                </div></div>
+                <div class="topjui-row"><div class="topjui-col-sm12"><label class="topjui-form-label">姓名</label>
+                    <div class="topjui-input-block">
+                        <input type="text" name="userName" data-toggle="topjui-textbox" th:value="${user.userName}"
+                               data-options="required:true,readonly:true,prompt:'必填'">
+                    </div>
+                </div></div>
+                <div class="topjui-row"><div class="topjui-col-sm12"><label class="topjui-form-label">性别</label>
+                    <div class="topjui-input-block">
+                        <div th:if="${user.sex == '1'}" th:remove="tag">
+                            <input name="sex" data-toggle="topjui-radiobutton"
+                                   data-options="value:'1',label:'男',labelPosition:'after',checked:'true'">
+                            <input name="sex" data-toggle="topjui-radiobutton"
+                                   data-options="value:'2',label:'女',labelPosition:'after'">
+                        </div>
+                        <div th:if="${user.sex == '2'}" th:remove="tag">
+                            <input name="sex" data-toggle="topjui-radiobutton"
+                                   data-options="value:'1',label:'男',labelPosition:'after'">
+                            <input name="sex" data-toggle="topjui-radiobutton"
+                                   data-options="value:'2',label:'女',labelPosition:'after',checked:'true'">
+                        </div>
+
+                    </div>
+                </div></div>
+                <div class="topjui-row"><div class="topjui-col-sm12"><label class="topjui-form-label">年龄</label>
+                    <div class="topjui-input-block">
+                        <input type="text" name="age" th:value="${user.age}" data-toggle="topjui-numberbox"
+                               data-options="groupSeparator:''">
+                    </div>
+                </div></div>
+                <div class="topjui-row"><div class="topjui-col-sm12"><label class="topjui-form-label">职务</label>
+                    <div class="topjui-input-block">
+                        <input type="hidden" name="postText">
+                        <input type="text" name="post" th:value="${user.post}"
+                               data-toggle="topjui-combobox"
+                               data-options="required:true,readonly:true,
+                   prompt:'必填',
+                   panelHeight:190,
+                   url:'/system/dicSet/getDicItemByCode?code=post',
+                   param:'postText:text'">
+                    </div>
+                </div></div>
+            </div>
+        </div>
+        <div class="topjui-row">
+            <div class=" topjui-col-sm12">
+                <label class="topjui-form-label">上传头像</label>
+                <div class="topjui-input-block">
+                    <input type="text" name="avatar" data-toggle="topjui-uploadbox" th:value="${user.avatar}"
+                           data-options="editable:false,
+                                   buttonText:'上传图片',
+                                   accept:'images',
+                                   uploadUrl:'/document/oss/upload',onChange:changeAvatar">
+                </div>
+            </div>
+            <div class="topjui-col-sm12" style="display: block;margin: auto">
+                <label class="topjui-form-label"></label><p>建议尺寸168*168，支持jpg、png、gif</p>
+            </div>
+        </div>
+        <div class="topjui-row">
+            <div class="topjui-col-sm12"><label class="topjui-form-label">固定电话</label>
+                <div class="topjui-input-block">
+                    <input type="text" name="telephone" th:value="${user.telephone}" data-toggle="topjui-textbox">
+                </div>
+            </div>
+        </div>
+
+        <div class="topjui-row">
+            <div class="topjui-col-sm12"><label class="topjui-form-label">电子邮箱</label>
+                <div class="topjui-input-block">
+                    <input type="text" name="email" th:value="${user.email}" data-toggle="topjui-textbox"
+                           data-options="required:true,validType:'email',prompt:'必填'">
+                </div>
+            </div>
+        </div>
+        <div class="topjui-row">
+            <div class="topjui-col-sm12"><label class="topjui-form-label">手机</label>
+                <div class="topjui-input-block">
+                    <input type="text" name="cellphone" th:value="${user.cellphone}" data-toggle="topjui-textbox"
+                           data-options="required:true,validType:'cellphone',prompt:'必填'">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+<script>
+    function changeAvatar(newValue, oldValue){
+        if(newValue){
+            $('#avatar').attr("src",newValue);
+        }
+    }
+</script>
+
+</th:block>
+</body>
+</html>

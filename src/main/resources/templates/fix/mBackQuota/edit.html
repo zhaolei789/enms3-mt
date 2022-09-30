@@ -1,0 +1,315 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+		<!--<div class="topjui-col-sm6">
+			<label class="topjui-form-label">定额ID</label>
+			<div class="topjui-input-block">
+				<input type="text" name="quotaId"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'定额ID'">
+			</div>
+		</div>-->
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">启用月份</label>
+			<div class="topjui-input-block">
+				<input type="text" name="beginMonth"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'启用月份'">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">工程编号</label>
+			<div class="topjui-input-block">
+				<input type="text" id="prjNo" name="prjNo"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'工程编号'">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">工程名称</label>
+			<div class="topjui-input-block">
+				<input type="text" name="prjName"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'工程名称'">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">材料内码</label>
+			<div class="topjui-input-block">
+				<input type="text" name="matNo"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'材料内码'">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">推进计量</label>
+			<div class="topjui-input-block">
+				<input type="text" name="measure"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'推进计量'">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">回收量</label>
+			<div class="topjui-input-block">
+				<input type="text" name="amount"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'回收量'">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">材料价格</label>
+			<div class="topjui-input-block">
+				<input type="text" name="matPrice"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'材料价格'">
+			</div>
+		</div>
+		<!--<div class="topjui-col-sm6">
+			<label class="topjui-form-label">职能科室</label>
+			<div class="topjui-input-block">
+				<input type="text" name="mngTeam"
+					data-toggle="topjui-numberbox"
+					data-options="prompt:'职能科室'">
+			</div>
+		</div>-->
+		<!--<div class="topjui-col-sm6">
+			<label class="topjui-form-label">录入日期</label>
+			<div class="topjui-input-block">
+				<input type="text" name="modiDate"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'录入日期'">
+			</div>
+		</div>-->
+		<!--<div class="topjui-col-sm6">
+			<label class="topjui-form-label">录入用户</label>
+			<div class="topjui-input-block">
+				<input type="text" name="modiUser"
+					data-toggle="topjui-textbox"
+					data-options="prompt:'录入用户'">
+			</div>
+		</div>-->
+	</div>
+</div>
+<script>
+
+	// $(function () {
+	//     // 向公用方法传递组件id
+	//     getCondition('leaveStartDate','leaveEndDate','leaveDays')
+	// });
+
+	function getCurrentDate() {
+		let date = new Date();
+		let yy = date.getFullYear();
+		let mm = date.getMonth() + 1;
+		let dd = date.getDate();
+		return yy + '-' + (mm<10?'0'+mm:mm) + '-' + (dd<10?'0'+dd:dd)
+	}
+
+	let rowDate,$myDialog;
+
+	//打开弹窗
+	function openSelectApprover(e){
+
+		$myDialog = $('<form id="myDialogForm"></form>'); // 创建form表单元素
+		$myDialog.iDialog({
+			id:'myDialog',
+			title: '选择批准人',
+			width: 900,
+			height: 550,
+			closed: false,
+			cache: false,
+			href: '/hr/hrTakeOffice/selectEmployee',
+			buttons: [{
+				text: '应用',
+				iconCls: 'fa fa-plus',
+				btnCls: 'topjui-btn-green',
+				handler: function () {
+					if(!rowDate.status){
+						$.iMessager.alert('提示','该员工已离职！','messager-info');
+						return
+					}
+					if(rowDate){
+						// 给输入框赋值
+						inputSetValue();
+						$myDialog.iDialog('close');
+					}else {
+						$.iMessager.alert('提示','请选择一条数据！','messager-info');
+					}
+				}
+			},{
+				text: '取消',
+				iconCls: 'fa fa-close',
+				btnCls: 'topjui-btn-red',
+				handler: function () {
+					$myDialog.iDialog('close');
+				}
+			}],
+			onClose:function () {
+				//窗口关闭后清空数据
+				rowDate = null;
+				$('#myDialog').dialog('destroy');
+			}
+		});
+	}
+
+	function employeeDgClickRow(index, row) {
+		rowDate = row
+	}
+
+	function employeeDgDblClickRow(index, row) {
+		rowDate = row;
+		if(!rowDate.status){
+			$.iMessager.alert('提示','该员工已离职！','messager-info');
+			return
+		}
+		inputSetValue();
+		$myDialog.iDialog('close');
+	}
+
+	function inputSetValue() {
+		$("#approverById").val(rowDate.employeeId);
+		$("#approverBy").textbox('setValue',rowDate.employeeName);
+		$("#approvalDepartment").val(rowDate.department);
+		$("#approvalDepartmentId").combotree('setValue',rowDate.departmentId)
+	}
+
+	setTimeout(function () {
+		if($("#approverBy").length > 0){
+			$("#approverBy").textbox('textbox').bind("click", function () {
+				openSelectApprover()
+			})
+		}
+	},10)
+
+	let startDate,
+			endDate,
+			startDateType,
+			endDateType;
+
+	function startDateSelect(date) {
+		// startDate = Date.parse(date)
+		startDate = date
+		$("#leaveEndDate").textbox('setValue','');
+
+		if(endDate<startDate && endDate){
+			endDate = '';
+			$.iMessager.alert('提示','结束日期不能早于开始日期！','messager-info');
+			$("#leaveDays").textbox('clear');
+			return false
+		}
+
+		compute_period(startDate,endDate);
+		$("#leaveDays").textbox('setValue', '');
+	}
+
+	function endDateSelect(date) {
+		// endDate = Date.parse(date)
+		endDate = date
+		if(startDate>endDate && startDate){
+			$.iMessager.alert('提示','结束日期不能早于开始日期！','messager-info');
+			$("#leaveDays").textbox('clear');
+			return false
+		}
+
+		if(Date.parse(startDate)==Date.parse(endDate)){
+			if(startDateType=='PM' && endDateType=='AM'){
+				$("input[name=leaveEndTimeSlot]").parent().prev().combobox('setValue','PM');
+			}
+		}
+		startDate = $("#leaveStartDate").datebox("getValue") + " 00:00:00";
+		compute_period(startDate,endDate)
+	}
+
+	function leaveStartDateType(record){
+		startDateType = record.value;
+		if(Date.parse(startDate)==Date.parse(endDate)){
+			if(startDateType=='PM' && endDateType=='AM'){
+				$("input[name=leaveEndTimeSlot]").parent().prev().combobox('setValue','PM');
+			}
+		}
+		try{
+			if($('#leaveEndDate').datebox('getValue')){
+				compute_period(startDate,endDate)
+			}
+		}catch (e) {
+
+		}
+	}
+
+	function leaveEndDateType(record){
+		endDateType = record.value;
+		if(Date.parse(startDate)==Date.parse(endDate)){
+			if(startDateType=='PM' && endDateType=='AM'){
+				$("input[name=leaveEndTimeSlot]").parent().prev().combobox('setValue','PM');
+			}
+		}
+		try{
+			if($('#leaveStartDate').datebox('getValue')){
+				compute_period(startDate,endDate)
+			}
+		}catch (e) {
+
+		}
+	}
+
+	function compute_period(s,e) {
+		if(e<s) return;
+		if(e==s) return 1;
+		let endDate=new Date(e);
+		let beginDate=new Date(s);
+
+		let real_day=0
+		// if(endDate.getDay()==0 || endDate.getDay()==6) real_day++;   //结束日期为周六日，则加一天
+		// if(beginDate.getDay()==0 || beginDate.getDay()==6) real_day++;  //开始日期为周六日，则加一天
+		if(startDateType=='AM' && endDateType=='AM'){
+			real_day-=0.5
+			if(endDate.getDay()==0 || endDate.getDay()==6) real_day+=0.5;
+		}
+		if(startDateType=='PM' && endDateType=='PM'){
+			real_day-=0.5
+			if(beginDate.getDay()==0 || beginDate.getDay()==6) real_day+=0.5;
+		}
+		if(startDateType=='PM' && endDateType=='AM'){
+			real_day-=1
+			if(endDate.getDay()==0 || endDate.getDay()==6) real_day+=0.5;
+			if(beginDate.getDay()==0 || beginDate.getDay()==6) real_day+=0.5;
+		}
+		while(endDate>=beginDate){
+			try{
+				if(endDate!=beginDate && endDate.getDay()!=0 && endDate.getDay()!=6){
+					real_day++
+				}
+			}catch (e) {
+				console.log(e);
+			}
+			endDate=new Date(endDate-3600000*24)
+		}
+
+		$("#leaveDays").textbox('setValue', real_day);
+	}
+
+	// 自定义验证
+	$.extend($.fn.validatebox.defaults.rules, {
+		equaldEndDate: {
+			validator: function(value, param){
+				let startDate = $("#leaveStartDate").datebox('getValue');
+				return value >= startDate;  //有效范围为结束时间大于等于开始时间
+			},
+			message: '结束日期不能早于开始日期!'
+		},
+		equaldEndTime: {
+			validator: function(value, param){
+				let startDate = $("#leaveStartDate").datebox('getValue');
+				return value >= startDate;  //有效范围为结束时间大于等于开始时间
+			},
+			message: '结束时间不能早于开始时间!'
+		}
+	})
+
+</script>

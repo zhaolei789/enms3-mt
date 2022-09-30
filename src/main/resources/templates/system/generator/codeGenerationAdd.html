@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      xmlns:ewsd="http://www.thymeleaf.org"
+      layout:decorator="public/layout">
+
+<head>
+    <th:block layout:fragment="css">
+
+    </th:block>
+</head>
+
+<body>
+<th:block layout:fragment="content">
+    <form id="formData" style="width: 100%;height: 100%">
+        <table id="table"
+               style="padding-left: 100px;padding-top: 10px;border-collapse:separate; border-spacing:0px 10px;">
+            <tr>
+                <td style="padding-right: 5px">主表</td>
+                <td><input type="text" id="masterTable" style="width: 200px" data-toggle="topjui-combobox"
+                           name="childTable"
+                           data-options="prompt:'主表',
+                          valueField:'tableName',
+                         textField:'tableName',
+                         required:true,
+                         onSelect:masterTableSelect,
+                         url:'/system/generator/getAll',
+                         editable:true,"></td>
+                <td style="padding-left: 40px"><input type="text" style="width: 200px" id="masterTableTitle" data-toggle="topjui-textbox" name="title"
+                                                      data-options="prompt:'标题',required:true,"></td>
+                <td style="padding-left: 40px"><input type="text" id="structure" style="width: 200px"
+                                                      data-toggle="topjui-combobox"
+                                                      name="structure" data-options="prompt:'页面结构',
+                                valueField: 'value',
+                                textField: 'label',
+                                required:true,
+                                panelHeight:'auto',
+                                data: [{
+                                label: '上下结构',
+                                        value: 'upAndDown'
+                                    },{
+                                         label: '左右结构',
+                                        value: 'about'
+                                    }]
+                                        "></td>
+            </tr>
+            <tr>
+                <td>子表</td>
+                <td ><input type="text" id="childTable" style="width: 200px"
+                                                      data-toggle="topjui-combobox"
+                                                      name="childTable"
+                                                      data-options="required:true,prompt:'子表',onSelect:childTableSelect,editable:true,valueField:'tableName',
+                         textField:'tableName',url:'/system/generator/getAll'">
+                </td>
+                <td style="padding-left: 40px"><input type="text" style="width: 200px" id="title" data-toggle="topjui-textbox" name="title"
+                           data-options="prompt:'标题',required:true,"></td>
+                <td style="padding-left: 40px"><input type="text" id="associated" style="width: 200px"
+                                                      data-toggle="topjui-combobox"
+                                                      name="associated"
+                                                      data-options="required:true,editable:true,prompt:'关联字段',url:'/system/generator/getColumns?tableName=null',valueField:'columnName',
+                         textField:'columnName'">
+                </td>
+                <td>
+                    <a id="addCondition" href="javascript:void(0)" class="l-btn l-btn-small l-btn-plain">
+                       <span class="l-btn-left l-btn-icon-left" style="margin-top: 2px;">
+                           <span class="l-btn-text l-btn-empty"> &nbsp;</span>
+                           <span class="l-btn-icon fa fa-plus"></span>
+                       </span>
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </form>
+
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        //id=" + titlei + "<input type='hidden' value=" + titlei + ">
+        var i = 1;
+        $("#addCondition").on("click", function () {
+            var titlei = "title" + i;
+            var childTablei = "childTable" + i;
+            var relationi = "relation" + i;
+            $("#table").append(" <tr>" +
+                "<td>子表</td><td > <input id=" + childTablei + "   type=\"text\" style=\"width: 200px\" data-toggle=\"topjui-combobox\"\ name=\"childTable\" " +
+                "data-options=\"prompt:'子表',required:true,loadFilter:function(data){for(var i=0;i<data.length;i++){data[i]['a']='" + titlei + "' ;data[i]['b']='" + relationi + "'};return   data},onSelect:childSelect,editable:true,valueField:'tableName',textField:'tableName',url:'/system/generator/getAll?aaa='+" + i + "\"></td>" +
+                "<td style=\"padding-left: 40px\"><input type='text'  style='width: 200px' id=" + titlei + " data-toggle='topjui-textbox' name='title' data-options=\"prompt:'标题',required:true\"></td>\n" +
+                "                <td style=\"padding-left: 40px\"><input id=" + relationi + "  type=\"text\" style=\"width: 200px\" data-toggle=\"topjui-combobox\"\n" +
+                "                                                      name=\"associated\"\n" +
+                "                                                      data-options=\"prompt:'关联字段',required:true,valueField:'columnName',\n" +
+                "                         textField:'columnName',url:'/system/generator/getPageSet'\">\n" +
+                "                </td>\n" +
+                "                <td>\n" +
+                "                    <a onclick='delTr(this)' href=\"javascript:void(0)\" class=\"l-btn l-btn-small l-btn-plain\">\n" +
+                "                       <span class=\"l-btn-left l-btn-icon-left\" style=\"margin-top: 2px;\">\n" +
+                "                           <span class=\"l-btn-text l-btn-empty\"> &nbsp;</span>\n" +
+                "                           <span class=\"l-btn-icon fa fa-minus\"></span>\n" +
+                "                       </span>\n" +
+                "                    </a>\n" +
+                "                </td>\n" +
+                "            </tr>");
+            i++;
+            $.parser.parse('#table');
+
+        });
+
+        function delTr(obj) {
+            $(obj).parents("tr").remove();
+        }
+
+        function childTableSelect(record) {
+            $('#title').iTextbox('setText', record.tableComment);
+            $('#title').iTextbox('setValue', record.tableComment);
+            $('#associated').iCombobox('clear');
+            $('#associated').iCombobox('reload', '/system/generator/getColumns?tableName=' + record.tableName);
+        }
+
+        function childSelect(record) {
+            $('#' + record.a).iTextbox('setText', record.tableComment);
+            $('#' + record.a).iTextbox('setValue', record.tableComment);
+            $('#' + record.b).iCombobox('clear');
+            $('#' + record.b).iCombobox('reload', '/system/generator/getColumns?tableName=' + record.tableName);
+        }
+
+        function masterTableSelect(record) {
+            $('#masterTableTitle').iTextbox('setText', record.tableComment);
+            $('#masterTableTitle').iTextbox('setValue', record.tableComment);
+        }
+
+    </script>
+
+</th:block>
+</body>
+</html>

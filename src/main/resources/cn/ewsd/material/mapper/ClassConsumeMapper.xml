@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.material.mapper.ClassConsumeMapper">
+
+    <select id="getPageSetXzcl" resultType="cn.ewsd.material.model.ConsumeStock">
+        SELECT a.mat_no, b.mat_code, a.mat_amount stock_amount, a.use_amount, a.site_code, b.mat_name, b.mat_unit, b.mat_price, b.erp_type, IFNULL(di.text, '区队控') account_type,
+        	   b.type_name
+        FROM m_team_stock a
+        LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN m_account_mat ma ON a.mat_no=ma.mat_no AND ma.team_no=#{teamNo}
+		LEFT JOIN sys_dic_item di ON di.value=ma.account_type
+		WHERE a.team_no=#{teamNo} AND a.mat_amount &gt; 0
+		  AND a.store_no=#{storeNoQry} AND a.mat_status=#{statusQry}
+		  AND NOT EXISTS (SELECT '1'
+		                  FROM m_team_bill
+		                  WHERE dept_no=#{deptNoQry}
+		                    AND occ_date=#{occDate2Qry}
+		                    AND prj_no=#{prjNoQry}
+		                    AND store_no=#{storeNoQry}
+					 	   	AND a.mat_no=mat_no)
+		<if test="matCodeQry!=''">
+            AND (b.mat_code LIKE CONCAT('_', #{matCodeQry}, '%') OR b.mat_code LIKE CONCAT(#{matCodeQry}, '%'))
+        </if>
+        <if test="matNameQry!=''">
+            AND b.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+        </if>
+    </select>
+
+    <select id="getPageSet" resultType="cn.ewsd.material.model.ConsumeStock">
+        SELECT a.bill_no, a.dept_no, a.occ_date, a.prj_no, a.team_no, a.mat_no, a.store_no, a.occ_amount, a.mat_price, di1.text mat_status, a.remark,
+               c.mat_code, c.mat_name, c.mat_unit, c.erp_type, c.type_name, (a.occ_amount * IFNULL(a.mat_price, 0)) mat_bala, st.store_name,
+               di2.text account_type, pj.prj_name, (SELECT item_name FROM m_item WHERE item_no=a.item_no) item_name
+        FROM m_team_bill a
+        LEFT JOIN m_material c ON a.mat_no=c.mat_no
+        LEFT JOIN sys_organization o ON a.dept_no=o.id
+        LEFT JOIN m_store st ON a.store_no=st.store_no
+        LEFT JOIN sys_dic_item di1 ON di1.value=a.mat_status
+        LEFT JOIN sys_dic_item di2 ON di2.value=a.account_type
+        LEFT JOIN m_prj pj ON a.prj_no=pj.prj_no
+        WHERE a.data_src='m.dataSrc.7'
+          AND o.pid=#{userTeam}
+          AND a.occ_date&gt;=#{occDate1Qry} AND a.occ_date&lt;=#{occDate2Qry}
+        <if test="deptNoQry!=''">
+            AND a.dept_no=#{deptNoQry}
+        </if>
+        ORDER BY c.mat_code
+    </select>
+
+    <select id="getPrice" resultType="java.lang.Double">
+        SELECT CASE WHEN SUM(a.amount)=0 THEN 0 ELSE (SUM(a.amount * a.mat_price) / SUM(a.amount)) END
+	    FROM (
+            SELECT occ_amount amount,mat_price FROM m_team_bill WHERE data_src='m.dataSrc.1' AND team_no=#{teamNo} AND mat_no=#{matNo} AND occ_amount!=0
+            UNION
+            SELECT out_amount amount,mat_price FROM m_out WHERE data_src='m.dataSrc.3' AND team_no=#{teamNo} AND mat_no=#{matNo} AND out_amount!=0
+		) a
+    </select>
+
+    <select id="getItem" resultType="cn.ewsd.material.model.MItem">
+        SELECT item_no, item_name
+        FROM m_item m
+        WHERE item_no IN (SELECT DISTINCT item_no FROM m_budget WHERE team_no=#{teamNo} AND occ_month=#{month})
+        ORDER BY item_no
+    </select>
+</mapper>

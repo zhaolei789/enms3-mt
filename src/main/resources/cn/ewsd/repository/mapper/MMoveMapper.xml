@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.repository.mapper.MMoveMapper">
+	<select id="getMoveOrderList" resultType="cn.ewsd.repository.model.MMove">
+		SELECT trans_no, move_step, out_store, in_store, occ_date, occ_time,
+			   (SELECT store_name FROM m_store WHERE store_no=m.out_store) out_name,
+			   (SELECT store_name FROM m_store WHERE store_no=m.in_store) in_name,
+			   (SELECT process_name FROM sys_audit_process WHERE process_no=m.move_step) step_name
+		FROM m_move m
+		WHERE occ_date LIKE CONCAT(#{monthQry}, '%')
+	</select>
+
+	<insert id="insertMove" parameterType="cn.ewsd.repository.model.MMove">
+		INSERT INTO m_move (`trans_no`, `move_step`, `out_store`, `in_store`, `take_emp`, `take_date`, `take_time`, `occ_date`, `occ_time`,
+						   `hand_date`, `hand_time`, `sign_date`, `sign_time`, `check_no`, `operation_emp`,
+						   `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{transNo}, #{moveStep}, #{outStore}, #{inStore}, #{takeEmp}, #{takeDate}, #{takeTime}, #{occDate}, #{occTime},
+				#{handDate}, #{handTime}, #{signDate}, #{signTime}, #{checkNo}, #{operationEmp},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+
+	<select id="getMove" resultType="cn.ewsd.repository.model.MMove">
+		SELECT * FROM m_move WHERE trans_no=#{transNo}
+	</select>
+
+	<select id="getPickAmount" resultType="java.lang.Double">
+		SELECT IFNULL(SUM(pick_amount), 0) pick_amount FROM m_move_list WHERE trans_no=#{transNo}
+	</select>
+
+	<delete id="deleteMove">
+		DELETE FROM m_move WHERE trans_no=#{transNo}
+	</delete>
+
+	<delete id="deleteMoveList">
+		DELETE FROM m_move_list WHERE trans_no=#{transNo}
+	</delete>
+
+	<select id="getMoveMat" resultType="cn.ewsd.material.model.MMaterial">
+		SELECT DISTINCT m.mat_no, m.mat_code, m.mat_name, m.mat_unit, m.erp_type, m.type_name
+		FROM m_stock p
+		LEFT JOIN m_material m ON p.mat_no=m.mat_no
+		WHERE p.store_no = #{outStore} AND p.stock_amount>0
+		  AND m.mat_no NOT IN (SELECT mat_no FROM m_move_list WHERE trans_no=#{transNo})
+		<if test="matNameQry!=''">
+			AND m.mat_name LIKE CONCAT('%', #{matNameQry}, '%')
+		</if>
+		<if test="matCodeQry!=''">
+			AND (m.mat_code LIKE CONCAT('_', #{matCodeQry}, '%') OR m.mat_code LIKE CONCAT(#{matCodeQry}, '%'))
+		</if>
+	</select>
+
+	<insert id="saveList" parameterType="cn.ewsd.repository.model.MMove">
+		INSERT INTO m_move_list (`list_no`, `trans_no`, `mat_no`, `mat_amount`, `pick_amount`, `pick_emp`, `get_amount`, `get_emp`, `get_date`, `mat_price`)
+		VALUES (#{listNo}, #{transNo}, #{matNo}, #{matAmount}, #{pickAmount}, #{pickEmp}, #{getAmount}, #{getEmp}, #{getDate}, #{matPrice})
+	</insert>
+
+	<select id="getMoveList" resultType="cn.ewsd.repository.model.MMove">
+		SELECT a.list_no, a.mat_no, b.mat_code, b.mat_name, b.mat_unit, b.erp_type, b.type_name, a.mat_amount, a.pick_amount,
+			   a.get_amount, c.take_emp, c.take_date, c.take_time, c.operation_emp, IFNULL(s.stock_amount, 0) stock_amount, IFNULL(s.site_code, '') site_code,
+			   (SELECT user_name FROM sys_user WHERE uuid=c.take_emp) take_emp_name,
+			   (SELECT user_name FROM sys_user WHERE uuid=c.operation_emp) operation_emp_name
+		FROM m_move_list a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN m_move c ON a.trans_no=c.trans_no
+		LEFT JOIN (SELECT mat_no, store_no, stock_amount, site_code
+				   FROM m_stock
+				   GROUP BY mat_no, store_no, stock_amount, site_code) s ON s.store_no=c.out_store AND s.mat_no=a.mat_no
+		WHERE a.trans_no=#{transNo}
+		ORDER BY b.mat_code
+	</select>
+
+	<delete id="deleteList">
+		DELETE FROM m_move_list WHERE list_no=#{listNo}
+	</delete>
+
+	<update id="updateList">
+		UPDATE m_move_list SET pick_amount=#{matAmount}, mat_amount=#{matAmount} WHERE list_no=#{listNo}
+	</update>
+
+	<update id="updateList1">
+		UPDATE m_move_list SET get_amount=#{getAmount} ,get_emp=#{getEmp}, get_date=#{getDate} WHERE list_no=#{listNo}
+	</update>
+
+	<update id="updateMove">
+		UPDATE m_move SET move_step=#{moveStep}, take_emp=#{userId}, take_date=#{takeDate}, take_time=#{takeTime} WHERE trans_no=#{transNo}
+	</update>
+
+	<update id="updateMove1">
+		UPDATE m_move SET sign_date=#{signDate}, sign_time=#{signTime}, move_step=#{moveStep} WHERE trans_no=#{transNo}
+	</update>
+
+	<select id="getMoveCheckList" resultType="cn.ewsd.repository.model.MMove">
+		SELECT trans_no, move_step, out_store, in_store, occ_date, occ_time,
+			   (SELECT store_name FROM m_store WHERE store_no=m.out_store) out_name,
+			   (SELECT store_name FROM m_store WHERE store_no=m.in_store) in_name,
+			   (SELECT process_name FROM sys_audit_process WHERE process_no=m.move_step) step_name
+		FROM m_move m
+		WHERE move_step='72104' AND in_store IN (SELECT store_no FROM sys_user_store WHERE user_id=#{userId})
+	</select>
+
+	<select id="getCheckList" resultType="cn.ewsd.repository.model.MMove">
+		SELECT a.list_no, a.mat_no, b.mat_code, b.mat_name, b.mat_unit, b.erp_type, b.type_name, a.mat_amount, a.pick_amount
+		FROM m_move_list a
+		LEFT JOIN m_material b ON a.mat_no=b.mat_no
+		LEFT JOIN m_move c ON a.trans_no=c.trans_no
+		WHERE a.trans_no=#{transNo} AND IFNULL(a.get_date, '')=''
+		ORDER BY b.mat_code
+	</select>
+
+	<select id="getMl" resultType="cn.ewsd.repository.model.MMove">
+		SELECT * FROM m_move_list WHERE list_no=#{listNo}
+	</select>
+
+	<select id="getCnt" resultType="java.lang.Integer">
+		SELECT COUNT(*) cnt FROM m_move_list WHERE trans_no=#{transNo} AND IFNULL(get_date,'')=''
+	</select>
+
+	<select id="getCnt1" resultType="java.lang.Integer">
+		SELECT COUNT(*) cnt FROM m_move_list WHERE trans_no=#{transNo}
+	</select>
+</mapper>

@@ -1,0 +1,110 @@
+<style>
+    .topjui-col-sm4, .topjui-col-sm6, .topjui-col-sm12 {
+        margin-top: 10px;
+    }
+</style>
+<input type="hidden" id="uuid" name="uuid">
+<div class="topjui-fluid">
+	<div class="topjui-row">
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">仓库编号</label>
+			<div class="topjui-input-block">
+				<input type="text" id="storeNo" name="storeNo" data-toggle="topjui-textbox" data-options="prompt:'',required:true" maxlength="2">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">仓库名称</label>
+			<div class="topjui-input-block">
+				<input type="text" name="storeName" data-toggle="topjui-textbox" data-options="prompt:'',required:true">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">井上井下</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="upDown" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=r.upDown',loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">管理部门</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="mngTeam" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',loadFilter:function(data){
+					data.unshift({id:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">发放审核部门</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="reserve1" data-options="valueField:'id',textField:'text',url:'/mdata/organization/getOrgListByTypeAndTenant?orgType=department',loadFilter:function(data){
+					data.unshift({id:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">仓库类型</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="storeType" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=r.storeType2',required:true,loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+    	<div class="topjui-col-sm6">
+			<label class="topjui-form-label">仓库级别</label>
+			<div class="topjui-input-block">
+				<input data-toggle="topjui-combobox" name="storeLevel" data-options="valueField:'value',textField:'text',url:'/system/dicSet/getDicItemByCode?code=r.storeLevel',required:true,loadFilter:function(data){
+					data.unshift({value:'', text:'--请选择--'});
+					return data
+				}">
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">安全库存</label>
+			<div class="topjui-input-block">
+				<select data-toggle="topjui-combobox" name="ifSafe">
+					<option value="1">是</option>
+					<option value="0">否</option>
+				</select>
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">参考利库</label>
+			<div class="topjui-input-block">
+				<select data-toggle="topjui-combobox" name="ifStock">
+					<option value="1">是</option>
+					<option value="0">否</option>
+				</select>
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">领料是否考核</label>
+			<div class="topjui-input-block">
+				<select data-toggle="topjui-combobox" name="ifAssess">
+					<option value="1">是</option>
+					<option value="0">否</option>
+				</select>
+			</div>
+		</div>
+		<div class="topjui-col-sm6">
+			<label class="topjui-form-label">是否控制库存</label>
+			<div class="topjui-input-block">
+				<select data-toggle="topjui-combobox" name="ifControl">
+					<option value="1">是</option>
+					<option value="0">否</option>
+				</select>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){
+	if($('#uuid').val() != ''){
+		$('#storeNo').attr('readonly', 'readonly');
+	}
+});
+</script>

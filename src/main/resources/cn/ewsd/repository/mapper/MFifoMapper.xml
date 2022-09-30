@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.ewsd.repository.mapper.MFifoMapper">
+	<insert id="insertFifo" parameterType="cn.ewsd.repository.model.MFifo">
+		INSERT INTO m_fifo (`bill_no`, `draw_no`, `in_no`, `mat_no`, `mat_amount`, `mat_price`, `mat_bala`, `occ_date`, `team_no`, `reserve_no`,
+						    `uuid`, `create_time`, `creator`, `creator_id`, `creator_org_id`, `modifier_id`, `modifier`, `modify_time`)
+		VALUES (#{billNo}, #{drawNo}, #{inNo}, #{matNo}, #{matAmount}, #{matPrice}, #{matBala}, #{occDate}, #{teamNo}, #{reserveNo},
+				#{uuid}, #{createTime}, #{creator}, #{creatorId}, #{creatorOrgId}, #{modifierId}, #{modifier}, #{modifyTime})
+	</insert>
+</mapper>
